@@ -1,5 +1,5 @@
 ---
-title: "MyWebsite"
+title: "Sex, Location, Time, Temperature: Greatest Impacts on Covid Fatalities"
 author: "Ben Beck"
 date: "`r Sys.Date()`"
 output: html_document
@@ -8,23 +8,753 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+<br><br><br>
 
-## R Markdown
+## • Set-Up
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+#### Dependencies
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+<button onclick="toggleCode('code1')">Show Code</button>
 
-```{r cars}
-summary(cars)
+<div id="code1" style="display:none; margin-top: 10px;">
+<pre><code class="r">
+library(readr)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(purrr)
+library(lubridate)
+library(mgcv)
+library(tidyr)
+library(forecast)
+library(randomForest)
+library(caret)
+library(gganimate)
+library(gifski)
+library(Cairo)
+library(tidytext)
+</code></pre>
+</div>
+
+```{r, echo=FALSE, eval=TRUE, results='hide', message=FALSE, warning=FALSE, fig.show='hide'}
+# This will run but not show any output
+library(readr)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(purrr)
+library(lubridate)
+library(mgcv)
+library(tidyr)
+library(forecast)
+library(randomForest)
+library(caret)
+library(gganimate)
+library(gifski)
+library(Cairo)
+library(tidytext)
 ```
 
-## Including Plots
+#### Cleaning Data
 
-You can also embed plots, for example:
+<button onclick="toggleCode('code2')">Show Code</button>
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+<div id="code2" style="display:none; margin-top: 10px;">
+<pre><code class="r">
+dat_original <- read.csv("Covid_19_Death_by_Sex_Age.csv")
+#Check the column names, tidy
+dat <- janitor::clean_names(dat_origional)
+all_states_pop<-read.csv("All_States_Population.csv")
+#Remove rows with "United States" under column "states"
+dat <- dat %>% filter(dat$state != "United States")
+#Only have 2 sexes
+dat <- dat %>% filter(sex != "All Sexes")
+#Filter "By Month"
+dat <- dat %>% filter(group == "By Month")
+#Remove Unnecessary Columns
+dat <- dat %>% 
+  select(-data_as_of, -start_date, -end_date, -group, -footnote, -pneumonia_influenza_or_covid_19_deaths)
+#Remove conflicting ages
+dat <- dat %>% 
+  filter(age_group != "All Ages", 
+         age_group != "0-17 years", 
+         age_group != "18-29 years")
+
+#Remove any NAs from the data
+dat <- na.omit(dat)
+#Change column names for simplicity
+names(dat) <- c("year", "month", "state", "sex", "age_group", 
+                "covid_deaths", "total_deaths", "pneumonia_deaths", 
+                "pneumonia_covid_deaths", "flu_deaths")
+
+#Change months from numerical to character/group
+dat <- dat %>%
+  mutate(month = factor(month, levels = 1:12, 
+                        labels = c("January", "February", "March", "April", 
+                                   "May", "June", "July", "August", 
+                                   "September", "October", "November", "December")))
+
+#Now load in other data
+all_states_data <- list.files(path = "C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Data", pattern = "\\.csv$", full.names = TRUE)
+
+# Read and combine all files
+all_states_data <- all_states_data %>%
+  map_df(~ {
+    state_name <- gsub("_Temperature.*", "", basename(.x))
+    read_csv(.x, skip = 4, col_names = c("Date", "Temperature")) %>%
+      mutate(
+        Date = as.Date(paste0(Date, "01"), format = "%Y%m%d"),
+        Temperature = as.numeric(Temperature),
+        State = state_name
+      )
+  })
+
+#Remove states that don't match:
+dat <- dat %>%
+  filter(!state %in% c("New York City", "District of Columbia", "Puerto Rico"))
+#Make the format the same
+all_states_data <- all_states_data %>%
+  mutate(State = gsub("_", " ", State))
+all_states_data <- janitor::clean_names(all_states_data)
+#Change the date format to year, month
+all_states_data <- all_states_data %>%
+  mutate(
+    month = month(date),
+    year = year(date)
+  )
+#Remove date
+all_states_data <- all_states_data %>% 
+  select(-date)
+#Change the months from numerical to words:
+all_states_data <- all_states_data %>%
+  mutate(month = factor(month, levels = 1:12, 
+                        labels = c("January", "February", "March", "April", 
+                                   "May", "June", "July", "August", 
+                                   "September", "October", "November", "December")))
+#Combine data
+dat <- left_join(dat, all_states_data, by = c("state", "year", "month"))
+dat <- dat %>% filter(!is.na(temperature))
+
+#Create a time-based df
+dat <- dat %>%
+  mutate(
+    date = as.Date(paste(year, month, "01", sep = "-"), format = "%Y-%B-%d")
+  ) %>%
+  arrange(date)
+#Remove flu
+dat <- dat %>% select(-flu_deaths)
+# Ensure months are in order
+dat$month <- factor(dat$month, levels = month.name)
+
+#Clean all_states_pop
+all_states_pop <- all_states_pop[, c("NAME", "POPESTIMATE2020", "POPESTIMATE2021", "POPESTIMATE2022", "POPESTIMATE2023")]
+unique(dat$state)
+unique(all_states_pop$NAME)
+all_states_pop <- all_states_pop[all_states_pop$NAME %in% unique(dat$state), ]
+all_states_pop <- janitor::clean_names(all_states_pop)
+colnames(dat)
+colnames(all_states_pop)
+all_states_pop <- all_states_pop %>% 
+  rename(
+    state = name,
+    `2020` = popestimate2020,
+    `2021` = popestimate2021,
+    `2022` = popestimate2022,
+    `2023` = popestimate2023
+  )
+
+# Tidy up all_states_pop
+all_states_pop <- all_states_pop %>%
+  pivot_longer(cols = `2020`:`2023`, 
+               names_to = "year", 
+               values_to = "population")
+
+# Merge all_states_pop to dat
+dat <- merge(dat, all_states_pop, by = c("state", "year"))
+# Add ratios
+dat <- dat %>%
+  mutate(
+    `covid/pop` = (covid_deaths / population) * 100,
+    `pneumonia/pop` = (pneumonia_deaths / population) * 100,
+    `pneumonia_covid/pop` = (pneumonia_covid_deaths / population) * 100,
+    `total/pop` = (total_deaths / population) * 100
+  )
+</code></pre>
+</div>
+
+<script>
+function toggleCode(id) {
+  var x = document.getElementById(id);
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+```{r, echo=FALSE, eval=TRUE, results='hide', message=FALSE, warning=FALSE, fig.show='hide'}
+# This will run but not show any output
+dat_original <- read.csv("Covid_19_Death_by_Sex_Age.csv")
+all_states_pop<-read.csv("All_States_Population.csv")
+#Check the column names, tidy
+dat <- janitor::clean_names(dat_original)
+#Remove rows with "United States" under column "states"
+dat <- dat %>% filter(dat$state != "United States")
+#Only have 2 sexes
+dat <- dat %>% filter(sex != "All Sexes")
+#Filter "By Month"
+dat <- dat %>% filter(group == "By Month")
+#Remove Unnecessary Columns
+dat <- dat %>% 
+  select(-data_as_of, -start_date, -end_date, -group, -footnote, -pneumonia_influenza_or_covid_19_deaths)
+#Remove conflicting ages
+dat <- dat %>% 
+  filter(age_group != "All Ages", 
+         age_group != "0-17 years", 
+         age_group != "18-29 years")
+
+#Remove any NAs from the data
+dat <- na.omit(dat)
+
+#Change column names for simplicity
+names(dat) <- c("year", "month", "state", "sex", "age_group", 
+                "covid_deaths", "total_deaths", "pneumonia_deaths", 
+                "pneumonia_covid_deaths", "flu_deaths")
+
+#Change months from numerical to character/group
+dat <- dat %>%
+  mutate(month = factor(month, levels = 1:12, 
+                        labels = c("January", "February", "March", "April", 
+                                   "May", "June", "July", "August", 
+                                   "September", "October", "November", "December")))
+
+#Now load in other data
+all_states_data <- list.files(path = "C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Data", pattern = "\\.csv$", full.names = TRUE)
+
+# Read and combine all files
+all_states_data <- all_states_data %>%
+  map_df(~ {
+    state_name <- gsub("_Temperature.*", "", basename(.x))
+    read_csv(.x, skip = 4, col_names = c("Date", "Temperature")) %>%
+      mutate(
+        Date = as.Date(paste0(Date, "01"), format = "%Y%m%d"),
+        Temperature = as.numeric(Temperature),
+        State = state_name
+      )
+  })
+
+#Remove states that don't match:
+dat <- dat %>%
+  filter(!state %in% c("New York City", "District of Columbia", "Puerto Rico"))
+#Make the format the same
+all_states_data <- all_states_data %>%
+  mutate(State = gsub("_", " ", State))
+all_states_data <- janitor::clean_names(all_states_data)
+#Change the date format to year, month
+all_states_data <- all_states_data %>%
+  mutate(
+    month = month(date),
+    year = year(date)
+  )
+#Remove date
+all_states_data <- all_states_data %>% 
+  select(-date)
+#Change the months from numerical to words:
+all_states_data <- all_states_data %>%
+  mutate(month = factor(month, levels = 1:12, 
+                        labels = c("January", "February", "March", "April", 
+                                   "May", "June", "July", "August", 
+                                   "September", "October", "November", "December")))
+#Combine data
+dat <- left_join(dat, all_states_data, by = c("state", "year", "month"))
+dat <- dat %>% filter(!is.na(temperature))
+
+#Create a time-based df
+dat <- dat %>%
+  mutate(
+    date = as.Date(paste(year, month, "01", sep = "-"), format = "%Y-%B-%d")
+  ) %>%
+  arrange(date)
+#Remove flu
+dat <- dat %>% select(-flu_deaths)
+# Ensure months are in order
+dat$month <- factor(dat$month, levels = month.name)
+
+#Clean all_states_pop
+all_states_pop <- all_states_pop[, c("NAME", "POPESTIMATE2020", "POPESTIMATE2021", "POPESTIMATE2022", "POPESTIMATE2023")]
+unique(dat$state)
+unique(all_states_pop$NAME)
+all_states_pop <- all_states_pop[all_states_pop$NAME %in% unique(dat$state), ]
+all_states_pop <- janitor::clean_names(all_states_pop)
+colnames(dat)
+colnames(all_states_pop)
+all_states_pop <- all_states_pop %>% 
+  rename(
+    state = name,
+    `2020` = popestimate2020,
+    `2021` = popestimate2021,
+    `2022` = popestimate2022,
+    `2023` = popestimate2023
+  )
+
+# Tidy up all_states_pop
+all_states_pop <- all_states_pop %>%
+  pivot_longer(cols = `2020`:`2023`, 
+               names_to = "year", 
+               values_to = "population")
+
+# Merge all_states_pop to dat
+dat <- merge(dat, all_states_pop, by = c("state", "year"))
+# Add ratios
+dat <- dat %>%
+  mutate(
+    `covid/pop` = (covid_deaths / population) * 100,
+    `pneumonia/pop` = (pneumonia_deaths / population) * 100,
+    `pneumonia_covid/pop` = (pneumonia_covid_deaths / population) * 100,
+    `total/pop` = (total_deaths / population) * 100
+  )
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#### Preparation
+<button onclick="toggleCode('code3')">Show Code</button>
+
+<div id="code3" style="display:none; margin-top: 10px;">
+<pre><code class="r">
+#Plot of Monthly Deaths by Month and Year
+monthly_deaths <- dat %>%
+  group_by(year, month) %>%
+  summarise(
+    covid = sum(covid_deaths, na.rm = TRUE),
+    pneumonia = sum(pneumonia_deaths, na.rm = TRUE),
+    pneumonia_covid = sum(pneumonia_covid_deaths, na.rm = TRUE)
+  ) %>%
+  ungroup()
+# Convert to long format for ggplot
+deaths_long <- monthly_deaths %>%
+  pivot_longer(cols = c(covid, pneumonia, pneumonia_covid),
+               names_to = "cause", values_to = "deaths")
+#Statistical Tests
+monthly_deaths_summary <- dat %>%
+  group_by(year, month) %>%
+  summarise(total_deaths = sum(covid_deaths, na.rm = TRUE)) %>%
+  ungroup()
+
+# Perform ANOVA to compare the means of total deaths by month
+anova_result <- aov(total_deaths ~ month, data = monthly_deaths_summary)
+#Does tempearture have an influence on total deaths?
+correlation1 <- cor(dat$temperature, dat$total_deaths, method = "pearson")
+cor_test_result <- cor.test(dat$temperature, dat$total_deaths)
+lm_model <- lm(covid_deaths ~ temperature, data = dat)
+anova_result2 <- aov(covid_deaths ~ month + temperature, data = dat)
+# Convert data to long format for plotting
+long_dat <- dat %>%
+  pivot_longer(cols = c(covid_deaths, pneumonia_deaths, pneumonia_covid_deaths),
+               names_to = "cause", values_to = "deaths")
+# Group by year, state, and cause
+state_year_deaths <- long_dat %>%
+  group_by(year, state, cause) %>%
+  summarise(total_deaths = sum(deaths, na.rm = TRUE), .groups = "drop")   
+# Prepare the data
+state_month_deaths1 <- dat %>%
+  group_by(state, date) %>%
+  summarise(total_deaths = sum(total_deaths, na.rm = TRUE), .groups = 'drop')
+
+# Create the animated plot
+animated_plot <- ggplot(state_month_deaths1, aes(x = state, y = total_deaths, fill = state)) +
+  geom_bar(stat = "identity", position = "stack", show.legend = FALSE) +
+  labs(title = "Total Deaths by State",
+       subtitle = "Date: {format(frame_time, '%m/%Y')}",
+       x = "State", y = "Number of Deaths") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  transition_time(date) +
+  ease_aes('cubic-in-out')
+#Anova test
+anova_state <- aov(covid_deaths ~ state, data = dat)
+# Split data into training and test sets (80% training, 20% testing)
+set.seed(123)  # Set seed for reproducibility
+trainIndex <- createDataPartition(dat$covid_deaths, p = 0.8, list = FALSE)
+train_data <- dat[trainIndex, ]
+test_data <- dat[-trainIndex, ]
+
+# Fit a Random Forest model
+rf_model <- randomForest(covid_deaths ~ temperature + state + sex + age_group, 
+                         data = train_data, 
+                         ntree = 100)
+
+# Make predictions
+predictions <- predict(rf_model, test_data)
+
+# Evaluate model performance (e.g., MSE)
+mse <- mean((predictions - test_data$covid_deaths)^2)
+# Perform ANOVA to test if sex and age group influence total deaths
+anova_result3 <- aov(total_deaths ~ sex * age_group, data = dat)
+results_temp_year <- dat %>%
+  group_by(year) %>%
+  do({
+    model <- lm(total_deaths ~ temperature, data = .)
+    p_value <- summary(model)$coefficients[2, 4]
+    data.frame(p_value)
+  })
+r_squared_by_year <- dat %>%
+  group_by(year) %>%
+  summarise(
+    r_squared = summary(lm(total_deaths ~ temperature))$r.squared
+  )
+</code></pre>
+</div>
+
+<script>
+function toggleCode(id) {
+  var x = document.getElementById(id);
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+```{r, echo=FALSE, eval=TRUE, results='hide', message=FALSE, warning=FALSE, fig.show='hide'}
+monthly_deaths <- dat %>%
+  group_by(year, month) %>%
+  summarise(
+    covid = sum(covid_deaths, na.rm = TRUE),
+    pneumonia = sum(pneumonia_deaths, na.rm = TRUE),
+    pneumonia_covid = sum(pneumonia_covid_deaths, na.rm = TRUE)
+  ) %>%
+  ungroup()
+deaths_long <- monthly_deaths %>%
+  pivot_longer(cols = c(covid, pneumonia, pneumonia_covid),
+               names_to = "cause", values_to = "deaths")
+monthly_deaths_summary <- dat %>%
+  group_by(year, month) %>%
+  summarise(total_deaths = sum(covid_deaths, na.rm = TRUE)) %>%
+  ungroup()
+anova_result <- aov(total_deaths ~ month, data = monthly_deaths_summary)
+correlation1 <- cor(dat$temperature, dat$total_deaths, method = "pearson")
+cor_test_result <- cor.test(dat$temperature, dat$total_deaths)
+lm_model <- lm(covid_deaths ~ temperature, data = dat)
+anova_result2 <- aov(covid_deaths ~ month + temperature, data = dat)
+long_dat <- dat %>%
+  pivot_longer(cols = c(covid_deaths, pneumonia_deaths, pneumonia_covid_deaths),
+               names_to = "cause", values_to = "deaths")
+state_year_deaths <- long_dat %>%
+  group_by(year, state, cause) %>%
+  summarise(total_deaths = sum(deaths, na.rm = TRUE), .groups = "drop")   
+state_month_deaths1 <- dat %>%
+  group_by(state, date) %>%
+  summarise(total_deaths = sum(total_deaths, na.rm = TRUE), .groups = 'drop')
+animated_plot <- ggplot(state_month_deaths1, aes(x = state, y = total_deaths, fill = state)) +
+  geom_bar(stat = "identity", position = "stack", show.legend = FALSE) +
+  labs(title = "Total Deaths by State",
+       subtitle = "Date: {format(frame_time, '%m/%Y')}",
+       x = "State", y = "Number of Deaths") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  transition_time(date) +
+  ease_aes('cubic-in-out')
+anova_state <- aov(covid_deaths ~ state, data = dat)
+set.seed(123)
+trainIndex <- createDataPartition(dat$covid_deaths, p = 0.8, list = FALSE)
+train_data <- dat[trainIndex, ]
+test_data <- dat[-trainIndex, ]
+rf_model <- randomForest(covid_deaths ~ temperature + state + sex + age_group, 
+                         data = train_data, 
+                         ntree = 100)
+predictions <- predict(rf_model, test_data)
+mse <- mean((predictions - test_data$covid_deaths)^2)
+anova_result3 <- aov(total_deaths ~ sex * age_group, data = dat)
+results_temp_year <- dat %>%
+  group_by(year) %>%
+  do({
+    model <- lm(total_deaths ~ temperature, data = .)
+    p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
+    data.frame(p_value)
+  })
+r_squared_by_year <- dat %>%
+  group_by(year) %>%
+  summarise(
+    r_squared = summary(lm(total_deaths ~ temperature))$r.squared
+  )
+```
+
+<br><br><br>
+
+## • Monthly Trends in COVID-19 and Related Deaths in the U.S
+
+This analysis explores trends in monthly mortality related to COVID-19, pneumonia, and cases involving both conditions across the United States. By grouping and visualizing death counts by month and year, the aim to identify patterns or spikes in mortality that may be associated with seasonal factors or the progression of the pandemic. Additionally, a statistical test (ANOVA) is conducted to determine whether there are significant differences in COVID-19-related death counts across different months. This helps assess whether time of year meaningfully influences mortality rates or if observed variations are likely due to chance.
+
+
+
+```{r, echo=FALSE}
+ggplot(deaths_long, aes(x = factor(month, levels = month.name), y = deaths, color = cause, group = cause)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ year) +
+  labs(title = "Monthly Deaths by Cause and Year",
+       x = "Month",
+       y = "Total Deaths",
+       color = "Cause of Death") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+Just after looking at the graph, there doesn't appear to be a strong correlation. However, we do notice that there appears to be more deaths around the winter months (December and January). Still, a statistical test is needed to explore how much of an effect it has.
+
+
+#### Anova Summary Result
+
+```{r, echo=FALSE}
+summary(anova_result)
+```
+
+The ANOVA analysis conducted on the total deaths across different months 
+indicates that there is no statistically significant difference in the mean 
+death counts between months. The F-statistic of 0.837, along with a p-value 
+of 0.606, suggests that the variation observed in death counts between months 
+is likely due to random chance rather than a systematic effect of the month 
+itself. Since the p-value is greater than the typical significance threshold 
+of 0.05, we fail to reject the null hypothesis, which posits that the mean 
+deaths across the months are equal. In practical terms, this means that, based 
+on the available data, there is no strong evidence to suggest that the month of 
+the year has a significant impact on the number of deaths. The observed 
+differences in death counts from one month to another could be attributed 
+to random variation rather than seasonal or other temporal effects. 
+Further investigations, possibly incorporating other variables such as 
+regional factors, underlying health conditions, or external events, may be 
+needed to better understand the patterns in mortality over time.
+
+<br><br><br>
+
+## • Temperature Influences on Covid-19 and Related Deaths
+
+This analysis explores whether there is a relationship between ambient temperature and Covid-19 and related deaths across the US. To visualize this potential association, below is a scatter plot of total deaths against temperature, along with a fitted linear regression line.The Pearson correlation coefficient was tested to quantify the strength and direction of the relationship and a correlation test to determine statistical significance.
+
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(dat, aes(x = temperature, y = total_deaths)) +
+  geom_point() +                     # Add points
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add linear regression line
+  labs(x = "Temperature (°F)", y = "Total Deaths", title = "Temperature vs Total Deaths") +
+  theme_minimal()
+
+```
+
+
+
+From looking at the graphs, temperature does NOT appear to have a significant effect on the death rate of Covid-19 or related diseases. More statistical tests, though, will be done to find out if there is any kind of correlation.
+
+
+##### Correlation
+
+```{r, echo=FALSE}
+print(correlation1)
+```
+
+##### Correlation Test
+
+```{r, echo=FALSE}
+print(cor_test_result$p.value)
+```
+
+
+The analysis of the relationship between temperature and total deaths 
+indicates a very weak positive correlation, with a Pearson correlation 
+coefficient of 0.1003. This suggests that while there is a slight tendency 
+for total deaths to increase as temperature rises, the relationship is not 
+strong. However, the correlation is statistically significant, as 
+evidenced by the extremely small p-value of 2.048246e-36, which 
+indicates that the correlation is unlikely to be due to random 
+chance. Despite the statistical significance, the weak strength of the 
+correlation suggests that temperature is not a strong predictor of total 
+deaths.
+
+<br>
+
+#### How Temperature's Effect Changes Year to Year
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(dat, aes(x = temperature, y = total_deaths)) +
+  geom_point() +                     # Add points
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add linear regression line
+  labs(x = "Temperature (°F)", y = "Total Deaths", title = "Temperature vs Total Deaths") +
+  facet_wrap(~ year) +                # Facet by year
+  theme_minimal()
+
+```
+
+
+From the appearance of the plots, it looks as though there is a correlation between increasing temperatures and increased deaths in the total deaths from Covid-19 and related diseases. Some statistical tests will be done to determine if it is significant, and how much of an influence temperature has on the data.
+
+##### P-Values Year to Year
+
+```{r, echo=FALSE}
+print(results_temp_year)
+```
+
+##### R-Squared
+
+```{r, echo=FALSE}
+print(r_squared_by_year)
+```
+
+
+The relationship between temperature and total deaths was analyzed for each year from 2020 to 2023. The results show that while the correlation is statistically significant in all years (p-values < 0.05), the strength of the relationship is extremely weak, as indicated by the low R-Squared Values.
+
+These findings suggest that although temperature appears to have a statistically significant effect on total deaths, it explains less than 3% of the variation in deaths in any year. Therefore, temperature is not a strong predictor of total mortality and likely interacts with many other more influential factors.
+
+<br>
+
+### How Temperature's Effect Changes Based on Month
+
+Below is a scatter plot of Covid-19 and Related deaths vs temperature from month to month.
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(dat, aes(x = temperature, y = covid_deaths)) +
+  geom_point(color = "blue", alpha = 0.6) +  # Scatter points
+  geom_smooth(method = "loess", color = "red", se = TRUE) +  # LOESS smoother with CI
+  labs(title = "Covid Deaths vs Temperature by Month", 
+       x = "Temperature (°C)", 
+       y = "Covid Deaths", 
+       subtitle = "LOESS smoother with confidence interval",
+       caption = "") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        plot.subtitle = element_text(size = 12, face = "italic"),
+        plot.caption = element_text(size = 10, face = "italic"),
+        strip.text = element_text(size = 10)) +  # Adjust facet label size
+  facet_wrap(~ month, scales = "free")  # Facet by month with free scales
+```
+
+The graph above seems to show a similar trend throughout the months: as temperature goes up, deaths go up.
+
+##### Linear Regression Test
+
+```{r, echo=FALSE}
+summary(lm_model)
+```
+
+##### Anova Test
+
+```{r, echo=FALSE}
+summary(anova_result2)
+```
+
+The results from both the linear regression and ANOVA analyses indicate that the month of the year has a highly significant impact on COVID-19 deaths, with very low p-values (< 2e-16) in both tests. While the regression model suggests a slight negative association between temperature and COVID-19 deaths, this relationship is not statistically significant (p-value = 0.696), and the model explains virtually none of the variation in deaths (R-squared = 9.716e-06). In contrast, the ANOVA test finds that temperature does have a statistically significant effect on COVID-19 deaths (p-value < 2e-16), implying that temperature may influence outcomes, but likely in interaction with other factors rather than as a strong standalone predictor.
+
+
+## • State Influences on Covid-19 and Related Deaths
+
+Below is a graph of the total deaths across states, thoughout time.
+
+![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/animation.gif)
+
+Below is a similar graph of the total deaths per population across the states, throughout time
+
+![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/animation2.gif)
+
+Here is the same graph with averages across each year:
+
+```{r, echo=FALSE, message=FALSE, fig.height=12}
+ggplot(dat, aes(x = `total/pop`, y = reorder_within(state, `total/pop`, year), fill = state)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~year, scales = "free_y") +
+  scale_y_reordered() +
+  labs(
+    title = "Total Deaths per Capita by State (Ordered Within Each Year)",
+    x = "Total Deaths / Population",
+    y = "State"
+  ) +
+  theme_minimal()
+```
+
+
+##### Anova Test on States vs Total Deaths
+
+```{r, echo=FALSE}
+summary(anova_state)
+```
+
+The ANOVA test results show a statistically significant relationship between the state and COVID-19 deaths (F(47, 15655) = 53.52, p < 2e-16). This indicates that the average number of COVID-19 deaths differs significantly across states. The extremely small p-value suggests that these variations are highly unlikely to be due to chance, supporting the conclusion that state-specific factors likely contribute to differences in COVID-19 death rates.
+
+##### Random Forest Model for Predicting COVID-19 Deaths
+
+In this section is a Random Forest model to predict COVID-19 deaths based on multiple factors, including temperature, state, sex, and age group. The Random Forest algorithm, an ensemble learning method, is well-suited for this task due to its ability to handle complex datasets and model nonlinear relationships between variables.
+
+###### Mean Squared Error (MSE)
+
+```{r, echo=FALSE}
+print(paste("Mean Squared Error (MSE):", mse))
+```
+
+###### Visualize feature importance
+
+```{r, echo=FALSE}
+importance(rf_model)
+varImpPlot(rf_model)
+```
+
+The predictive model for COVID-19 deaths showed a Mean Squared Error (MSE) of 5631.59, indicating the model's performance in predicting actual deaths based on available features. Feature importance analysis revealed that Age Group is the most significant predictor of COVID-19 deaths, followed by Temperature, State, and Sex. These findings suggest that age-related factors play a critical role in COVID-19 mortality, while environmental conditions (temperature) and regional factors (state) also contribute to the model's predictions. Further improvements to the model could focus on refining these features or exploring additional variables for better accuracy.
+
+<br>
+
+## • Age Group's Effect on Covid-19 and Related Deaths
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE, results = "hide"}
+ggplot(dat, aes(x = age_group, y = total_deaths)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ sex) +
+  labs(title = "Distribution of Total Deaths by Age Group and Sex",
+       x = "Age Group",
+       y = "Total Deaths") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal()
+```
+
+This graph shows the total deaths by age group, separated by sex. It allows for a comparison of how deaths are distributed across different age groups for males and females.
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE, results = "hide"}
+ggplot(dat, aes(x = age_group, y = total_deaths)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ sex) +
+  labs(title = "Distribution of Total Deaths by Age Group and Sex",
+       x = "Age Group",
+       y = "Total Deaths") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal()
+```
+
+This boxplot illustrates the distribution of total deaths across different age groups, with separate boxes for each sex. It shows the spread, median, and potential outliers of death counts for males and females in each age group.
+
+##### Statistical Analysis of Deaths Across Age Groups
+
+```{r, echo=FALSE}
+summary(anova_result3)
+```
+
+The results of the ANOVA indicate significant effects for sex, age group, and their interaction on the dependent variable. The sex variable showed a significant effect (F = 18.52, p < 0.001), as did age group (F = 877.07, p < 2e-16), with both factors contributing notably to the variation in the data. Additionally, the interaction between sex and age group was highly significant (F = 40.58, p < 2e-16), suggesting that the relationship between the dependent variable and age group differs depending on sex. The residuals indicate that there is still some unexplained variation in the model, but the significant p-values for the factors and their interaction suggest a strong model fit.
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE, results = "hide"}
+ggplot(dat, aes(x = age_group, y = total_deaths, fill = sex)) +
+  geom_boxplot() +
+  labs(title = "Deaths by Age Group and Sex", x = "Age Group", y = "Total Deaths") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## • Conclusions
+
+Based on the analysis of COVID-19 and related deaths across different states, age groups, temperatures, sexes, and years, we observed several key patterns. Statistical tests revealed significant influences of state, sex, and age group on the total number of deaths, with age group showing the most pronounced effect on death rates. For example, older age groups, particularly those aged 85 years and over, were associated with much higher death counts compared to younger groups. Additionally, temperature and state showed considerable effects, with certain states, such as Alabama and Florida, consistently exhibiting higher death counts. Sex also played a role, but its influence was less pronounced compared to age and state. Predictive modeling using random forests provided a solid approach for forecasting total deaths, with temperature and state being the most influential features. Furthermore, a variety of visualizations, including histograms, boxplots, and heatmaps, helped illustrate these relationships and trends over time. Overall, this comprehensive analysis highlights the complex interplay of demographic, environmental, and geographic factors in influencing COVID-19-related mortality, offering valuable insights for public health strategies.
+
+## • References
+
+https://catalog.data.gov/dataset/provisional-covid-19-death-counts-by-sex-age-and-state
+
+https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/48/tavg/1/0/2020-2023
+
+<br><br><br>
+
