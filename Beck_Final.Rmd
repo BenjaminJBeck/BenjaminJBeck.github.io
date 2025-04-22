@@ -1,8 +1,10 @@
 ---
-title: "Sex, Location, Time, Temperature: Greatest Impacts on Covid Fatalities"
+title: "Covid and Covid Related Fatalities"
 author: "Ben Beck"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 <br><br><br>
 
+# • Sex, Location, Time, Temperature: Greatest Impacts on Covid Fatalities
 ## • Set-Up
 
 #### Dependencies
@@ -480,8 +483,7 @@ r_squared_by_year <- dat %>%
     r_squared = summary(lm(total_deaths ~ temperature))$r.squared
   )
 ```
-
-<br><br><br>
+<br>
 
 ## • Monthly Trends in COVID-19 and Related Deaths in the U.S
 
