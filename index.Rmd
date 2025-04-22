@@ -2,7 +2,13 @@
 title: "About Me"
 author: "Ben Beck"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  prettydoc::html_pretty:
+    theme: leonids
 ---
-[Final Project (Biol 3100)](Beck_Final.html)
+## Who I am
 
+## Education
+
+## Projects
+[Final Project (Biol 3100)](Beck_Final.html)
