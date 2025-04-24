@@ -29,6 +29,6 @@ High School Diploma
 American Fork High School — 2020
 
 ## Projects
-[Final Project (Biol 3100)](Beck_Final.html)
+[Final Project (Biol 3100)](Final_Project_Biol_3100/Beck_Final.html)
 
-[The Impact of Dental Neglect on the Oral Microbiome (MICR 3455)](Oral_Microbiome_Research.html)
+[The Impact of Dental Neglect on the Oral Microbiome (MICR 3455)](Oral Microbiome Research/Oral_Microbiome_Research.html)
