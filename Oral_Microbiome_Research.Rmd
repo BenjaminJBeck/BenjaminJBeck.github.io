@@ -1,0 +1,139 @@
+---
+title: "The Impact of Dental Neglect on the Oral Microbiome"
+author: "Ben Beck, Daniel Parker"
+date: "2/19/2025"
+output:  
+  prettydoc::html_pretty:
+    theme: cayman
+---
+# Introduction
+
+This research is about the human oral microbiome, which represents one of the largest and most diverse microbial ecosystems in the human body, consisting of over 700 different species of bacteria. This complex microbiome plays a critical role in maintaining the oral health and systemic health (Sharma et al., 2018). There have been recent epidemiological and clinical studies that have established there is a strong connection between oral health and various conditions of the body, including cardiovascular disease, diabetes, respiratory infections, and immune system issues (Wade, 2021). Although there is significant research done about the oral microbiome, there are many gaps that exist in the understanding of how common hygiene behaviors, such as neglect on teeth brushing for even a few days, impacts the oral microbiome and its function.
+
+The oral microbiome has different parts that support a diverse amount of bacterial communities. These communities exist with a delicate balance, many bacteria within helps to maintain health and prevent colonization of dangerous bacterial strains. If this delicate balance is ever interrupted or impacted negatively, dysbiosis can occur (an imbalance between the types of organisms present in the microbiome). This can eventually lead to dental caries, gingivitis, and periodontitis (Lamont et al., 2018). Although the effects of long-term dental hygiene is well documented, there are some gaps in the effects of short term neglect, such as over the course of a few days. 
+
+There has been previous research that has shown that biofilm formation on the teeth begins within minutes after cleaning. There are initial colonizers, especially Streptococcus, which adhere to the coating on the teeth and create conditions that are favorable for more bacteria attachment (Kolenbrander et al., 2020). Carda-Dieguez et al. (2022) had found that microbiome function can change rapidly after changes in oral hygiene practices, especially affecting metabolic pathways that are involved in acid production and stress responses. However, their research focused more on the changes in toothpaste ingredients than the effects of complete absence of teeth- brushing.
+
+The majority of studies about this particular topic, discussing the effects of poor dental hygiene, have shown accumulation of acidogenic and aciduric species, particularly Streptococcus mutants and Lactobacillus species. Also, these species are most often associated with dental carries (Takahashi & Nyvad, 2019). There are links from the periodontal disease and that of the proliferation of anaerobic Gram-negative bacteria. Some of these kinds of bacteria include Porphyromonas gingivalis and Tannerella forsythia. However, these studies mostly examine poor oral hygiene rather than short-term dental neglect that almost every occasionally experiences.
+
+There’s a huge knowledge gap in the scientific community that focuses on the resilience of the oral microbiome, particularly how quickly these dysbiotic communities develop after short periods of dental neglect, and whether the microbiome can fully recover after regular hygiene is resumed, or if it takes a while. This information has practical implications for the public health, and about the importance of consistent oral hygiene. It may help with future research and development that correspond to short-term changes in dental hygiene. 
+
+This research aims to address these knowledge gaps by analyzing the differences in oral microbiome from a period of consistent brushing to immediate pause on any dental hygiene. By using advanced microbiology techniques including 16S rRNA sequencing and functional metagenomic analysis, we will track the microbial community and its composition throughout the experimental period. This approach will allow for a comprehensive understanding of not only which bacterial species grow the most and fastest, but also how their functions change.
+
+Hopefully, the findings from this research will benefit the scientific community by providing a higher understanding of the shift in microbiome composition during dental neglect. By identifying these things, this may aid in the development of novel diagnostic tools that can be used for assessing oral health and predicting bacterial infection risks. It may also help in the development of restoring microbiome composition after short periods of dental neglect. 
+
+This research has many applications, both in patient education and preventative dentistry. Understanding how drastic the microbiome can shift during a few days can emphasize the importance of consistent oral hygiene and may provide ideas or recommendations to those patients who have a temporary lapse in their dental hygiene routines.
+
+<br>
+
+# Research Questions
+
+•	How does the bacterial composition change in the oral cavity prior to and post a one week period of dental hygiene neglect?
+•	How do bacteria grow and change over time after someone stops brushing their teeth regularly?
+•	Are changes in microbial diversity and community structure reversible upon resumption of regular oral hygiene practices?
+•	How do functional metabolic pathways within the oral microbiome shift during periods of dental neglect?
+
+<br>
+
+# Hypothesis and Predictions
+
+The hypothesis for this study is that a brief period of dental neglect will lead to a significant increase in pathogenic bacteria associated with dental caries and periodontal disease, as well as a more dangerous microbiome in general.
+
+#### Predictions:
+
+•	If brushing is stopped for several days, there will be an increase in Streptococcus mutans and other acid-producing bacteria.
+•	If regular brushing is resumed, microbial diversity will shift back toward a healthier composition within a few days.
+
+<br>
+
+# Methods
+
+#### Null Hypothesis: 
+A one-week period of dental hygiene cessation will not significantly alter oral microbiome composition or its effects on health.
+
+#### Alternative Hypothesis:
+A one-week period of dental hygiene cessation will lead to significant increases in both abundance and metabolic activity of acidogenic and periodontopathic bacteria, resulting in a measurably altered oral microbiome.
+
+#### Based on previous studies examining biofilm formation dynamics (Marsh & Zaura, 2017), we predict that:
+
+•	Cessation of oral hygiene practices will lead to a progressive increase in overall bacterial load, with the most substantial changes occurring 3-5 days after discontinuation.
+•	Microbial diversity will initially increase as opportunistic species proliferate, followed by a decrease in diversity as acidogenic and aciduric species become dominant.
+•	Resumption of oral hygiene will result in partial restoration of the original microbiome composition within 72 hours, though complete recovery may require longer periods, and is outside of the scope of this study.
+
+<br>
+
+# Supplies and Timeline
+
+#### Sample Collection
+
+Oral samples will be collected from voluntary participants (the researchers) who will maintain strict oral hygiene protocols for two weeks to establish a consistent baseline. Participants will then completely cease all dental hygiene practices for one week, followed by the resumption of normal hygiene practices. Sampling will occur at the following timepoints:
+
+- Baseline (Day 0, after two weeks of strict hygiene)
+- Day 7 of hygiene cessation
+
+For each sampling, both supragingival plaque and saliva will be collected. Supragingival plaque will be obtained using sterile curettes from standardized tooth surfaces, while unstimulated saliva will be collected into sterile containers after participants refrain from eating or drinking for at least 2 hours.
+
+#### Direct and Plate Culture
+
+A portion of each sample will be used for direct microscopic examination using Gram staining to provide quick visualization of bacterial morphotypes. Additionally, serial dilutions of samples will be plated on both non-selective media (blood agar) and selective media (Mitis Salivarius agar with bacitracin for Streptococcus mutans, Rogosa agar for Lactobacillus species, and anaerobic blood agar with hemin and vitamin K for periodontopathic species). Plates will be incubated under appropriate conditions (aerobic, anaerobic, or 5% CO₂) at 37°C for 24-72 hours. Colony counts will provide quantitative assessment of cultivable. The results from these plates will be shone near the end of the paper.
+
+#### DNA Extraction
+
+Total bacterial DNA will be taken from both plaque and saliva samples using the QIAamp DNA Mini Kit (Qiagen) following the manufacturer's protocol with few modifications for oral samples. Briefly, samples will be subjected to mechanical disruption with bead-beating, followed by enzymatic lysis with lysozyme and proteinase K. The quantity and quality of extracted DNA will be assessed using NanoDrop spectrophotometry and agarose gel electrophoresis.
+
+#### 16S PCR and Gel Electrophoresis
+
+The V3-V4 hypervariable regions of the 16S rRNA gene will be amplified using universal bacterial primers 341F (5'-CCTACGGGNGGCWGCAG-3') and 806R (5'-GACTACHVGGGTATCTAATCC-3'). PCR reactions will be performed in triplicate for each sample using the following conditions: initial denaturation at 95°C for 3 minutes, followed by 25 cycles of denaturation (95°C, 30 seconds), annealing (55°C, 30 seconds), and extension (72°C, 30 seconds), with a final extension at 72°C for 5 minutes. PCR products will be visualized on 1.5% agarose gels stained with ethidium bromide to confirm amplification.
+
+#### DNA Purification, Sequencing, and Data Analysis
+
+PCR products will be purified using the QIAquick PCR Purification Kit (Qiagen). Purified amplicons will be quantified using the Qubit dsDNA HS Assay Kit (Thermo Fisher Scientific) and pooled in equimolar amounts. The pooled library will be sequenced on the Oxford Nanopore MinION platform using the R9.4.1 flow cell and SQK-LSK109 ligation sequencing kit.
+
+Raw sequencing data will be processed using the EPI2ME workflow for 16S bacterial classification. This pipeline performs quality filtering, demultiplexing, and taxonomic assignment using the NCBI 16S reference database. Further analysis will include alpha diversity metrics (Shannon diversity index, observed species), beta diversity (Bray-Curtis dissimilarity, UniFrac distances), and differential abundance analysis to identify taxa that significantly change during the experimental period.
+
+Metabolic pathway prediction will be performed using PICRUSt2 to infer functional potential from 16S rRNA gene profiles. Statistical analyses will be conducted in R using the phyloseq, vegan, and DESeq2 packages.
+
+#### Timeline
+
+- Week 1-2: Establishment of baseline through strict oral hygiene protocols
+- Week 3: Dental hygiene cessation period with sampling on days 7
+- Week 4-5: Laboratory processing of samples, including culture, DNA extraction, and PCR
+- Week 6: Nanopore sequencing
+- Week 7-10: Data analysis and preparation of findings
+
+# Results
+
+#### Figure 1:
+
+![](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Pictures/Oral_Microbiome1.png)
+
+The relative amounts of various types of bacteria found in the oral microbiome. The “After” group signifies the results from the test swab after the week with no brushing. The “Before” group signifies the results of the test swab done before the week with no brushing. In this case, swabbing was done immediately after brushing.
+
+#### Figure 2:
+
+![](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Pictures/Oral_Microbiome2.png)
+
+Shows a boxplot of the relative amounts of bacterium “Before” week of cessation and “After” week of cessation.
+
+# Conclusions
+
+The combined results indicate that cessation of brushing led to a notable shift in the oral microbiome, characterized by a significant increase in bacterial diversity and the emergence of potentially pathogenic species. Boxplot analysis supports these findings, revealing elevated abundances of Bacillales, Bacilli, Bacillota, Neisseria, Staphylococcus, Streptococcus, and several unclassified taxa following the discontinuation of brushing. A marked transition was observed from a Staphylococcus-dominant community to one enriched with Neisseria and other anaerobic bacteria.
+Pathogenic genera such as Fusobacterium, Campylobacter, and Prevotella, which were previously undetected or present in low abundance, emerged after brushing ceased. This microbial shift suggests that the absence of oral hygiene facilitates the proliferation of potentially opportunistic and harmful species. In contrast, commensal groups including Actinomycetota, Lactobacillales, and Pseudomonadaceae were more prevalent prior to brushing cessation, indicating their potential role in maintaining a balanced and healthy oral microbiome under routine hygiene conditions.
+While the study was limited to two participants, the findings underscore the substantial influence of dental hygiene practices on the oral microbiome, even over a short period of time.
+
+# References
+
+Carda-Diéguez, M., Moazzez, R., & Mira, A. (2022). Functional changes in the oral microbiome after use of fluoride and arginine containing dentifrices: A metagenomic and metatranscriptomic study. Microbiome, 10(1), 76.
+
+Kolenbrander, P. E., Palmer, R. J., Periasamy, S., & Jakubovics, N. S. (2020). Oral multispecies biofilm development and the key role of cell-cell distance. Nature Reviews Microbiology, 18(4), 196-210.
+
+Lamont, R. J., Koo, H., & Hajishengallis, G. (2018). The oral microbiota: dynamic communities and host interactions. Nature Reviews Microbiology, 16(12), 745-759.
+
+Marsh, P. D., & Zaura, E. (2017). Dental biofilm: ecological interactions in health and disease. Journal of Clinical Periodontology, 44, S12-S22.
+
+Sharma, N., Bhatia, S., Sodhi, A. S., & Batra, N. (2018). Oral microbiome and health. AIMS Microbiology, 4(1), 42-66.
+
+Takahashi, N., & Nyvad, B. (2019). Ecological hypothesis of dentin and root caries. Caries Research, 50(4), 422-431.
+
+Wade, W. G. (2021). The oral microbiome in health and disease. Pharmacological Research, 169, 105587.
+105587.
