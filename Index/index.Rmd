@@ -13,7 +13,7 @@ After high school, I began my college journey at Utah Valley University, where I
 
 I’m currently working toward my Bachelor’s degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology.
 
-Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I’ll be sharing some of my artwork on this site—feel free to check it out! [-> My Artwork](My_Art/My_Art.html)
+Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I’ll be sharing some of my artwork on this site—feel free to check it out! [-> My Artwork](My_Art.html)
 
 In terms of work experience, I spent five years at Carson Meats (now Mosida Market) in Lehi, where I developed a strong work ethic. I now work at Panda Express and plan to continue working there while I complete my degree and build a career in bioinformatics.
 
@@ -29,6 +29,6 @@ High School Diploma
 American Fork High School — 2020
 
 ## Projects
-[Final Project (Biol 3100)](Final_Project_Biol_3100/)
+[Final Project (Biol 3100)](Final_Biol3100)
 
-[The Impact of Dental Neglect on the Oral Microbiome (MICR 3455)](Oral_Microbiome_Research/Oral_Microbiome_Research.html)
+[The Impact of Dental Neglect on the Oral Microbiome (MICR 3455)](Oral_Microbiome_Research.html)
