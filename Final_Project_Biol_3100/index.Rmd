@@ -233,7 +233,7 @@ dat <- dat %>%
                                    "September", "October", "November", "December")))
 
 #Now load in other data
-all_states_data <- list.files(path = "C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project _Biol_3100/Final_Data", pattern = "\\.csv$", full.names = TRUE)
+all_states_data <- list.files(path = "C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project_Biol_3100/Final_Data", pattern = "\\.csv$", full.names = TRUE)
 
 # Read and combine all files
 all_states_data <- all_states_data %>%
@@ -654,11 +654,11 @@ The results from both the linear regression and ANOVA analyses indicate that the
 
 Below is a graph of the total deaths across states, thoughout time.
 
-![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project _Biol_3100/animation.gif)
+![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project_Biol_3100/animation.gif)
 
 Below is a similar graph of the total deaths per population across the states, throughout time
 
-![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project _Biol_3100/animation2.gif)
+![Total Deaths by State](C:/Users/beckb/Desktop/BenjaminJBeck.github.io/Final_Project_Biol_3100/animation2.gif)
 
 Here is the same graph with averages across each year:
 
