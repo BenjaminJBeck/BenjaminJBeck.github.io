@@ -9,8 +9,6 @@ output:
 ## Who I am
 Hi, I'm Benjamin Beck, and I’m from American Fork, Utah. Ever since I was young, I’ve been passionate about biology—especially evolutionary science. That passion led me to pursue a career in the biological sciences, starting with participation in the STEM science fair during high school. My project focused on the effects of Nicotinamide Riboside (NR) on cell growth and proliferation, for which I received the Reoch Award.
 
-Before graduating high school, I earned the rank of Eagle Scout, a milestone that taught me the value of leadership, service, and perseverance.
-
 After high school, I began my college journey at Utah Valley University, where I earned my Associate's Degree in 2022. From 2022 to 2023, I served a full-time LDS mission, which was a meaningful and transformative experience. Upon returning, I resumed my education and made the decision to shift my focus from Biology to Bioinformatics, combining my love for science with a growing interest in computers and data analysis.
 
 I’m currently working toward my Bachelor’s degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology.
@@ -32,3 +30,5 @@ American Fork High School — 2020
 
 ## Projects
 [Final Project (Biol 3100)](Beck_Final.html)
+
+[The Impact of Dental Neglect on the Oral Microbiome (MICR 3455)](Oral_Microbiome_Research.html)
