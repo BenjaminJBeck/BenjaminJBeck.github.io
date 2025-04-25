@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Introduction
 
-The COVID-19 pandemic has profoundly impacted global health, with varying mortality rates influenced by demographic, geographic, and environmental factors. This study aims to elucidate the relationships between COVID-19 fatalities and variables such as sex, location, time, and temperature across the United States. By integrating mortality data with demographic statistics and environmental information, the research seeks to identify patterns and correlations that may inform public health strategies and interventions.​
+The COVID-19 pandemic has profoundly impacted global health, with varying mortality rates influenced by demographic, geographic, and environmental factors. This study aims to elucidate the relationships between COVID-19 fatalities and variables such as sex, location, time, and temperature across the United States. By integrating mortality data with demographic statistics and environmental information, the research seeks to identify patterns and correlations that may inform public health strategies and interventions.
 
 Utilizing data from the Centers for Disease Control and Prevention (CDC) and state-level temperature records, the study employs statistical analyses to explore how these factors interact and contribute to the observed mortality trends. The findings are intended to provide insights into the multifaceted nature of the pandemic's impact and to support data-driven decision-making in public health policy.
 
