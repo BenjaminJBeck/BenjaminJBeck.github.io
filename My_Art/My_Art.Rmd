@@ -16,50 +16,123 @@ output:
 
 
 # Paintings
-#### Description
-Okay, so I know they are not spectacular, but keep in mind that the first painting I ever did was maybe five months ago. I have always been artistic and I love to try new things, so I kind of picked this up as my hobby. I expect that the more I paint, the better I will get at it. The first painting I ever did is in here, it is the big one of the Milky Way Galaxy - because of my love for space. The second one I did is the Big one of Stranger Things will the orange and red clouds. Many of these paintings are from my favorite movies and shows, like 'Interstellar', 'Inception', and 'Stranger Things'. I have plans to make a painting for 'Life of Pi', as it is also one of my favorites. I mostly am doing poster-like paintings, just because I like those ones better. I plan to keep uploading my work here, so stay posted for new ones!
+#### Introduction
+Okay, so I know they are not spectacular, but keep in mind that the first painting I ever did was maybe five months ago. I have always been artistic and I love to try new things, so I kind of picked this up as my hobby. I expect that the more I paint, the better I will get at it. I mostly am doing poster-like paintings, just because I like those ones better. I plan to keep uploading my work here, so stay posted for new ones! 
 
 <div class="full-width">
-  <img src="Pictures/Art1.jpg" />
-  <img src="Pictures/Art3.jpg" />
-  <img src="Pictures/Art6.jpg" />
-  <img src="Pictures/Art8.jpg" />
-  <img src="Pictures/Art9.jpg" />
-  <img src="Pictures/Art10.jpg" />
-  <img src="Pictures/Art11.jpg" />
-  <img src="Pictures/Art13.jpg" />
-  <img src="Pictures/Art14.jpg" />
-  <img src="Pictures/Art16.jpg" />
-  <img src="Pictures/Art17.jpg" />
-  <img src="Pictures/Art18.jpg" />
-  <img src="Pictures/Art31.jpg" />
-  <img src="Pictures/Art32.jpg" />
+<img src="../Pictures/Art27.jpg" />
 </div>
+
+Here is my *Star Wars* painting! We have Anakin Skywalker fighting Obi-Wan Kenobi on Mustafar, inside of Darth Vadar's iconic helmet. We also have the Death Star and the main title, giving the painting a nice touch. 
+
+<div class="full-width">
+<img src="../Pictures/Art3.jpg" />
+</div>
+
+This is the Mocking Jay from the movie series *The Hunger Games.* The symbol in this painting was probably spray painted long ago on a wall now overgrown with vegetation. This also would be a cool concept for *The Last of Us*, I might have to do one for that show, too.
+
+<div class="full-width">
+<img src="../Pictures/Art11.jpg" />
+</div>
+
+Here is the Shadow Monster from *Stranger Things*, lurking through the clouds.
+
+<div class="full-width">
+<img src="../Pictures/Art6.jpg" />
+</div>
+
+I saw something similar to this on the Instagram, thought I might make one. It was not a cheap painting.
+
+<div class="full-width">
+<img src="../Pictures/Art32.jpg" />
+</div>
+
+*Indiana Jones*, of course
+
+<div class="full-width">
+<img src="../Pictures/Art10.jpg" />
+</div>
+
+This was the origional painting of the Mocking Jay, which gave me inspiration to make the 3d painting above.
+
+<div class="full-width">
+<img src="../Pictures/Art9.jpg" />
+</div>
+
+<div class="full-width">
+<img src="../Pictures/Art8.jpg" />
+</div>
+
+This is the album cover of the *Imagine Dragons* song, "Wrecked." The song meant a lot to me during the time I painted this.
+
+<div class="full-width">
+<img src="../Pictures/Art31.jpg" />
+</div>
+
+This painting I screwed up on just a little, but I plan on fixing it. From the Movie *Inception*, just in case you can't read the words on the painting.
+
+<div class="full-width">
+<img src="../Pictures/Art1.jpg" />
+</div>
+
+In this painting, you have one of my favorite prehistoric sea reptiles: *Liopleurodon*.
+
+<div class="full-width">
+<img src="../Pictures/Art14.jpg" />
+</div>
+
+I think this one is a really cool one. From the show *Stranger Things*, we have Max getting attacked by Vecna, who is in the upside down. I like the symmetry in it, too.
+
+<div class="full-width">
+<img src="../Pictures/Art13.jpg" />
+</div>
+
+This is probably my favorite painting out of the ones I have done so far. I am obsessed with *Interstellar*, as it is just one of the most beautiful movies out there. I think this one really portrays some of the beauty that is found in space and the movie.
+
+<div class="full-width">
+<img src="../Pictures/Art16.jpg" />
+</div>
+
+*Jurassic Park*, one of my favorite movies
+
+<div class="full-width">
+<img src="../Pictures/Art17.jpg" />
+</div>
+
+This is my second painting! I don't really love the clouds, but they were tricky and I'm still learning.
+
+<div class="full-width">
+  <img src="../Pictures/Art18.jpg" />
+</div>
+
+Here is my first painting! It is simply of the Milky Way Galaxy, because I love space a lot.
 <br>
 
 # Clay Projects
-#### Description
-These are my Clay Projects! There won't be as many on here, as I mostly do painting and drawing, but I also kind of just picked this up as a hobby, so there will be much more coming out! The blue monster and green dinosaur I chose from looking at online projects done, and thought they would be really fun. The red robot is from one of my new favorite games called "REPO". I have a few more that I am currently working on, so stay tuned!
+#### Introduction
+These are my Clay Projects! There won't be as many on here, as I mostly do painting and drawing, but I also kind of just picked this up as a hobby, so there will be much more coming out!
 
 <div class="full-width">
-  <img src="Pictures/Art4.jpg" />
-  <img src="Pictures/Art5.jpg" />
-  </div>
+  <img src="../Pictures/Art4.jpg" />
+  <img src="../Pictures/Art5.jpg" />
+</div>
+This Red guy is actually a robot from the video game *REPO*. 
+
 <br>
 
 # Dinopedia
-#### Description
+#### Introduction
 Aside from how much I love movies and shows, I also love dinosaurs and prehistoric life! I also love to draw, so I created a "dinopedia" where I can draw out my favorite animals and create short descriptions of each one! (Also there are a few fictional creatures from movies or shows)
 <div class="full-width">
-  <img src="Pictures/Art19.jpg" />
-  <img src="Pictures/Art20.jpg" />
-  <img src="Pictures/Art21.jpg" />
-  <img src="Pictures/Art22.jpg" />
-  <img src="Pictures/Art23.jpg" />
-  <img src="Pictures/Art24.jpg" />
-  <img src="Pictures/Art25.jpg" />
-  <img src="Pictures/Art26.jpg" />
-  <img src="Pictures/Art28.jpg" />
-  <img src="Pictures/Art29.jpg" />
-  <img src="Pictures/Art30.jpg" />
+  <img src="../Pictures/Art19.jpg" />
+  <img src="../Pictures/Art20.jpg" />
+  <img src="../Pictures/Art21.jpg" />
+  <img src="../Pictures/Art22.jpg" />
+  <img src="../Pictures/Art23.jpg" />
+  <img src="../Pictures/Art24.jpg" />
+  <img src="../Pictures/Art25.jpg" />
+  <img src="../Pictures/Art26.jpg" />
+  <img src="../Pictures/Art28.jpg" />
+  <img src="../Pictures/Art29.jpg" />
+  <img src="../Pictures/Art30.jpg" />
   </div>
