@@ -7,132 +7,121 @@ output:
     theme: cayman
 ---
 <style>
-.full-width img {
-  width: 100%;
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+.gallery img {
+  width: 200px;
   height: auto;
-  margin-bottom: 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.gallery img:hover {
+  transform: scale(1.05);
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.9);
+}
+.modal-content {
+  margin: auto;
+  display: block;
+  max-width: 80%;
+  border-radius: 20px;
+}
+.caption {
+  margin: 15px auto;
+  text-align: center;
+  color: #f1f1f1;
+  font-size: 18px;
+  max-width: 80%;
+}
+.close {
+  position: absolute;
+  top: 30px;
+  right: 45px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
 }
 </style>
 
+<script>
+function openModal(src, captionText) {
+  document.getElementById("imgModal").style.display = "block";
+  document.getElementById("modalImg").src = src;
+  document.getElementById("modalCaption").innerText = captionText;
+}
+function closeModal() {
+  document.getElementById("imgModal").style.display = "none";
+}
+</script>
 
 # Paintings
 #### Introduction
-Okay, so I know they are not spectacular, but keep in mind that the first painting I ever did was maybe five months ago. I have always been artistic and I love to try new things, so I kind of picked this up as my hobby. I expect that the more I paint, the better I will get at it. I mostly am doing poster-like paintings, just because I like those ones better. I plan to keep uploading my work here, so stay posted for new ones! 
+Okay, so I know they are not spectacular, but keep in mind that the first painting I ever did was maybe five months ago. I have always been artistic and I love to try new things, so I kind of picked this up as my hobby...
 
-<div class="full-width">
-<img src="../Pictures/Art27.jpg" />
+<div class="gallery">
+  <img src="../Pictures/Art33.jpg" onclick="openModal(this.src, 'Markus from VRchat')" />
+  <img src="../Pictures/Art27.jpg" onclick="openModal(this.src, 'Star Wars helmet battle')" />
+  <img src="../Pictures/Art3.jpg" onclick="openModal(this.src, 'Mocking Jay, Hunger Games / The Last of Us')" />
+  <img src="../Pictures/Art11.jpg" onclick="openModal(this.src, 'Shadow Monster from Stranger Things')" />
+  <img src="../Pictures/Art6.jpg" onclick="openModal(this.src, 'Inspired by an Instagram painting')" />
+  <img src="../Pictures/Art32.jpg" onclick="openModal(this.src, 'Indiana Jones')" />
+  <img src="../Pictures/Art10.jpg" onclick="openModal(this.src, 'Original Mocking Jay concept')" />
+  <img src="../Pictures/Art9.jpg" onclick="openModal(this.src, 'Early symbolic art')" />
+  <img src="../Pictures/Art8.jpg" onclick="openModal(this.src, 'Imagine Dragons - Wrecked')" />
+  <img src="../Pictures/Art31.jpg" onclick="openModal(this.src, 'Inception painting - WIP')" />
+  <img src="../Pictures/Art1.jpg" onclick="openModal(this.src, 'Liopleurodon sea reptile')" />
+  <img src="../Pictures/Art14.jpg" onclick="openModal(this.src, 'Max & Vecna from Stranger Things')" />
+  <img src="../Pictures/Art13.jpg" onclick="openModal(this.src, 'Interstellar-inspired space art')" />
+  <img src="../Pictures/Art16.jpg" onclick="openModal(this.src, 'Jurassic Park')" />
+  <img src="../Pictures/Art17.jpg" onclick="openModal(this.src, 'Second painting - cloud study')" />
+  <img src="../Pictures/Art18.jpg" onclick="openModal(this.src, 'First painting - Milky Way Galaxy')" />
 </div>
 
-Here is my *Star Wars* painting! We have Anakin Skywalker fighting Obi-Wan Kenobi on Mustafar, inside of Darth Vadar's iconic helmet. We also have the Death Star and the main title, giving the painting a nice touch. 
-
-<div class="full-width">
-<img src="../Pictures/Art3.jpg" />
+<div id="imgModal" class="modal" onclick="closeModal()">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="modalImg">
+  <div class="caption" id="modalCaption"></div>
 </div>
-
-This is the Mocking Jay from the movie series *The Hunger Games.* The symbol in this painting was probably spray painted long ago on a wall now overgrown with vegetation. This also would be a cool concept for *The Last of Us*, I might have to do one for that show, too.
-
-<div class="full-width">
-<img src="../Pictures/Art11.jpg" />
-</div>
-
-Here is the Shadow Monster from *Stranger Things*, lurking through the clouds.
-
-<div class="full-width">
-<img src="../Pictures/Art6.jpg" />
-</div>
-
-I saw something similar to this on the Instagram, thought I might make one. It was not a cheap painting.
-
-<div class="full-width">
-<img src="../Pictures/Art32.jpg" />
-</div>
-
-*Indiana Jones*, of course
-
-<div class="full-width">
-<img src="../Pictures/Art10.jpg" />
-</div>
-
-This was the origional painting of the Mocking Jay, which gave me inspiration to make the 3d painting above.
-
-<div class="full-width">
-<img src="../Pictures/Art9.jpg" />
-</div>
-
-<div class="full-width">
-<img src="../Pictures/Art8.jpg" />
-</div>
-
-This is the album cover of the *Imagine Dragons* song, "Wrecked." The song meant a lot to me during the time I painted this.
-
-<div class="full-width">
-<img src="../Pictures/Art31.jpg" />
-</div>
-
-This painting I screwed up on just a little, but I plan on fixing it. From the Movie *Inception*, just in case you can't read the words on the painting.
-
-<div class="full-width">
-<img src="../Pictures/Art1.jpg" />
-</div>
-
-In this painting, you have one of my favorite prehistoric sea reptiles: *Liopleurodon*.
-
-<div class="full-width">
-<img src="../Pictures/Art14.jpg" />
-</div>
-
-I think this one is a really cool one. From the show *Stranger Things*, we have Max getting attacked by Vecna, who is in the upside down. I like the symmetry in it, too.
-
-<div class="full-width">
-<img src="../Pictures/Art13.jpg" />
-</div>
-
-This is probably my favorite painting out of the ones I have done so far. I am obsessed with *Interstellar*, as it is just one of the most beautiful movies out there. I think this one really portrays some of the beauty that is found in space and the movie.
-
-<div class="full-width">
-<img src="../Pictures/Art16.jpg" />
-</div>
-
-*Jurassic Park*, one of my favorite movies
-
-<div class="full-width">
-<img src="../Pictures/Art17.jpg" />
-</div>
-
-This is my second painting! I don't really love the clouds, but they were tricky and I'm still learning.
-
-<div class="full-width">
-  <img src="../Pictures/Art18.jpg" />
-</div>
-
-Here is my first painting! It is simply of the Milky Way Galaxy, because I love space a lot.
-<br>
 
 # Clay Projects
 #### Introduction
 These are my Clay Projects! There won't be as many on here, as I mostly do painting and drawing, but I also kind of just picked this up as a hobby, so there will be much more coming out!
 
-<div class="full-width">
-  <img src="../Pictures/Art4.jpg" />
-  <img src="../Pictures/Art5.jpg" />
+<div class="gallery">
+  <img src="../Pictures/Art4.jpg" onclick="openModal(this.src, 'Blue Monster and Green Dinosaur')" />
+  <img src="../Pictures/Art5.jpg" onclick="openModal(this.src, 'R.E.P.O Robot')" />
 </div>
-This Red guy is actually a robot from the video game *REPO*. 
-
-<br>
 
 # Dinopedia
 #### Introduction
 Aside from how much I love movies and shows, I also love dinosaurs and prehistoric life! I also love to draw, so I created a "dinopedia" where I can draw out my favorite animals and create short descriptions of each one! (Also there are a few fictional creatures from movies or shows)
-<div class="full-width">
-  <img src="../Pictures/Art19.jpg" />
-  <img src="../Pictures/Art20.jpg" />
-  <img src="../Pictures/Art21.jpg" />
-  <img src="../Pictures/Art22.jpg" />
-  <img src="../Pictures/Art23.jpg" />
-  <img src="../Pictures/Art24.jpg" />
-  <img src="../Pictures/Art25.jpg" />
-  <img src="../Pictures/Art26.jpg" />
-  <img src="../Pictures/Art28.jpg" />
-  <img src="../Pictures/Art29.jpg" />
-  <img src="../Pictures/Art30.jpg" />
-  </div>
+
+<div class="gallery">
+  <img src="../Pictures/Art34.jpg" onclick="openModal(this.src, 'Trilobite and Dimetrodon')" />
+  <img src="../Pictures/Art35.jpg" onclick="openModal(this.src, 'Therizinosaurus and Cameroceras')" />
+  <img src="../Pictures/Art36.jpg" onclick="openModal(this.src, 'Eurypterid and Pikaia')" />
+  <img src="../Pictures/Art37.jpg" onclick="openModal(this.src, 'Hallocigenia and Postosuchus')" />
+  <img src="../Pictures/Art38.jpg" onclick="openModal(this.src, 'Cymbospondylus and Shadow Monster')" />
+  <img src="../Pictures/Art39.jpg" onclick="openModal(this.src, 'Demogorgon and Myosaurus')" />
+  <img src="../Pictures/Art40.jpg" onclick="openModal(this.src, 'Cartorhynchus and Ammonite')" />
+  <img src="../Pictures/Art41.jpg" onclick="openModal(this.src, 'Coelophysis and Cynodont')" />
+  <img src="../Pictures/Art42.jpg" onclick="openModal(this.src, 'Lungfish and Placerias')" />
+  <img src="../Pictures/Art43.jpg" onclick="openModal(this.src, 'Helicopricorn')" />
+  <img src="../Pictures/Art44.jpg" onclick="openModal(this.src, 'Kylo the Thero, based on Sonic')" />
+</div>
