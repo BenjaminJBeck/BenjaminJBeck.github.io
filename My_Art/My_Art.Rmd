@@ -101,19 +101,6 @@ Okay, so I know they are not spectacular, but keep in mind that the first painti
 </div>
 
 
-<div class="gallery">
-  <div class="image-pair">
-    <img src="../Pictures/Art33.jpg" onclick="openModal(this.src, 'Markus from VRchat')" />
-    <img src="../Pictures/Art27.jpg" onclick="openModal(this.src, 'Star Wars helmet battle')" />
-  </div>
-  
- 
-  <div class="image-pair">
-    <img src="../Pictures/Art3.jpg" onclick="openModal(this.src, 'Mocking Jay, Hunger Games / The Last of Us')" />
-    <img src="../Pictures/Art11.jpg" onclick="openModal(this.src, 'Shadow Monster from Stranger Things')" />
-  </div>
-</div>
-
 # Clay Projects
 #### Introduction
 These are my Clay Projects! There won't be as many on here, as I mostly do painting and drawing, but I also kind of just picked this up as a hobby, so there will be much more coming out!
