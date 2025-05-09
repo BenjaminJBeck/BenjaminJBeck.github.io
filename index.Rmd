@@ -49,3 +49,5 @@ American Fork High School — 2020
 <a href="Oral_Microbiome_Research/Oral_Microbiome_Research.html">Oral Microbiome Research (MICR 3455)</a>
 
 <a href="My_Art/My_Art.html">My Artwork</a>
+
+<a href="https://mcreator.net/modification/115866/fossils-and-archeology-add" target="_blank">My Minecraft 1.18.2 Fossils and Archeology Add-on Mod</a>
