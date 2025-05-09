@@ -38,7 +38,8 @@ output:
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 80%;
+  max-width: 90vw;
+  max-height: 90vh;
   border-radius: 20px;
 }
 .caption {
