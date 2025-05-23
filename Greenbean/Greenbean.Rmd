@@ -1,0 +1,48 @@
+---
+title: "Greenbean"
+output: html_document
+runtime: shiny
+---
+
+## Enter Your: First Name + Last Name + Dog's Name  
+**(No caps, no spaces)**
+
+```{r, echo=FALSE}
+library(shiny)
+options(repos = c(CRAN = "https://cran.r-project.org"))
+
+# Define correct password
+correct_password <- "cheyanngreenmanlilly"
+
+# UI embedded in Rmd
+fluidPage(
+  passwordInput("user_password", "Password:"),
+  actionButton("submit_btn", "Submit"),
+  br(),
+  textOutput("response")
+)
+
+# Server logic in a separate chunk
+observeEvent(input$submit_btn, {
+  if (input$user_password == correct_password) {
+    output$response <- renderText("Dear Greenbean,
+
+I know you’ve blocked me on everything, and I respect that choice — I won’t try to reach out again beyond this. Still, there are things on my heart that I just needed to put into words, even if you never read them.
+
+I’ve come to understand that no matter what I say, I can’t change how you feel toward me — and that’s something I’m learning to accept. That doesn’t make it any less true that you meant a lot to me.
+
+When we first got close — the late-night calls, the daily texts — I began to feel something I hadn’t felt before: hope. I’ve always struggled when it comes to dating, and while I technically had someone before you, it never felt real. With you, it did. I genuinely thought the world of you, and I would’ve gladly driven those six hours just for a chance to see you in person.
+
+In September, I made one of the biggest mistakes of my life by letting our connection fade while I was seeing someone else. When that ended and I realized I couldn’t reach out to you anymore, it wasn’t just losing the chance to talk — it was losing a friend I deeply valued. Even though we never met in person, we shared something meaningful. And when you came back but wanted nothing to do with me, I was overwhelmed with regret.
+
+I know now that part of why I missed you so much wasn’t just you as a person, but the hope and happiness I had when we were close. Before you, I didn’t believe love — real, honest love — was possible for me. And after losing you, that hopelessness started to creep back in.
+
+Even though I’ve dated since then, nothing has changed that feeling. Something inside me felt like it broke after December, and I haven’t figured out how to get it back. I think that’s part of why I’ve held onto you so tightly — not to possess you, but because I missed the light you brought into my life.
+
+I understand you never want to see or hear from me again, and I will do my best to let go. But still, I want you to know I genuinely wish you happiness. If life ever brings you to a place where you need a friend — someone who truly cares — I’ll always be here.
+
+Take care of yourself, Greenbean. You deserve the world.")
+  } else {
+    output$response <- renderText("Incorrect password. Please try again.")
+  }
+})
