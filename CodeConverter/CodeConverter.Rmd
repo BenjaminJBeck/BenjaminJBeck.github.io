@@ -1,0 +1,214 @@
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #f2f6fc, #e3ecf9);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  #container {
+    width: 100%;
+    max-width: 960px;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+  }
+
+  textarea {
+    width: 100%;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    border: 1px solid #d3d9e3;
+    border-radius: 10px;
+    padding: 15px;
+    resize: vertical;
+    box-sizing: border-box;
+    background: #f9fbfd;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  #input {
+    height: 200px;
+  }
+
+  #output {
+    height: 240px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+  }
+
+  #buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .dynamic-button {
+    padding: 12px 24px;
+    background: linear-gradient(to right, #007bff, #0056d2);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+
+  .dynamic-button:hover {
+    background: linear-gradient(to right, #0056d2, #0043a2);
+    transform: translateY(-2px);
+  }
+</style>
+
+<div id="container">
+  <h2>Game JSON to HTML Converter</h2>
+
+  <textarea id="input" placeholder="Paste your game JSON code here..."></textarea>
+
+  <div id="buttons"></div>
+
+  <textarea id="output" readonly placeholder="Converted HTML will appear here..."></textarea>
+</div>
+
+<script>
+  function convert() {
+    const input = document.getElementById('input').value.trim();
+    if (!input) {
+      alert('Please paste your JSON code first.');
+      return;
+    }
+
+    let gameData;
+    try {
+      gameData = JSON.parse(input);
+    } catch (e) {
+      alert('Invalid JSON. Please check your input.');
+      return;
+    }
+
+    const htmlCode = generateHTMLFromGameData(gameData);
+    document.getElementById('output').value = htmlCode;
+  }
+
+  function copyOutput() {
+    const output = document.getElementById('output');
+    output.select();
+    output.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    alert('Converted code copied to clipboard!');
+  }
+
+  function clearOutput() {
+    document.getElementById('output').value = '';
+    document.getElementById('input').value = '';
+  }
+
+ function generateHTMLFromGameData(gameData) {
+  return `
+<div id="actual-canvas" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  z-index: 0;
+  font-family: 'Segoe UI', sans-serif;
+"></div>
+
+<script>
+  const gameData = ${JSON.stringify(gameData, null, 2)};
+  const currentPage = "1";
+
+  function loadScene(pageNum) {
+    const canvas = document.getElementById('actual-canvas');
+    canvas.innerHTML = '';
+
+    const bg = gameData.pages[pageNum]?.background;
+    if (bg) {
+      canvas.style.backgroundImage = \`url('\${bg}')\`;
+    } else {
+      canvas.style.backgroundImage = '';
+    }
+
+    const elements = gameData.pages[pageNum]?.elements || [];
+    elements.forEach(elData => {
+      let el;
+
+      if (elData.tag === 'img') {
+        el = document.createElement('img');
+        // Handle missing or relative src safely
+        if (elData.src && !elData.src.startsWith('http')) {
+          el.src = './' + elData.src;
+        } else {
+          el.src = elData.src;
+        }
+      } else if (elData.tag === 'button') {
+        el = document.createElement('button');
+        el.textContent = elData.content || 'Button';
+        el.addEventListener('click', () => alert('Button clicked!'));
+      } else {
+        el = document.createElement(elData.tag);
+        el.innerHTML = elData.content || '';
+      }
+
+      el.style.cssText = elData.style || '';
+      if (elData.top) el.style.top = elData.top;
+      if (elData.left) el.style.left = elData.left;
+      if (elData.width) el.style.width = elData.width;
+      if (elData.height) el.style.height = elData.height;
+
+      if (elData.rotation || elData.scale) {
+        const rotation = elData.rotation || '0';
+        const scale = elData.scale || '1';
+        el.style.transform = \`rotate(\${rotation}deg) scale(\${scale})\`;
+      }
+
+      canvas.appendChild(el);
+    });
+  }
+
+  loadScene(currentPage);
+<\/script>`;
+}
+
+  // ✅ Moved to the bottom so handlers are defined first
+  window.onload = function () {
+    const actions = [
+      { label: 'Convert', handler: convert },
+      { label: 'Copy', handler: copyOutput },
+      { label: 'Clear', handler: clearOutput }
+    ];
+    const buttonsDiv = document.getElementById('buttons');
+    actions.forEach(action => {
+      const btn = document.createElement('button');
+      btn.textContent = action.label;
+      btn.className = 'dynamic-button';
+      btn.onclick = action.handler;
+      buttonsDiv.appendChild(btn);
+    });
+  };
+</script>
