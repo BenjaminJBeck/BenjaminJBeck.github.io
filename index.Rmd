@@ -55,3 +55,5 @@ American Fork High School — 2020
 <a href="https://benjaminjbeck.shinyapps.io/Greenbean/" target="_blank">Greenbean</a>
 
 <a href="PictureSplitter/PictureSplitter.html">Picture Splitter</a>
+
+<a href="Pixelator/Pixelator.html">Pixelator</a>

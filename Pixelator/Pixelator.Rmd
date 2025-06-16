@@ -1,0 +1,465 @@
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+}
+
+#app-container {
+  position: relative;
+  width: 90%;
+  margin: 30px auto;
+  background-color: #d3d3d3;
+  padding: 20px 20px 20px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.left-controls, .right-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 48%;
+}
+
+button {
+  background-color: #c0c0c0;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background-color: #a9a9a9;
+}
+
+.image-area {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.image-box {
+  width: 48%;
+  height: 500px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-content: flex-start;
+}
+
+.image-box img {
+  width: calc(33% - 10px);   /* 3 per row */
+  height: auto;
+  image-rendering: pixelated; /* shows sharp pixels */
+  border-radius: 8px;
+  cursor: pointer;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#convert-button {
+  display: block;
+  margin: 20px auto;
+  padding: 14px 30px;
+  font-size: 18px;
+  border-radius: 999px;
+  background-color: #a9a9a9;
+  border: none;
+  cursor: pointer;
+}
+
+#convert-button:hover {
+  background-color: #888;
+}
+
+img.selected {
+  outline: 3px solid #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+}
+
+body {
+  overflow: hidden;
+}
+
+</style>
+
+<div id="app-container">
+<div style="background:#aaa; padding:10px 30px; border-radius:16px; text-align:center; margin-bottom:20px; box-shadow:0 6px 18px rgba(0,0,0,0.2);">
+  <h1 style="margin:0; font-size:32px; font-weight:600;">Pixelator</h1>
+  <button id="reset-btn" style="position: absolute; bottom: 20px; right: 20px; background-color: #e74c3c; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Reset</button></div>
+
+<div class="top-bar">
+<div class="left-controls">
+<button id="upload-btn">Upload</button>
+<button id="paste-btn">Paste</button>
+<input type="file" id="file-input" accept="image/*" multiple style="display:none;"></div>
+<div class="right-controls">
+<button id="download-btn">Download</button></div>
+</div>
+
+<div id="name-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  background:#ddd; border-radius:20px; padding:20px; width:400px; text-align:center; z-index:1000;
+  box-shadow:0 10px 30px rgba(0, 0, 0, 0.3);">
+<div style="position:relative; margin-bottom:10px;">
+<div style="position:absolute; top:0; right:0; font-size:20px; cursor:pointer; padding:5px;" onclick="closeNamePopup()">✕</div>
+<div style="font-size:20px; background:#aaa; border-radius:10px; padding:8px 60px; text-align:center; display:inline-block; margin:0 auto;">Name Editor</div>
+</div>
+<div style="margin-bottom:10px;"><img id="name-preview" src=""
+  style="width:128px; height:128px; image-rendering: pixelated; box-shadow: 0 0 20px rgba(0,0,0,0.5);"></div>
+<div style="display:flex; justify-content:center; gap:10px;">
+<input id="name-input" type="text" placeholder="Name" style="padding:10px; border-radius:12px; font-size:16px;"><button id="save-name-btn" style="padding:10px 20px; border-radius:12px; font-size:16px;">Save</button></div></div>
+
+<div class="image-area">
+<div id="input-images" class="image-box"></div>
+<div style="display: flex; flex-direction: column; align-items: center; width: 48%;">
+<div id="output-images" class="image-box" style="width: 100%;"></div>
+<button id="name-images-btn" style="margin-top: 10px;">Name Images</button>
+</div>
+<button id="convert-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);">CONVERT</button>
+
+
+
+<!-- Help Button -->
+<button id="help-btn" style="position: absolute; bottom: 20px; left: 20px; background-color: #c0c0c0; border-radius: 12px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Help</button>
+
+<!-- Help Popup -->
+<div id="help-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+background: #ddd; border-radius: 20px; padding: 20px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+<div style="font-size: 20px; background: #aaa; border-radius: 10px; padding: 5px 10px;">Help</div>
+<div style="cursor: pointer; font-size: 20px;" onclick="document.getElementById('help-popup').style.display='none'">✕</div>
+</div>
+<div style="font-size: 14px; line-height: 1.5;">
+<p><strong>Purpose:</strong> This application is specifically designed to convert real-world images into Minecraft-style pixel textures.</p>
+<p><strong>How it works:</strong></p>
+<ul style="padding-left: 20px; margin: 0;">
+<li><strong>Block Textures:</strong> Upload or paste any full image. The tool will crop it into a square and convert it to a 16×16 pixelated texture suitable for Minecraft blocks.</li>
+<li><strong>Item Textures:</strong> Use images with transparent backgrounds. The tool will automatically scale and rotate the item to fit neatly within a 16×16 frame, adding transparent padding so the item doesn't touch the edges.</li>
+</ul>
+</div>
+</div>
+<script>
+let namingInProgress = false;
+const uploadBtn = document.getElementById('upload-btn');
+const fileInput = document.getElementById('file-input');
+const inputBox = document.getElementById('input-images');
+const convertBtn = document.getElementById('convert-button');
+const outputBox = document.getElementById('output-images');
+const pasteBtn = document.getElementById('paste-btn');
+const addedImageKeys = new Set();
+
+uploadBtn.addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', (event) => {
+  const files = event.target.files;
+  handleFiles(files);
+  fileInput.value = ''; // ✅ Fix: allow re-uploading the same image
+});
+
+function handleFiles(files) {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+  const src = e.target.result;
+  const key = `${file.name}_${file.size}`;
+  if (addedImageKeys.has(key)) return;
+
+  addedImageKeys.add(key);
+  displayImage(src, key);
+};
+    reader.readAsDataURL(file);
+  }
+}
+
+pasteBtn.addEventListener('click', () => {
+  navigator.clipboard.read().then(items => {
+    for (const item of items) {
+      for (const type of item.types) {
+        if (type.startsWith("image/")) {
+          item.getType(type).then(blob => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target.result;
+              const key = `${blob.size}_${blob.type}`;
+              if (addedImageKeys.has(key)) return;
+
+              addedImageKeys.add(key);
+              displayImage(src, key);
+            };
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    }
+  }).catch(err => {
+    alert("No image found on clipboard or browser blocked access.");
+    console.error(err);
+  });
+});
+
+function displayImage(src, key = null) {
+  const img = document.createElement('img');
+  img.src = src;
+  img.dataset.key = key; // store the key
+  img.style.maxWidth = 'calc(33% - 10px)';
+  img.style.height = 'auto';
+  img.style.borderRadius = '8px';
+  img.style.cursor = 'pointer';
+  img.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+  inputBox.appendChild(img);
+  img.addEventListener('click', () => {
+    img.classList.toggle('selected');
+  });
+}
+
+convertBtn.addEventListener('click', () => {
+  outputBox.innerHTML = '';
+  const images = inputBox.querySelectorAll('img');
+  if (!images.length) return alert("No images to convert.");
+
+  images.forEach(sourceImg => {
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      const w = tempImg.naturalWidth;
+      const h = tempImg.naturalHeight;
+
+      // Draw image to canvas
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(tempImg, 0, 0);
+
+      const imageData = tempCtx.getImageData(0, 0, w, h).data;
+
+      // Check for transparency
+      let hasTransparency = false;
+      for (let i = 3; i < imageData.length; i += 4) {
+        if (imageData[i] < 255) {
+          hasTransparency = true;
+          break;
+        }
+      }
+
+      let croppedCanvas = document.createElement('canvas');
+      let croppedCtx = croppedCanvas.getContext('2d');
+
+      if (!hasTransparency) {
+        // Crop to square
+        const size = Math.min(w, h);
+        const offsetX = Math.floor((w - size) / 2);
+        const offsetY = Math.floor((h - size) / 2);
+        croppedCanvas.width = size;
+        croppedCanvas.height = size;
+        croppedCtx.drawImage(tempImg, offsetX, offsetY, size, size, 0, 0, size, size);
+      } else {
+        // Find bounding box of non-transparent pixels
+        let minX = w, minY = h, maxX = 0, maxY = 0;
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4 + 3;
+            if (imageData[i] > 0) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+
+        const bw = maxX - minX + 1;
+        const bh = maxY - minY + 1;
+        const boundsCanvas = document.createElement('canvas');
+        boundsCanvas.width = bw;
+        boundsCanvas.height = bh;
+        const boundsCtx = boundsCanvas.getContext('2d');
+        boundsCtx.drawImage(tempImg, minX, minY, bw, bh, 0, 0, bw, bh);
+
+        // Scale to fit inside 14×14 box (1px padding)
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = 16;
+        finalCanvas.height = 16;
+        const finalCtx = finalCanvas.getContext('2d');
+
+        finalCtx.clearRect(0, 0, 16, 16);
+        finalCtx.translate(8, 8); // center
+        finalCtx.rotate((Math.random() * 20 - 10) * Math.PI / 180); // optional slight rotation
+        const scale = Math.min(14 / bw, 14 / bh);
+        finalCtx.drawImage(boundsCanvas, -bw * scale / 2, -bh * scale / 2, bw * scale, bh * scale);
+
+        croppedCanvas = finalCanvas;
+        croppedCtx = finalCtx;
+      }
+
+      // Resize to 16x16
+      const tinyCanvas = document.createElement('canvas');
+      tinyCanvas.width = 16;
+      tinyCanvas.height = 16;
+      const tinyCtx = tinyCanvas.getContext('2d');
+      tinyCtx.imageSmoothingEnabled = true;
+      tinyCtx.imageSmoothingQuality = 'high';
+      tinyCtx.clearRect(0, 0, 16, 16);
+      tinyCtx.drawImage(croppedCanvas, 0, 0, 16, 16);
+
+      const newImg = document.createElement('img');
+      newImg.src = tinyCanvas.toDataURL('image/png');
+      newImg.style.width = 'calc(33% - 10px)';
+      newImg.style.objectFit = 'contain';
+      newImg.style.imageRendering = 'pixelated';
+      newImg.style.borderRadius = '8px';
+      newImg.style.cursor = 'pointer';
+      newImg.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+      outputBox.appendChild(newImg);
+
+      newImg.addEventListener('click', () => {
+        newImg.classList.toggle('selected');
+      });
+    };
+    tempImg.src = sourceImg.src;
+  });
+});
+
+document.getElementById('download-btn').addEventListener('click', async () => {
+  const allImages = document.querySelectorAll('#output-images img');
+  if (!allImages.length) {
+    alert('There are no images to download.');
+    return;
+  }
+
+  const zip = new JSZip();
+  const folder = zip.folder("converted_images");
+
+  let count = 1;
+  for (const img of allImages) {
+    const response = await fetch(img.src);
+    const blob = await response.blob();
+    let name = imageNames.get(img) || `image_${count}`;
+    folder.file(`${name}.png`, blob);
+    count++;
+  }
+
+  zip.generateAsync({ type: "blob" }).then(content => {
+    saveAs(content, "converted_images.zip");
+  });
+});
+
+
+const nameBtn = document.getElementById('name-images-btn');
+const popup = document.getElementById('name-popup');
+const preview = document.getElementById('name-preview');
+const input = document.getElementById('name-input');
+const saveBtn = document.getElementById('save-name-btn');
+
+let namingIndex = 0;
+let outputImages = [];
+let imageNames = new Map(); // maps image element to name
+
+nameBtn.addEventListener('click', () => {
+  outputImages = [...document.querySelectorAll('#output-images img')];
+  if (!outputImages.length) return alert("No output images to name.");
+  namingIndex = 0;
+  input.value = '';
+  preview.src = outputImages[namingIndex].src;
+  popup.style.display = 'block';
+  namingInProgress = true; // ✅ Start naming session
+  input.focus();
+});
+
+function closeNamePopup() {
+  popup.style.display = 'none';
+  namingInProgress = false; // ✅ End naming session
+}
+
+function saveCurrentName() {
+  const name = input.value.trim();
+  if (name) {
+    imageNames.set(outputImages[namingIndex], name);
+  }
+  namingIndex++;
+  if (namingIndex < outputImages.length) {
+    input.value = '';
+    preview.src = outputImages[namingIndex].src;
+    input.focus();
+  } else {
+    popup.style.display = 'none';
+    namingInProgress = false; // ✅ Add this line to mark naming as finished
+  }
+}
+
+saveBtn.addEventListener('click', saveCurrentName);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveCurrentName();
+});
+
+
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Delete') {
+    document.querySelectorAll('#input-images img.selected').forEach(img => {
+      const key = img.dataset.key;
+      if (key) addedImageKeys.delete(key);
+      img.remove();
+    });
+  }
+});
+
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm("Are you sure you want to reset? This will remove all images.")) {
+    inputBox.innerHTML = '';
+    outputBox.innerHTML = '';
+    addedImageKeys.clear();
+  }
+});
+
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  if (namingInProgress) {
+  alert('Please finish naming images before copying.');
+  return;
+}
+
+  const allOutputImages = [...document.querySelectorAll('#output-images img')];
+const selected = allOutputImages.filter(img => img.classList.contains('selected'));
+  if (selected.length !== 1) {
+    alert('Please select exactly one image to copy.');
+    return;
+  }
+
+  try {
+    const img = selected[0];
+    const blob = await fetch(img.src).then(res => res.blob());
+    const item = new ClipboardItem({ [blob.type]: blob });
+    await navigator.clipboard.write([item]);
+    alert('Image copied to clipboard!');
+  } catch (err) {
+    console.error(err);
+    alert('Failed to copy image. Clipboard permissions may be restricted.');
+  }
+});
+
+const helpPopup = document.getElementById('help-popup');
+document.getElementById('help-btn').addEventListener('click', () => {
+  const isVisible = window.getComputedStyle(helpPopup).display !== 'none';
+  helpPopup.style.display = isVisible ? 'none' : 'block';
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
