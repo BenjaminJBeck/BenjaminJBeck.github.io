@@ -910,14 +910,27 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Smooth scrolling for navigation links (both desktop and mobile)
+// Smooth scrolling for navigation links with custom offsets
 document.querySelectorAll('.navbar a, .mobile-menu a').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const targetId = this.getAttribute('href');
         const targetSection = document.querySelector(targetId);
+        
         if (targetSection) {
-            const offsetTop = targetSection.offsetTop - 180;
+            // Custom offsets for each section
+            const offsets = {
+                '#what': 120,        // Main section
+                '#how': 150,         // How It Works
+                '#pricing': 230,     // Pricing
+                '#testimonials': 310, // Testimonials
+                '#book': 90          // Book Now
+            };
+            
+            // Get custom offset or use default
+            const customOffset = offsets[targetId] || 120;
+            const offsetTop = targetSection.offsetTop - customOffset;
+            
             window.scrollTo({
                 top: offsetTop,
                 behavior: 'smooth'
