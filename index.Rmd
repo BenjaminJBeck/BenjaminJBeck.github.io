@@ -461,6 +461,13 @@ flex-direction: column;
 padding: 20px;
 transition: left 0.3s ease;
 overflow-y: auto;
+/* Hide scrollbar */
+-ms-overflow-style: none;     /* IE and Edge */
+scrollbar-width: none;        /* Firefox */
+}
+
+.nav-menu::-webkit-scrollbar {
+display: none;                /* Chrome, Safari, Opera */
 }
 
 .nav-menu.active {
@@ -510,22 +517,7 @@ flex-direction: column;
 }
 
 .profile-box {
-width: 100%;
-min-width: unset;
-max-width: unset;
-position: static;
-height: auto;
-padding: 20px;
-border-right: none;
-border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-box h1 {
-font-size: 24px;
-}
-
-.profile-box h3 {
-font-size: 12px;
+display: none;
 }
 
 .scrollable-section {
@@ -642,7 +634,26 @@ padding: 15px;
 }
 
 .profile-box {
-padding: 15px;
+padding: 8px 12px;
+}
+
+.profile-box h1 {
+font-size: 16px;
+margin-bottom: 3px;
+}
+
+.profile-box h3 {
+font-size: 9px;
+margin-bottom: 8px;
+}
+
+.profile-info {
+margin-top: 10px;
+}
+
+.profile-info p {
+margin-bottom: 3px;
+font-size: 11px;
 }
 
 .profile-image {
