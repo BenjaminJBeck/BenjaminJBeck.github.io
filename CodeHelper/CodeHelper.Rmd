@@ -1,0 +1,179 @@
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e6f4ff;
+    padding: 20px;
+}
+#app-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+.text-block {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.text-section {
+    margin-bottom: 20px;
+}
+.text-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+}
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    resize: none;
+    border: 1px solid #888;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.words-textarea {
+    height: 250px;
+}
+.code-textarea {
+    height: 100px;
+    font-family: monospace;
+    font-size: 14px;
+}
+#buttons {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+button {
+    padding: 14px 28px;
+    background-color: #00aee3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+button:hover {
+    background-color: #0095c7;
+}
+button:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
+</style>
+
+<h1 style="text-align:center; font-size:32px; color:#005b8f; margin-bottom:30px;">Text Encryption</h1>
+<div id="app-container">
+<div class="text-block">
+<div class="text-section">
+<h3>Original Text</h3>
+<textarea id="input-words" class="words-textarea" placeholder="Enter text here..."></textarea>
+</div>
+<div class="text-section">
+<h3>Original Code</h3>
+<textarea id="input-code" class="code-textarea" placeholder="Enter or edit code here..."></textarea>
+</div>
+</div>
+<div class="text-block">
+<div class="text-section">
+<h3>Scrambled Text</h3>
+<textarea id="output-words" class="words-textarea" placeholder="Scrambled text will appear here..." readonly></textarea>
+</div>
+<div class="text-section">
+<h3>Scrambled Code</h3>
+<textarea id="output-code" class="code-textarea" placeholder="Scrambled code will appear here..." readonly></textarea>
+</div>
+</div>
+</div>
+<div id="buttons">
+<button onclick="scrambleText()">Scramble</button>
+<button onclick="descrambleText()">Descramble</button>
+<button onclick="clearText()">Clear</button>
+</div>
+
+<script>
+function scrambleWord(word) {
+    if (word.length <= 3) return word;
+    const middle = word.slice(1, -1).split('').sort(() => 0.5 - Math.random()).join('');
+    return word[0] + middle + word[word.length - 1];
+}
+
+function scrambleText() {
+    const input = document.getElementById('input-words').value.trim();
+    if (!input) return;
+    
+    const words = input.split(/\s+/);
+    const original = words.map((word, i) => ({ word, index: i + 1 }));
+    const scrambled = [...original];
+    
+    // Shuffle scrambled list
+    for (let i = scrambled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
+    }
+    
+    // Build output text
+    const scrambledText = scrambled.map(obj => obj.word).join(' ');
+    
+    // Build code: original index → new position
+    const outputCode = original
+        .map(orig => {
+            const newIndex = scrambled.findIndex(w => w.index === orig.index) + 1;
+            return `${orig.index}.${newIndex}`;
+        })
+        .join(', ');
+    
+    // Create original sequence code
+    const originalCode = original.map(obj => `${obj.index}.${obj.index}`).join(', ');
+    
+    document.getElementById('input-code').value = originalCode;
+    document.getElementById('output-words').value = scrambledText;
+    document.getElementById('output-code').value = outputCode;
+}
+
+function descrambleText() {
+    const scrambledWords = document.getElementById('output-words').value.trim();
+    const scrambledCode = document.getElementById('output-code').value.trim();
+    
+    if (!scrambledWords || !scrambledCode) {
+        alert('No scrambled text and code found to descramble!');
+        return;
+    }
+    
+    // Parse the code
+    const mappings = scrambledCode.split(', ').map(pair => {
+        const [original, scrambled] = pair.split('.');
+        return { original: parseInt(original), scrambled: parseInt(scrambled) };
+    });
+    
+    // Get scrambled words
+    const wordsArray = scrambledWords.split(/\s+/);
+    
+    // Reconstruct original order
+    const originalWords = new Array(wordsArray.length);
+    mappings.forEach(mapping => {
+        originalWords[mapping.original - 1] = wordsArray[mapping.scrambled - 1];
+    });
+    
+    const originalText = originalWords.join(' ');
+    document.getElementById('input-words').value = originalText;
+    
+    // Update original code
+    const originalCode = mappings.map(m => `${m.original}.${m.original}`).join(', ');
+    document.getElementById('input-code').value = originalCode;
+}
+
+function clearText() {
+    document.getElementById('input-words').value = '';
+    document.getElementById('input-code').value = '';
+    document.getElementById('output-words').value = '';
+    document.getElementById('output-code').value = '';
+}
+</script>

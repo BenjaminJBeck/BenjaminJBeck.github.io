@@ -1,0 +1,891 @@
+<style>
+.gui-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 35px;
+  gap: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: auto;
+  z-index: 3000;
+
+  /* Hide scrollbar visually */
+  -ms-overflow-style: none;     /* IE and Edge */
+  scrollbar-width: none;        /* Firefox */
+}
+
+.gui-box::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, Opera */
+}
+
+.gui-title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  text-align: left;
+  width: auto;
+  align-self: flex-start;
+}
+
+.code-editor {
+  position: relative;
+  display: flex;
+  border: 1px solid #1a202c;
+  border-radius: 12px;
+  background: #2f3e50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.line-numbers {
+  background: #253544;
+  color: #6b7280;
+  padding: 18px 12px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: right;
+  min-width: 50px;
+  user-select: none;
+  border-right: 1px solid #1a202c;
+  white-space: pre;
+  overflow: hidden;
+  
+  /* Hide scrollbars but keep scroll functionality */
+  -ms-overflow-style: none;     /* IE and Edge */
+  scrollbar-width: none;        /* Firefox */
+}
+
+.line-numbers::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, Opera */
+}
+
+.gui-textarea {
+  flex: 1;
+  border: none;
+  padding: 18px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 14px;
+  resize: none;
+  background: transparent;
+  color: #ffffff;
+  line-height: 1.4;
+  white-space: pre;
+  tab-size: 4;
+  box-sizing: border-box;
+  outline: none;
+  
+  /* Hide scrollbars but keep scroll functionality */
+  -ms-overflow-style: none;     /* IE and Edge */
+  scrollbar-width: none;        /* Firefox */
+}
+
+.gui-textarea::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, Opera */
+}
+
+.gui-textarea:focus {
+  outline: none;
+}
+
+.code-editor:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.highlighted-textarea {
+  position: absolute;
+  top: 0;
+  left: 50px;
+  right: 0;
+  bottom: 0;
+  padding: 18px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre;
+  tab-size: 4;
+  color: transparent;
+  background: transparent;
+  pointer-events: none;
+  overflow: hidden;
+  
+  /* Hide scrollbars but keep scroll functionality */
+  -ms-overflow-style: none;     /* IE and Edge */
+  scrollbar-width: none;        /* Firefox */
+}
+
+.highlighted-textarea::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, Opera */
+}
+
+.highlight {
+  background-color: rgba(255, 235, 59, 0.3);
+  border-radius: 2px;
+}
+
+.highlight.current {
+  background-color: rgba(255, 87, 34, 0.5);
+  border: 1px solid #ff5722;
+}
+
+.gui-button {
+  padding: 12px 20px;
+  min-width: auto;
+  height: auto;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 5px;
+}
+
+.gui-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.gui-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gui-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.gui-button:hover::before {
+  left: 100%;
+}
+
+.gui-button.save {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.gui-button.save:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+}
+
+.gui-button.danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+.gui-button.danger:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+}
+
+.gui-button.navigation {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.gui-button.navigation:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+}
+
+.gui-section {
+  width: 100%;
+  margin: 15px 0;
+}
+
+.collapsible-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.collapse-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  color: #6b7280;
+}
+
+.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.gui-section-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.section-content {
+  padding: 20px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.collapsed .section-content {
+  display: none;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.code-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.code-section.full-width {
+  grid-column: 1 / -1;
+}
+
+.simple-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  width: 100%;
+  gap: 12px;
+}
+
+.simple-section-header .gui-section-title {
+  flex-grow: 1;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+#fullCodeContainer {
+  height: 350px;
+}
+
+#findCodeContainer, #replaceCodeContainer {
+  height: 180px;
+}
+
+.action-section {
+  text-align: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.navigation-section {
+  text-align: center;
+  margin: 15px 0;
+  width: 100%;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-info {
+  color: #ffffff;
+  font-size: 14px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-message {
+  margin-top: 15px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  min-height: 20px;
+  font-weight: 500;
+}
+
+.status-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.status-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.status-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.popup-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.popup {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 25px 35px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4);
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.popup-overlay.show .popup {
+  transform: scale(1);
+}
+</style>
+
+<div class="gui-box">
+<div class="gui-title">⚡ Enhanced Code Replacement Tool</div>
+
+<div class="tool-grid">
+<div class="code-section full-width">
+<div class="simple-section-header">
+<span class="gui-section-title">Full Code</span>
+<button class="copy-btn" onclick="copyToClipboard('fullCode')">📋 Copy</button>
+</div>
+<div class="code-editor" id="fullCodeContainer">
+<div class="line-numbers" id="fullCodeLineNumbers"></div>
+<div class="highlighted-textarea" id="fullCodeHighlight"></div>
+<textarea id="fullCode" class="gui-textarea" placeholder="Paste your full code here..." oninput="updateLineNumbers('fullCode'); highlightMatches()"></textarea>
+</div>
+</div>
+
+<div class="code-section">
+<div class="simple-section-header">
+<span class="gui-section-title">Find Code</span>
+<button class="copy-btn" onclick="copyToClipboard('findCode')">📋 Copy</button>
+</div>
+<div class="code-editor" id="findCodeContainer">
+<div class="line-numbers" id="findCodeLineNumbers"></div>
+<textarea id="findCode" class="gui-textarea" placeholder="Enter the code you want to replace..." oninput="updateLineNumbers('findCode'); highlightMatches()"></textarea>
+</div>
+</div>
+
+<div class="code-section">
+<div class="simple-section-header">
+<span class="gui-section-title">Replace With</span>
+<button class="copy-btn" onclick="copyToClipboard('replaceCode')">📋 Copy</button>
+</div>
+<div class="code-editor" id="replaceCodeContainer">
+<div class="line-numbers" id="replaceCodeLineNumbers"></div>
+<textarea id="replaceCode" class="gui-textarea" placeholder="Enter the replacement code..." oninput="updateLineNumbers('replaceCode')"></textarea>
+</div>
+</div>
+</div>
+
+<div class="navigation-section" id="navigationSection" style="display: none;">
+<div class="match-info" id="matchInfo"></div>
+<div class="button-group">
+<button class="gui-button navigation" onclick="navigateMatch(-1)">⬅️ Previous</button>
+<button class="gui-button save" onclick="replaceCurrentMatch()">🔄 Replace This</button>
+<button class="gui-button navigation" onclick="navigateMatch(1)">Next ➡️</button>
+</div>
+</div>
+
+<div class="action-section">
+<div class="button-group">
+<button class="gui-button save" onclick="performReplaceAll()">🔄 Replace All</button>
+<button class="gui-button danger" onclick="clearAll()">🗑️ Clear All</button>
+</div>
+<div id="statusMessage" class="status-message"></div>
+</div>
+
+<div id="popupOverlay" class="popup-overlay">
+<div class="popup">
+✅ Code replaced successfully!
+</div>
+</div>
+</div>
+
+<script>
+let matches = [];
+let currentMatchIndex = -1;
+
+function updateLineNumbers(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  const lineNumbersDiv = document.getElementById(textareaId + 'LineNumbers');
+  
+  const lines = textarea.value.split('\n');
+  const lineCount = lines.length;
+  
+  let lineNumbers = '';
+  for (let i = 1; i <= lineCount; i++) {
+    lineNumbers += i + '\n';
+  }
+  
+  lineNumbersDiv.textContent = lineNumbers;
+}
+
+function findAllMatches(text, pattern) {
+  const matches = [];
+  if (!pattern) return matches;
+  
+  let index = 0;
+  while ((index = text.indexOf(pattern, index)) !== -1) {
+    matches.push({
+      start: index,
+      end: index + pattern.length,
+      text: pattern
+    });
+    index += 1; // Move by 1 to catch overlapping matches
+  }
+  return matches;
+}
+
+function getTextPosition(text, charIndex) {
+  const beforeText = text.substring(0, charIndex);
+  const lines = beforeText.split('\n');
+  return {
+    line: lines.length,
+    column: lines[lines.length - 1].length + 1
+  };
+}
+
+function scrollToMatch(matchIndex) {
+  if (matchIndex < 0 || matchIndex >= matches.length) return;
+  
+  const textarea = document.getElementById('fullCode');
+  const match = matches[matchIndex];
+  
+  // Calculate line and column position
+  const position = getTextPosition(textarea.value, match.start);
+  
+  // Estimate scroll position (approximate)
+  const lineHeight = 19.6; // 14px font-size * 1.4 line-height
+  const scrollTop = Math.max(0, (position.line - 5) * lineHeight);
+  
+  // Scroll the textarea
+  textarea.scrollTop = scrollTop;
+  
+  // Also scroll the line numbers and highlight div
+  const lineNumbers = document.getElementById('fullCodeLineNumbers');
+  const highlight = document.getElementById('fullCodeHighlight');
+  lineNumbers.scrollTop = scrollTop;
+  highlight.scrollTop = scrollTop;
+  
+  // Focus on the textarea and set cursor position
+  textarea.focus();
+  textarea.setSelectionRange(match.start, match.end);
+}
+
+function highlightMatches() {
+  const fullCodeTextarea = document.getElementById('fullCode');
+  const findCodeTextarea = document.getElementById('findCode');
+  const highlightDiv = document.getElementById('fullCodeHighlight');
+  const navigationSection = document.getElementById('navigationSection');
+  const matchInfo = document.getElementById('matchInfo');
+  
+  const fullCode = fullCodeTextarea.value;
+  const findCode = findCodeTextarea.value;
+  
+  if (!findCode.trim()) {
+    highlightDiv.innerHTML = '';
+    navigationSection.style.display = 'none';
+    matches = [];
+    currentMatchIndex = -1;
+    return;
+  }
+  
+  // Find all matches
+  matches = findAllMatches(fullCode, findCode);
+  
+  if (matches.length === 0) {
+    highlightDiv.innerHTML = '';
+    navigationSection.style.display = 'none';
+    currentMatchIndex = -1;
+    return;
+  }
+  
+  // Show navigation section and update match info
+  navigationSection.style.display = 'block';
+  if (currentMatchIndex === -1 && matches.length > 0) {
+    currentMatchIndex = 0;
+  }
+  
+  updateMatchInfo();
+  
+  // Escape HTML and highlight matches
+  const escapedFullCode = fullCode
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+    
+  const escapedFindCode = findCode
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  // Create highlighted text with current match distinction
+  let highlightedText = '';
+  let lastIndex = 0;
+  
+  matches.forEach((match, index) => {
+    // Add text before match
+    highlightedText += escapedFullCode.substring(lastIndex, match.start);
+    
+    // Add highlighted match
+    const isCurrentMatch = index === currentMatchIndex;
+    const highlightClass = isCurrentMatch ? 'highlight current' : 'highlight';
+    highlightedText += `<span class="${highlightClass}">${escapedFindCode}</span>`;
+    
+    lastIndex = match.end;
+  });
+  
+  // Add remaining text
+  highlightedText += escapedFullCode.substring(lastIndex);
+  
+  highlightDiv.innerHTML = highlightedText;
+  
+  // Auto-scroll to current match
+  if (currentMatchIndex >= 0) {
+    setTimeout(() => scrollToMatch(currentMatchIndex), 100);
+  }
+}
+
+function updateMatchInfo() {
+  const matchInfo = document.getElementById('matchInfo');
+  if (matches.length === 0) {
+    matchInfo.textContent = 'No matches found';
+  } else {
+    matchInfo.textContent = `Match ${currentMatchIndex + 1} of ${matches.length}`;
+  }
+}
+
+function navigateMatch(direction) {
+  if (matches.length === 0) return;
+  
+  currentMatchIndex += direction;
+  
+  if (currentMatchIndex >= matches.length) {
+    currentMatchIndex = 0;
+  } else if (currentMatchIndex < 0) {
+    currentMatchIndex = matches.length - 1;
+  }
+  
+  updateMatchInfo();
+  highlightMatches();
+}
+
+function replaceCurrentMatch() {
+  if (matches.length === 0 || currentMatchIndex < 0) {
+    showStatus('⚠️ No match selected to replace', 'error');
+    return;
+  }
+  
+  const fullCodeElement = document.getElementById('fullCode');
+  const replaceCodeElement = document.getElementById('replaceCode');
+  
+  const replaceCode = replaceCodeElement.value;
+  const currentMatch = matches[currentMatchIndex];
+  
+  // Perform replacement
+  const fullCode = fullCodeElement.value;
+  const newCode = fullCode.substring(0, currentMatch.start) + 
+                  replaceCode + 
+                  fullCode.substring(currentMatch.end);
+  
+  fullCodeElement.value = newCode;
+  updateLineNumbers('fullCode');
+  
+  // Adjust current match index if we're not at the last match
+  if (currentMatchIndex >= matches.length - 1) {
+    currentMatchIndex = Math.max(0, matches.length - 2);
+  }
+  
+  // Update highlights
+  highlightMatches();
+  
+  showStatus('✅ Successfully replaced current match', 'success');
+}
+
+function performReplaceAll() {
+  const fullCodeElement = document.getElementById('fullCode');
+  const findCodeElement = document.getElementById('findCode');
+  const replaceCodeElement = document.getElementById('replaceCode');
+  
+  const fullCode = fullCodeElement.value;
+  const findCode = findCodeElement.value;
+  const replaceCode = replaceCodeElement.value;
+  
+  if (!fullCode.trim()) {
+    showStatus('⚠️ Please enter your full code first', 'error');
+    return;
+  }
+  
+  if (!findCode.trim()) {
+    showStatus('⚠️ Please enter the code you want to find', 'error');
+    return;
+  }
+  
+  if (!fullCode.includes(findCode)) {
+    showStatus('❌ Code to replace not found in full code', 'error');
+    return;
+  }
+  
+  // Count occurrences
+  const occurrences = (fullCode.match(new RegExp(escapeRegExp(findCode), 'g')) || []).length;
+  
+  // Perform replacement while preserving formatting
+  const newCode = fullCode.split(findCode).join(replaceCode);
+  
+  fullCodeElement.value = newCode;
+  updateLineNumbers('fullCode');
+  highlightMatches();
+  
+  // Show success popup
+  showPopup();
+  
+  if (occurrences === 1) {
+    showStatus('✅ Successfully replaced 1 occurrence', 'success');
+  } else {
+    showStatus(`✅ Successfully replaced ${occurrences} occurrences`, 'success');
+  }
+}
+
+function clearAll() {
+  document.getElementById('fullCode').value = '';
+  document.getElementById('findCode').value = '';
+  document.getElementById('replaceCode').value = '';
+  
+  updateLineNumbers('fullCode');
+  updateLineNumbers('findCode');
+  updateLineNumbers('replaceCode');
+  
+  matches = [];
+  currentMatchIndex = -1;
+  
+  document.getElementById('fullCodeHighlight').innerHTML = '';
+  document.getElementById('navigationSection').style.display = 'none';
+  
+  showStatus('🗑️ All fields cleared', 'info');
+}
+
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId).parentElement;
+  section.classList.toggle('collapsed');
+}
+
+function copyToClipboard(elementId) {
+  const element = document.getElementById(elementId);
+  element.select();
+  element.setSelectionRange(0, 99999);
+  
+  try {
+    document.execCommand('copy');
+    showStatus('✅ Copied to clipboard!', 'success');
+  } catch (err) {
+    showStatus('❌ Failed to copy to clipboard', 'error');
+  }
+}
+
+function showStatus(message, type) {
+  const statusElement = document.getElementById('statusMessage');
+  statusElement.textContent = message;
+  statusElement.className = `status-message status-${type}`;
+  
+  setTimeout(() => {
+    statusElement.textContent = '';
+    statusElement.className = 'status-message';
+  }, 3000);
+}
+
+function showPopup() {
+  const popupOverlay = document.getElementById('popupOverlay');
+  popupOverlay.classList.add('show');
+  
+  setTimeout(() => {
+    popupOverlay.classList.remove('show');
+  }, 1500);
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Initialize line numbers for all textareas
+document.addEventListener('DOMContentLoaded', function() {
+  updateLineNumbers('fullCode');
+  updateLineNumbers('findCode');
+  updateLineNumbers('replaceCode');
+});
+
+// Handle tab key in textareas for proper indentation
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'TEXTAREA' && e.key === 'Tab') {
+    e.preventDefault();
+    
+    const textarea = e.target;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    
+    // Insert tab character
+    textarea.value = textarea.value.substring(0, start) + '\t' + textarea.value.substring(end);
+    
+    // Move cursor after the tab
+    textarea.selectionStart = textarea.selectionEnd = start + 1;
+    
+    // Update line numbers if this textarea has them
+    if (textarea.id === 'fullCode' || textarea.id === 'findCode' || textarea.id === 'replaceCode') {
+      updateLineNumbers(textarea.id);
+    }
+    
+    // Update highlighting if needed
+    if (textarea.id === 'fullCode' || textarea.id === 'findCode') {
+      highlightMatches();
+    }
+  }
+});
+
+// Handle keyboard navigation
+document.addEventListener('keydown', function(e) {
+  if (matches.length > 0 && (e.ctrlKey || e.metaKey)) {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      navigateMatch(-1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      navigateMatch(1);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      replaceCurrentMatch();
+    }
+  }
+});
+
+// Handle scroll synchronization between textarea and line numbers
+document.getElementById('fullCode').addEventListener('scroll', function() {
+  const lineNumbers = document.getElementById('fullCodeLineNumbers');
+  const highlight = document.getElementById('fullCodeHighlight');
+  lineNumbers.scrollTop = this.scrollTop;
+  highlight.scrollTop = this.scrollTop;
+  highlight.scrollLeft = this.scrollLeft;
+});
+
+document.getElementById('findCode').addEventListener('scroll', function() {
+  const lineNumbers = document.getElementById('findCodeLineNumbers');
+  lineNumbers.scrollTop = this.scrollTop;
+});
+
+document.getElementById('replaceCode').addEventListener('scroll', function() {
+  const lineNumbers = document.getElementById('replaceCodeLineNumbers');
+  lineNumbers.scrollTop = this.scrollTop;
+});
+</script>

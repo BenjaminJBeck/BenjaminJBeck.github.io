@@ -1,59 +1,539 @@
----
-title: "About Me"
-author: "Ben Beck"
-date: "`r Sys.Date()`"
-output: 
-  prettydoc::html_pretty:
-    theme: leonids
----
-
 <style>
-.img-left {
-  float: left;
-  margin-right: 20px;
-  width: 150px;
-  height: 150px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+}
+
+/* Top navigation bar */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  z-index: 1000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation menu */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: block;
+  padding: 20px 24px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.8s ease;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 0 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.nav-link:hover::before {
+  left: 100%;
+}
+
+.nav-link:hover {
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.nav-link:focus,
+.nav-link:active {
+  color: inherit;
+  outline: none;
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+.dropdown {
+  position: absolute;
+  top: 68px;
+  left: 0;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  min-width: 250px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 12px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  opacity: 0;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    max-height 0.4s ease;
+  z-index: 998; /* we'll address the z-index next */
+}
+
+.nav-item:hover .dropdown {
+  opacity: 1;
+  visibility: visible;
+  max-height: 300px;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: block;
+  padding: 12px 20px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.dropdown-item:hover::before {
+  left: 100%;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 12px 12px;
+}
+
+.dropdown-item:first-child {
+  border-radius: 0;
+}
+
+/* Main content wrapper */
+.main-wrapper {
+  position: absolute;
+  top: 60px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.profile-box {
+  width: 25vw; /* or use 22% or 20% if you prefer tighter spacing */
+  min-width: 200px; /* optional: to prevent it from getting too small */
+  max-width: 400px; /* optional: to preserve original max size */
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-box h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-box h3 {
+  font-size: 14px;
+  color: #a0a9b8;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.profile-info {
+  margin-top: 30px;
+}
+
+.profile-info p {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #a0a9b8;
+}
+
+.profile-info strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Scrollable right section */
+.scrollable-section {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  scrollbar-width: none; /* Firefox */
+  backdrop-filter: blur(10px);
+}
+
+.scrollable-section::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.scrollable-section h2 {
+  color: #ffffff;
+  font-size: 32px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.scrollable-section h3 {
+  color: #ffffff;
+  font-size: 24px;
+  margin-top: 40px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.scrollable-section p {
+  margin-bottom: 16px;
+  color: #ffffff;
+  font-size: 16px;
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.education-item {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid #667eea;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.education-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.education-item h4 {
+  color: #ffffff;
+  font-size: 18px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.education-item .institution {
+  color: #a0a9b8;
+  font-style: italic;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.education-item .year {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.project-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.project-card:hover::before {
+  left: 100%;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #667eea;
+}
+
+.project-card h4 {
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.project-card p {
+  color: #a0a9b8;
+  font-size: 14px;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+.main-title {
+  font-size: 42px;
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
+  border: 4px solid #667eea;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: scale(1.1);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
 }
 </style>
 
-<img src="Pictures/ben.jpg" class="img-left">
+<div class="top-bar">
+<nav class="nav-menu">
+<div class="nav-item">
+<a href="#" class="nav-link">About Me</a>
+<div class="dropdown">
+<a href="index.html" class="dropdown-item">Main</a>
+<a href="https://instagram.com/_bens_art_" class="dropdown-item">My Artwork</a>
+</div>
+</div>
+<div class="nav-item">
+<a href="#" class="nav-link">Tools</a>
+<div class="dropdown">
+<a href="PictureSplitter/PictureSplitter.html" class="dropdown-item">Picture Splitter</a>
+<a href="Pixelator/Pixelator.html" class="dropdown-item">Pixelator</a>
+<a href="RandomItemGen/RandomItemGen.html" class="dropdown-item">Random Item Generator</a>
+<a href="CodeHelper/CodeHelper.html" class="dropdown-item">Text Encryption</a>
+</div>
+</div>
+<div class="nav-item">
+<a href="#" class="nav-link">Projects</a>
+<div class="dropdown">
+<a href="Final_Project_Biol_3100/Final_Biol3100.html" class="dropdown-item">Final Project (Biol 3100)</a>
+<a href="Oral_Microbiome_Research/Oral_Microbiome_Research.html" class="dropdown-item">Oral Microbiome Research (MICR 3455)</a>
+<a href="https://mcreator.net/modification/115866/fossils-and-archeology-add" target="_blank" class="dropdown-item">My Minecraft 1.18.2 Fossils and Archeology Add-on Mod</a>
+<a href="https://benjaminjbeck.shinyapps.io/Greenbean/" target="_blank" class="dropdown-item">Greenbean</a>
+</div>
+</div>
+<div class="nav-item">
+<a href="#" class="nav-link">TheroEngine</a>
+</div>
+<div class="nav-item">
+<a href="#" class="nav-link">CC&C</a>
+<div class="dropdown">
+<a href="CC&C/CC-C.html" class="dropdown-item">CC&C Main</a>
+<a href="https://docs.google.com/forms/d/e/1FAIpQLSfWYVfLmmCOcZTjRhamiC-byDUJAnuUORYGc9BIxGVTzmEnqg/viewform?usp=header" target="_blank" class="dropdown-item">Book Appointment</a>
+</div>
+</div>
+<div class="nav-item">
+<a href="#" class="nav-link">Contact</a>
+</div>
+</nav>
+</div>
 
+<div class="main-wrapper">
+<div class="profile-box">
+<h1>Benjamin Beck</h1>
+<h3>BIOINFORMATICS STUDENT & RESEARCH ENTHUSIAST</h3>
+<div class="profile-info">
+<p><strong>University:</strong> Utah Valley University</p>
+<p><strong>Expected Graduation:</strong> 2027</p>
+<p><strong>Last Updated:</strong> July 31, 2025</p>
+</div>
+</div>
+<div class="scrollable-section">
+<div class="profile-header">
+<img src="Pictures/ben.jpg" alt="Benjamin Beck" class="profile-image">
+<div class="title-block">
+<h1 class="main-title">Benjamin Beck</h1>
+<h2>About Me</h2>
+</div>
+</div>
+<p>Hi, I'm Benjamin Beck, and I'm from American Fork, Utah. Ever since I was young, I've been passionate about biology—especially evolutionary science. That passion led me to pursue a career in the biological sciences, starting with participation in the STEM science fair during high school. My project focused on the effects of Nicotinamide Riboside (NR) on cell growth and proliferation, for which I received the Reoch Award.</p>
+<p>After high school, I began my college journey at Utah Valley University, where I earned my Associate's Degree in 2022. From 2022 to 2023, I served a full-time LDS mission, which was a meaningful and transformative experience. Upon returning, I resumed my education and made the decision to shift my focus from Biology to Bioinformatics, combining my love for science with a growing interest in computers and data analysis.</p>
+<p>I'm currently working toward my Bachelor's degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology. Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I'll be sharing some of my artwork on this site—feel free to check it out!</p>
+<p>In terms of work experience, I spent five years at Carson Meats (now Mosida Market) in Lehi, where I developed a strong work ethic. I now work at Panda Express and plan to continue working there while I complete my degree and build a career in bioinformatics.</p>
 
-## Who I am
-Hi, I'm Benjamin Beck, and I’m from American Fork, Utah. Ever since I was young, I’ve been passionate about biology—especially evolutionary science. That passion led me to pursue a career in the biological sciences, starting with participation in the STEM science fair during high school. My project focused on the effects of Nicotinamide Riboside (NR) on cell growth and proliferation, for which I received the Reoch Award.
+<h3>Education</h3>
+<div class="education-item">
+<h4>Bachelor of Science in Bioinformatics</h4>
+<div class="institution">Utah Valley University</div>
+<div class="year">Expected 2027</div>
+</div>
+<div class="education-item">
+<h4>Associate of Science</h4>
+<div class="institution">Utah Valley University</div>
+<div class="year">2022</div>
+</div>
+<div class="education-item">
+<h4>High School Diploma</h4>
+<div class="institution">American Fork High School</div>
+<div class="year">2020</div>
+</div>
 
-After high school, I began my college journey at Utah Valley University, where I earned my Associate's Degree in 2022. From 2022 to 2023, I served a full-time LDS mission, which was a meaningful and transformative experience. Upon returning, I resumed my education and made the decision to shift my focus from Biology to Bioinformatics, combining my love for science with a growing interest in computers and data analysis.
+<h3>Featured Projects</h3>
+<div class="projects-grid">
+<div class="project-card">
+<h4>Final Project (Biol 3100)</h4>
+<p>Comprehensive biological research project showcasing advanced analytical techniques and scientific methodology.</p>
+</div>
+<div class="project-card">
+<h4>Oral Microbiome Research (MICR 3455)</h4>
+<p>In-depth study of oral microbiome composition and its implications for human health.</p>
+</div>
+<div class="project-card">
+<h4>Minecraft Fossils & Archeology Add-on</h4>
+<p>Custom modification for Minecraft 1.18.2 that enhances the paleontology and archaeology experience.</p>
+</div>
+<div class="project-card">
+<h4>Greenbean</h4>
+<p>Interactive web application built with R Shiny for data analysis and visualization.</p>
+</div>
+<div class="project-card">
+<h4>Picture Splitter</h4>
+<p>Digital tool for processing and manipulating image files with advanced splitting capabilities.</p>
+</div>
+<div class="project-card">
+<h4>Pixelator</h4>
+<p>Image processing application that converts photos into pixelated art with customizable parameters.</p>
+</div>
+<div class="project-card">
+<h4>Random Item Generator</h4>
+<p>Utility tool for generating random items or selections for various applications and research purposes.</p>
+</div>
+<div class="project-card">
+<h4>Text Encryption</h4>
+<p>Security-focused application for encrypting and decrypting text using various cryptographic methods.</p>
+</div>
+</div>
 
-I’m currently working toward my Bachelor’s degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology.
+<h3>Research Interests</h3>
+<p>My primary research interests lie at the intersection of biology and computational science. I'm particularly fascinated by evolutionary biology and how we can use modern bioinformatics tools to better understand biological processes. My work focuses on developing innovative approaches that integrate traditional biological research with cutting-edge data analysis techniques.</p>
+<p>Through my academic projects and personal research, I aim to contribute to our understanding of complex biological systems while advancing the field of bioinformatics through practical applications and novel methodologies.</p>
 
-Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I’ll be sharing some of my artwork on this site—feel free to check it out!
+<h3>Skills & Expertise</h3>
+<p>Throughout my academic journey and project work, I've developed proficiency in various bioinformatics tools, programming languages, and research methodologies. My experience spans from wet lab techniques to computational analysis, allowing me to approach biological questions from multiple perspectives.</p>
+<p>I'm committed to continuous learning and staying current with the latest developments in both biology and technology, ensuring that my research and projects reflect the most current understanding and best practices in the field.</p>
 
-In terms of work experience, I spent five years at Carson Meats (now Mosida Market) in Lehi, where I developed a strong work ethic. I now work at Panda Express and plan to continue working there while I complete my degree and build a career in bioinformatics.
+<h3>Work Experience</h3>
+<div class="education-item">
+<h4>Panda Express – Team Member</h4>
+<div class="institution">Lehi, Utah</div>
+<div class="year">2024 – Present</div>
+<p>Provide excellent customer service, manage orders, and maintain a clean and efficient kitchen environment in a high-paced setting. Gained experience in teamwork, time management, and leadership.</p>
+</div>
+<div class="education-item">
+<h4>Carson Meats / Mosida Market – Butcher Assistant</h4>
+<div class="institution">Lehi, Utah</div>
+<div class="year">2017 – 2022</div>
+<p>Assisted in meat preparation, packaging, and retail operations. Developed strong work ethic, attention to detail, and customer-facing communication skills.</p>
+</div>
+</div>
 
-## Education
-
-Bachelor of Science in Bioinformatics
-Utah Valley University — Expected 2027
-
-Associate of Science
-Utah Valley University — 2022
-
-High School Diploma
-American Fork High School — 2020
-
-## Projects
-<a href="Final_Project_Biol_3100/Final_Biol3100.html">Final Project (Biol 3100)</a>
-
-<a href="Oral_Microbiome_Research/Oral_Microbiome_Research.html">Oral Microbiome Research (MICR 3455)</a>
-
-<a href="My_Art/My_Art.html">My Artwork</a>
-
-<a href="https://mcreator.net/modification/115866/fossils-and-archeology-add" target="_blank">My Minecraft 1.18.2 Fossils and Archeology Add-on Mod</a>
-
-<a href="https://benjaminjbeck.shinyapps.io/Greenbean/" target="_blank">Greenbean</a>
-
-<a href="PictureSplitter/PictureSplitter.html">Picture Splitter</a>
-
-<a href="Pixelator/Pixelator.html">Pixelator</a>
+<script>
+// Placeholder for future scripts
+</script>
