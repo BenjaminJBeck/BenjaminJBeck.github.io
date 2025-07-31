@@ -64,7 +64,7 @@ button:hover {
 .image-box img {
   width: calc(33% - 10px);   /* 3 per row */
   height: auto;
-  image-rendering: pixelated; /* shows sharp pixels */
+  image-rendering: auto; /* shows sharp pixels */
   border-radius: 8px;
   cursor: pointer;
   object-fit: contain;
@@ -430,30 +430,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   }
 });
 
-document.getElementById('copy-btn').addEventListener('click', async () => {
-  if (namingInProgress) {
-  alert('Please finish naming images before copying.');
-  return;
-}
 
-  const allOutputImages = [...document.querySelectorAll('#output-images img')];
-const selected = allOutputImages.filter(img => img.classList.contains('selected'));
-  if (selected.length !== 1) {
-    alert('Please select exactly one image to copy.');
-    return;
-  }
-
-  try {
-    const img = selected[0];
-    const blob = await fetch(img.src).then(res => res.blob());
-    const item = new ClipboardItem({ [blob.type]: blob });
-    await navigator.clipboard.write([item]);
-    alert('Image copied to clipboard!');
-  } catch (err) {
-    console.error(err);
-    alert('Failed to copy image. Clipboard permissions may be restricted.');
-  }
-});
 
 const helpPopup = document.getElementById('help-popup');
 document.getElementById('help-btn').addEventListener('click', () => {

@@ -1,0 +1,192 @@
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ccc;
+    font-family: sans-serif;
+    width: 100%;
+    height: 100%;
+  }
+
+#app {
+  width: 80%;
+  max-width: 1100px;
+  height: 95vh;              /* taller vertically */
+  margin: 2.5vh auto;
+  background: #d5d5d5;
+  border-radius: 40px;       /* rounded again */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+}
+
+  #topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .action-btn {
+    width: 120px;
+    padding: 12px;
+    border: none;
+    border-radius: 20px;
+    background: #aaa;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .action-btn:hover {
+    background: #888;
+  }
+
+#content {
+  height: 200px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+#waveform {
+  width: 2000px; /* can expand dynamically */
+  height: 100%;
+}
+
+  #controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    padding-right: 10px;
+  }
+
+  .icon-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 26px;
+    background: #aaa;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .icon-btn:hover {
+    background: #888;
+  }
+#filename {
+  font-size: 14px;
+  color: #444;
+  margin-top: -10px;
+  padding-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+
+<div id="app">
+<div id="topbar">
+<button class="action-btn" id="uploadBtn">Upload</button>
+<button class="action-btn" id="splitBtn">Split</button>
+<button class="action-btn" id="clearBtn">Clear</button>
+<button class="action-btn" id="downloadBtn">Download</button>
+<input type="file" id="fileInput" accept=".mp3" style="display:none;">
+</div>
+<div id="content">
+<div id="filename"></div>
+<div id="waveform"></div>
+</div>
+<div id="controls">
+<button class="icon-btn" id="pauseBtn">⏸️</button>
+<button class="icon-btn" id="playBtn">▶️</button>
+<button class="icon-btn" id="stopBtn">⏹️</button>
+</div>
+</div>
+
+
+<script src="https://unpkg.com/wavesurfer.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.js"></script>
+
+
+
+<script>
+let wavesurfer;
+const fileInput = document.getElementById("fileInput");
+const uploadBtn = document.getElementById("uploadBtn");
+const content = document.getElementById("content");
+const filenameDisplay = document.getElementById("filename");
+
+// Trigger file input
+uploadBtn.onclick = () => {
+  fileInput.click();
+};
+
+// Load MP3 and render waveform
+fileInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Destroy existing waveform
+  if (wavesurfer) {
+    wavesurfer.destroy();
+    wavesurfer = null;
+  }
+
+  // Reset content box
+  content.innerHTML = '<div id="waveform"></div>';
+  filenameDisplay.textContent = "File: " + file.name;
+
+  // Create new waveform
+  wavesurfer = WaveSurfer.create({
+    container: '#waveform',
+    waveColor: '#4a90e2',
+    progressColor: '#357ABD',
+    height: 180,
+    responsive: true,
+    scrollParent: true
+  });
+
+  // Load the file
+  const blobUrl = URL.createObjectURL(file);
+  wavesurfer.load(blobUrl);
+
+  // Reset file input so same file can be reselected
+  fileInput.value = null;
+});
+
+// Clear everything
+document.getElementById("clearBtn").onclick = () => {
+  if (wavesurfer) {
+    wavesurfer.destroy();
+    wavesurfer = null;
+  }
+  content.innerHTML = '<div id="waveform"></div>';
+  filenameDisplay.textContent = "";
+  fileInput.value = null;
+  alert("Cleared!");
+};
+
+// Playback controls
+document.getElementById("playBtn").onclick = () => {
+  if (wavesurfer) wavesurfer.play();
+};
+document.getElementById("pauseBtn").onclick = () => {
+  if (wavesurfer) wavesurfer.pause();
+};
+document.getElementById("stopBtn").onclick = () => {
+  if (wavesurfer) wavesurfer.stop();
+};
+
+// Download placeholder
+document.getElementById("downloadBtn").onclick = () => alert("Download clicked");
+</script>

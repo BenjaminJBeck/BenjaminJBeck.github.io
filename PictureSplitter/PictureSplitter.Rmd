@@ -1,152 +1,440 @@
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f2f2f2;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  overflow: auto;
 }
 
 #app-container {
   position: relative;
-  width: 90%;
-  margin: 30px auto;
-  background-color: #d3d3d3;
-  padding: 20px 20px 20px 20px;
+  width: 95%;
+  max-width: 1400px;
+  margin: 15px auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 20px;
   border-radius: 20px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: calc(100vh - 30px);
+  max-height: calc(100vh - 30px);
+  overflow-y: auto;
 }
 
 .top-bar {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .left-controls, .right-controls {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 48%;
 }
 
 button {
-  background-color: #c0c0c0;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
   border: none;
   border-radius: 12px;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  font-family: 'Inter', sans-serif;
 }
 
 button:hover {
-  background-color: #a9a9a9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+  background: linear-gradient(135deg, #5b5ef1 0%, #7c5af0 100%);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .image-area {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   justify-content: space-between;
 }
 
 .image-box {
   width: 48%;
-  height: 500px;
-  background-color: white;
-  border-radius: 20px;
-  padding: 10px;
+  height: 400px;
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+  padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-content: flex-start;
+  border: 2px dashed #e2e8f0;
+  transition: all 0.3s ease;
 }
 
+.image-box:hover {
+  border-color: #cbd5e1;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+}
+
+/* Input images - make them bigger (2 per row) */
 .image-box img {
-  max-width: calc(33% - 10px);
+  max-width: calc(50% - 10px);
+  max-height: 200px;
+  width: auto;
   height: auto;
-  border-radius: 8px;
+  object-fit: contain;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.image-box img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Output images - make them smaller (5 per row) */
+#output-images img {
+  max-width: calc(20% - 10px) !important;
+  height: auto;
+  border-radius: 12px;
   cursor: pointer;
 }
 
 #convert-button {
   display: block;
   margin: 20px auto;
-  padding: 14px 30px;
-  font-size: 18px;
-  border-radius: 999px;
-  background-color: #a9a9a9;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   cursor: pointer;
+  color: white;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', sans-serif;
 }
 
 #convert-button:hover {
-  background-color: #888;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 img.selected {
-  outline: 3px solid #007bff;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+  outline: 3px solid #6366f1;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
 }
 
 body {
-  overflow: hidden;
+  overflow: auto;
 }
 
+/* Progress bar styles */
+#progress-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  color: white;
+  padding: 40px;
+  border-radius: 24px;
+  text-align: center;
+  z-index: 2000;
+  min-width: 350px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px 0;
+  position: relative;
+}
+
+#progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 8px;
+}
+
+#progress-text {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+#progress-details {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Image Modal Styles - Modified for 6x bigger preview */
+#image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  overflow: auto;
+  backdrop-filter: blur(5px);
+}
+
+#modal-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+
+#modal-image {
+  max-width: 600vw;
+  max-height: 600vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+  cursor: move;
+}
+
+#modal-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(248, 250, 252, 0.95);
+  color: #1e293b;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3001;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#modal-close:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Reset button specific styling */
+#reset-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.35);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Help button specific styling */
+#help-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+}
+
+#help-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(100, 116, 139, 0.35);
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+}
+
+/* Name Images button specific styling */
+#name-images-btn {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+#name-images-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+/* Download button specific styling */
+#download-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+#download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
 </style>
 
 <div id="app-container">
-<div style="background:#aaa; padding:10px 30px; border-radius:16px; text-align:center; margin-bottom:20px; box-shadow:0 6px 18px rgba(0,0,0,0.2);">
-  <h1 style="margin:0; font-size:32px; font-weight:600;">Image Separator</h1>
-  <button id="reset-btn" style="position: absolute; bottom: 20px; right: 20px; background-color: #e74c3c; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Reset</button></div>
+<div style="background: linear-gradient(135deg, #1e293b, #334155); padding: 15px 30px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); position: relative;">
+  <h1 style="margin: 0; font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #ffffff, #e2e8f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Image Separator</h1>
+  <p style="margin: 6px 0 0 0; color: #94a3b8; font-size: 14px; font-weight: 400;">Extract individual objects with transparent backgrounds</p>
+  <button id="reset-btn">Reset</button>
+</div>
 
 <div class="top-bar">
 <div class="left-controls">
-<button id="upload-btn">Upload</button>
-<button id="paste-btn">Paste</button>
-<input type="file" id="file-input" accept="image/*" multiple style="display:none;"></div>
+<button id="upload-btn">📁 Upload</button>
+<button id="paste-btn">📋 Paste</button>
+<input type="file" id="file-input" accept="image/*" multiple style="display:none;">
+</div>
 <div class="right-controls">
-<button id="download-btn">Download</button></div>
+<button id="name-all-btn">🏷️ Name All</button>
+<button id="download-btn">💾 Download</button>
+</div>
 </div>
 
 <div id="name-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
-  background:#ddd; border-radius:20px; padding:20px; width:400px; text-align:center; z-index:1000;
-  box-shadow:0 10px 30px rgba(0, 0, 0, 0.3);">
-<div style="position:relative; margin-bottom:10px;">
-<div style="position:absolute; top:0; right:0; font-size:20px; cursor:pointer; padding:5px;" onclick="closeNamePopup()">✕</div>
-<div style="font-size:20px; background:#aaa; border-radius:10px; padding:8px 60px; text-align:center; display:inline-block; margin:0 auto;">Name Editor</div>
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; padding: 30px; width: 420px; text-align:center; z-index:1000;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
+<div style="position:relative; margin-bottom:20px;">
+<div style="position:absolute; top:-5px; right:-5px; font-size:20px; cursor:pointer; padding:8px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; transition: all 0.3s;" onclick="closeNamePopup()" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">✕</div>
+<div style="font-size: 22px; font-weight: 600; background: linear-gradient(135deg, #1e293b, #334155); color: white; border-radius: 16px; padding: 12px 24px; text-align: center; display: inline-block; margin: 0 auto;">Name Editor</div>
 </div>
-<div style="margin-bottom:10px;"><img id="name-preview" src="" style="max-width:100%; max-height:200px; box-shadow:0 0 20px rgba(0,0,0,0.5);"></div>
-<div style="display:flex; justify-content:center; gap:10px;">
-<input id="name-input" type="text" placeholder="Name" style="padding:10px; border-radius:12px; font-size:16px;"><button id="save-name-btn" style="padding:10px 20px; border-radius:12px; font-size:16px;">Save</button></div></div>
+<div style="margin-bottom:20px;"><img id="name-preview" src="" style="max-width:100%; max-height:200px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); border-radius: 12px;"></div>
+<div style="margin-bottom: 15px;">
+<input id="name-input" type="text" placeholder="Enter image name..." style="padding: 12px 16px; border-radius: 12px; font-size: 16px; border: 2px solid #e2e8f0; background: white; width: 100%; box-sizing: border-box; transition: all 0.3s; font-family: 'Inter', sans-serif;" onfocus="this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+</div>
+<div style="display:flex; justify-content:center; gap:12px; margin-bottom: 15px;">
+<button id="save-name-btn" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500;">💾 Save</button>
+<button id="delete-image-btn" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239, 68, 68, 0.35)'; this.style.background='linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.25)'; this.style.background='linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'">🗑️ Delete</button>
+</div>
+<div style="display:flex; justify-content:center; gap:12px;">
+<button id="prev-image-btn" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(100, 116, 139, 0.35)'; this.style.background='linear-gradient(135deg, #475569 0%, #334155 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(100, 116, 139, 0.25)'; this.style.background='linear-gradient(135deg, #64748b 0%, #475569 100%)'">← Previous</button>
+<button id="next-image-btn" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(100, 116, 139, 0.35)'; this.style.background='linear-gradient(135deg, #475569 0%, #334155 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(100, 116, 139, 0.25)'; this.style.background='linear-gradient(135deg, #64748b 0%, #475569 100%)'">Next →</button>
+</div>
+</div>
+
+
+<div id="name-all-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; padding: 30px; width: 420px; text-align:center; z-index:1000;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
+<div style="position:relative; margin-bottom:20px;">
+<div style="position:absolute; top:-5px; right:-5px; font-size:20px; cursor:pointer; padding:8px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; transition: all 0.3s;" onclick="closeNameAllPopup()" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">✕</div>
+<div style="font-size: 22px; font-weight: 600; background: linear-gradient(135deg, #1e293b, #334155); color: white; border-radius: 16px; padding: 12px 24px; text-align: center; display: inline-block; margin: 0 auto;">Name All Images</div>
+</div>
+<div style="margin-bottom: 15px; text-align: left;">
+<label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Base name for all images:</label>
+<input id="name-all-input" type="text" placeholder="Enter base name..." style="padding: 12px 16px; border-radius: 12px; font-size: 16px; border: 2px solid #e2e8f0; background: white; width: 100%; box-sizing: border-box; transition: all 0.3s; font-family: 'Inter', sans-serif;" onfocus="this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+</div>
+<div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 12px; font-size: 14px; color: #64748b; text-align: left;">
+<strong>Preview:</strong> YourName (1).png, YourName (2).png, etc.
+</div>
+<div style="display:flex; justify-content:center; gap:12px;">
+<button id="apply-name-all-btn" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500;">✨ Apply to All</button>
+<button onclick="closeNameAllPopup()" style="padding: 12px 24px; border-radius: 12px; font-size: 16px; font-weight: 500; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);">Cancel</button>
+</div>
+</div>
+
+
 
 <div class="image-area">
 <div id="input-images" class="image-box"></div>
 <div style="display: flex; flex-direction: column; align-items: center; width: 48%;">
 <div id="output-images" class="image-box" style="width: 100%;"></div>
-<button id="name-images-btn" style="margin-top: 10px;">Name Images</button>
+<button id="name-images-btn">🏷️ Name Images</button>
 </div>
-<button id="convert-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);">CONVERT</button>
+</div>
+<button id="convert-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;">✨ CONVERT</button>
 
+<!-- Progress Bar -->
+<div id="progress-container" style="display: none;">
+<div id="progress-text">Converting Images...</div>
+<div id="progress-bar">
+<div id="progress-fill"></div>
+</div>
+<div id="progress-details">Processing image 1 of 5</div>
+</div>
 
+<!-- Image Modal -->
+<div id="image-modal">
+<div id="modal-content">
+<button id="modal-close">×</button>
+<img id="modal-image" src="" alt="Full size view">
+</div>
+</div>
 
 <!-- Help Button -->
-<button id="help-btn" style="position: absolute; bottom: 20px; left: 20px; background-color: #c0c0c0; border-radius: 12px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Help</button>
+<button id="help-btn">❓ Help</button>
 
 <!-- Help Popup -->
 <div id="help-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-background: #ddd; border-radius: 20px; padding: 20px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000;">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-<div style="font-size: 20px; background: #aaa; border-radius: 10px; padding: 5px 10px;">Help</div>
-<div style="cursor: pointer; font-size: 20px;" onclick="document.getElementById('help-popup').style.display='none'">✕</div>
+background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; padding: 30px; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); z-index: 1000; border: 1px solid rgba(255, 255, 255, 0.2);">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div style="font-size: 22px; font-weight: 600; background: linear-gradient(135deg, #1e293b, #334155); color: white; border-radius: 16px; padding: 10px 20px;">Help</div>
+<div style="cursor: pointer; font-size: 20px; padding: 8px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; transition: all 0.3s;" onclick="document.getElementById('help-popup').style.display='none'" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">✕</div>
 </div>
-<div style="font-size: 14px; line-height: 1.5;">
-<p><strong>What this does:</strong> This tool extracts individual objects from uploaded images with transparent backgrounds, and provides you the separate images ready to name and download.</p>
-<p><strong>How to use:</strong></p>
-<ul style="padding-left: 20px; margin: 0;">
-<li>Upload or paste an image.</li>
-<li>Click “Convert” to split the image into individual parts.</li>
-<li>Click on parts to name or download them.</li>
-<li>Use “Name Images” to assign names before downloading.</li>
+<div style="font-size: 14px; line-height: 1.6; color: #374151;">
+<p style="margin: 0 0 16px 0;"><strong style="color: #1f2937;">What this does:</strong> This tool extracts individual objects from uploaded images with transparent backgrounds, and provides you the separate images ready to name and download.</p>
+<p style="margin: 0 0 8px 0;"><strong style="color: #1f2937;">How to use:</strong></p>
+<ul style="padding-left: 20px; margin: 0 0 16px 0;">
+<li style="margin-bottom: 6px;">Upload or paste an image.</li>
+<li style="margin-bottom: 6px;">Click "Convert" to split the image into individual parts.</li>
+<li style="margin-bottom: 6px;">Click on parts to name or download them.</li>
+<li style="margin-bottom: 6px;">Use "Name Images" to assign names before downloading.</li>
+<li style="margin-bottom: 6px;"><strong>Double-click any image to view it full size (6x bigger).</strong></li>
+<li style="margin-bottom: 6px;"><strong>In modal view, you can scroll to see the entire enlarged image.</strong></li>
+<li><strong>Select images and press Delete to remove them (with confirmation).</strong></li>
 </ul>
 </div>
 </div>
@@ -160,6 +448,68 @@ const inputBox = document.getElementById('input-images');
 const pasteBtn = document.getElementById('paste-btn');
 
 const addedImageKeys = new Set();
+
+// Modal elements
+const imageModal = document.getElementById('image-modal');
+const modalImage = document.getElementById('modal-image');
+const modalClose = document.getElementById('modal-close');
+
+// Modal functions
+function openModal(imageSrc) {
+  modalImage.src = imageSrc;
+  imageModal.style.display = 'flex';
+  // Scroll to top-left of the modal content when opening
+  document.querySelector('#modal-content').scrollTo(0, 0);
+}
+
+function closeModal() {
+  imageModal.style.display = 'none';
+  modalImage.src = '';
+}
+
+// Modal event listeners
+modalClose.addEventListener('click', closeModal);
+imageModal.addEventListener('click', (e) => {
+  if (e.target === imageModal) {
+    closeModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && imageModal.style.display === 'flex') {
+    closeModal();
+  }
+});
+
+// Add drag functionality for the enlarged image
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+
+modalImage.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  modalImage.style.cursor = 'grabbing';
+  startX = e.pageX - document.querySelector('#modal-content').offsetLeft;
+  startY = e.pageY - document.querySelector('#modal-content').offsetTop;
+  scrollLeft = document.querySelector('#modal-content').scrollLeft;
+  scrollTop = document.querySelector('#modal-content').scrollTop;
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const x = e.pageX - document.querySelector('#modal-content').offsetLeft;
+  const y = e.pageY - document.querySelector('#modal-content').offsetTop;
+  const walkX = (x - startX) * 2;
+  const walkY = (y - startY) * 2;
+  document.querySelector('#modal-content').scrollLeft = scrollLeft - walkX;
+  document.querySelector('#modal-content').scrollTop = scrollTop - walkY;
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  modalImage.style.cursor = 'move';
+});
 
 uploadBtn.addEventListener('click', () => {
   fileInput.click();
@@ -209,8 +559,47 @@ pasteBtn.addEventListener('click', () => {
       }
     }
   }).catch(err => {
-    alert("No image found on clipboard or browser blocked access.");
-    console.error(err);
+    const popup = document.createElement('div');
+Object.assign(popup.style, {
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  background: '#00cfee',
+  color: 'white',
+  padding: '20px 24px',
+  borderRadius: '16px',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  zIndex: 9999,
+  minWidth: '280px',
+  textAlign: 'center',
+});
+
+const closeX = document.createElement('div');
+closeX.textContent = '✕';
+Object.assign(closeX.style, {
+  position: 'absolute',
+  top: '8px',
+  right: '12px',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+});
+closeX.onclick = () => popup.remove();
+
+const message = document.createElement('div');
+message.textContent = "No image found on clipboard or browser blocked access.";
+
+popup.appendChild(closeX);
+popup.appendChild(message);
+document.body.appendChild(popup);
+
+// Auto close after 2 seconds
+setTimeout(() => popup.remove(), 2000);
+
+console.error(err);
   });
 });
 
@@ -218,14 +607,24 @@ function displayImage(src, key = null) {
   const img = document.createElement('img');
   img.src = src;
   img.dataset.key = key; // store the key
-  img.style.maxWidth = 'calc(33% - 10px)';
+  img.style.maxWidth = 'calc(50% - 10px)';
+  img.style.maxHeight = '200px';
+  img.style.width = 'auto';
   img.style.height = 'auto';
+  img.style.objectFit = 'contain';
   img.style.borderRadius = '8px';
   img.style.cursor = 'pointer';
   img.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
   inputBox.appendChild(img);
+  
+  // Single click for selection
   img.addEventListener('click', () => {
     img.classList.toggle('selected');
+  });
+  
+  // Double click for modal
+  img.addEventListener('dblclick', () => {
+    openModal(src);
   });
 }
 
@@ -233,16 +632,78 @@ const convertBtn = document.getElementById('convert-button');
 const outputBox = document.getElementById('output-images');
 
 
-convertBtn.addEventListener('click', () => {
-  outputBox.innerHTML = '';
+convertBtn.addEventListener('click', async () => {
   const images = inputBox.querySelectorAll('img');
-
   if (!images.length) {
-    alert("No images to convert.");
-    return;
-  }
+  const popup = document.createElement('div');
+  Object.assign(popup.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: '#e0e0e0', // light grey
+    color: '#333', // dark text for contrast
+    padding: '20px 24px',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    zIndex: 9999,
+    minWidth: '280px',
+    textAlign: 'center',
+  });
 
-  images.forEach(img => {
+  const closeX = document.createElement('div');
+  closeX.textContent = '✕';
+  Object.assign(closeX.style, {
+    position: 'absolute',
+    top: '8px',
+    right: '12px',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#333',
+    cursor: 'pointer',
+  });
+  closeX.onclick = () => popup.remove();
+
+  const message = document.createElement('div');
+  message.textContent = "No images to convert.";
+
+  popup.appendChild(closeX);
+  popup.appendChild(message);
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 2000);
+
+  return;
+}
+
+  // Show progress bar
+  const progressContainer = document.getElementById('progress-container');
+  const progressFill = document.getElementById('progress-fill');
+  const progressText = document.getElementById('progress-text');
+  const progressDetails = document.getElementById('progress-details');
+  
+  progressContainer.style.display = 'block';
+  outputBox.innerHTML = '';
+  
+  let totalImages = images.length;
+  let processedImages = 0;
+
+  // Process images one by one to show progress
+  for (let imgIndex = 0; imgIndex < images.length; imgIndex++) {
+    const img = images[imgIndex];
+    
+    // Update progress
+    processedImages++;
+    const percentage = (processedImages / totalImages) * 100;
+    progressFill.style.width = percentage + '%';
+    progressText.textContent = `Converting Images... ${Math.round(percentage)}%`;
+    progressDetails.textContent = `Processing image ${processedImages} of ${totalImages}`;
+    
+    // Small delay to show progress update
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -345,22 +806,30 @@ convertBtn.addEventListener('click', () => {
           objCtx.putImageData(objImageData, 0, 0);
 
           // Skip very narrow or flat objects (invisible noise)
-if (w < 20 || h < 20) continue;
+          if (w < 20 || h < 20) continue;
 
-const newImg = document.createElement('img');
-newImg.src = objCanvas.toDataURL('image/png');
-newImg.style.width = 'auto';
-newImg.style.height = 'auto';
-newImg.style.maxWidth = 'calc(33% - 10px)';
-newImg.style.maxHeight = '200px';
-newImg.style.objectFit = 'contain';
-newImg.style.borderRadius = '8px';
-newImg.style.cursor = 'pointer';
-newImg.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-outputBox.appendChild(newImg);
-newImg.addEventListener('click', () => {
-  newImg.classList.toggle('selected');
-});
+          const newImg = document.createElement('img');
+          const imgSrc = objCanvas.toDataURL('image/png');
+          newImg.src = imgSrc;
+          newImg.style.width = 'auto';
+          newImg.style.height = 'auto';
+          newImg.style.maxWidth = 'calc(20% - 10px)';
+          newImg.style.maxHeight = '120px';
+          newImg.style.objectFit = 'contain';
+          newImg.style.borderRadius = '8px';
+          newImg.style.cursor = 'pointer';
+          newImg.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+          outputBox.appendChild(newImg);
+          
+          // Single click for selection
+          newImg.addEventListener('click', () => {
+            newImg.classList.toggle('selected');
+          });
+          
+          // Double click for modal
+          newImg.addEventListener('dblclick', () => {
+            openModal(imgSrc);
+          });
         }
       }
     }
@@ -373,27 +842,86 @@ newImg.addEventListener('click', () => {
       msg.style.padding = "10px";
       outputBox.appendChild(msg);
     }
-  });
+  }
+  
+  // Hide progress bar when done
+  progressContainer.style.display = 'none';
 });
 
 document.getElementById('download-btn').addEventListener('click', async () => {
   const allImages = document.querySelectorAll('#output-images img');
-  if (!allImages.length) {
-    alert('There are no images to download.');
-    return;
-  }
+if (!allImages.length) {
+  const popup = document.createElement('div');
+  Object.assign(popup.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: '#e0e0e0',
+    color: '#333',
+    padding: '20px 24px',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    zIndex: 9999,
+    minWidth: '280px',
+    textAlign: 'center',
+  });
+
+  const closeX = document.createElement('div');
+  closeX.textContent = '✕';
+  Object.assign(closeX.style, {
+    position: 'absolute',
+    top: '8px',
+    right: '12px',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#333',
+    cursor: 'pointer',
+  });
+  closeX.onclick = () => popup.remove();
+
+  const message = document.createElement('div');
+  message.textContent = 'There are no images to download.';
+
+  popup.appendChild(closeX);
+  popup.appendChild(message);
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 2000);
+
+  return;
+}
 
   const zip = new JSZip();
   const folder = zip.folder("converted_images");
 
-  let count = 1;
-  for (const img of allImages) {
-    const response = await fetch(img.src);
-    const blob = await response.blob();
-    let name = imageNames.get(img) || `image_${count}`;
-    folder.file(`${name}.png`, blob);
-    count++;
+// Keep track of used names to handle duplicates
+const usedNames = new Map(); // name -> count
+
+for (const img of allImages) {
+  const response = await fetch(img.src);
+  const blob = await response.blob();
+  
+  // Get the base name - use global base name if set, otherwise individual names, otherwise default
+  let baseName = imageNames.get(img) || globalBaseName || "Converted Image";
+  
+  // Handle duplicate names by adding numbers
+  let finalName;
+  if (usedNames.has(baseName)) {
+    // Increment counter for this base name
+    const count = usedNames.get(baseName) + 1;
+    usedNames.set(baseName, count);
+    finalName = `${baseName} (${count})`;
+  } else {
+    // First time using this name
+    usedNames.set(baseName, 1);
+    finalName = `${baseName} (1)`;
   }
+  
+  folder.file(`${finalName}.png`, blob);
+}
 
   zip.generateAsync({ type: "blob" }).then(content => {
     saveAs(content, "converted_images.zip");
@@ -413,7 +941,48 @@ let imageNames = new Map(); // maps image element to name
 
 nameBtn.addEventListener('click', () => {
   outputImages = [...document.querySelectorAll('#output-images img')];
-  if (!outputImages.length) return alert("No output images to name.");
+  if (!outputImages.length) {
+  const popup = document.createElement('div');
+  Object.assign(popup.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: '#e0e0e0',
+    color: '#333',
+    padding: '20px 24px',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    zIndex: 9999,
+    minWidth: '280px',
+    textAlign: 'center',
+  });
+
+  const closeX = document.createElement('div');
+  closeX.textContent = '✕';
+  Object.assign(closeX.style, {
+    position: 'absolute',
+    top: '8px',
+    right: '12px',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#333',
+    cursor: 'pointer',
+  });
+  closeX.onclick = () => popup.remove();
+
+  const message = document.createElement('div');
+  message.textContent = 'No output images to name.';
+
+  popup.appendChild(closeX);
+  popup.appendChild(message);
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 2000);
+  return;
+}
   namingIndex = 0;
   input.value = '';
   preview.src = outputImages[namingIndex].src;
@@ -448,56 +1017,390 @@ input.addEventListener('keydown', e => {
   if (e.key === 'Enter') saveCurrentName();
 });
 
-
-
+// Enhanced delete functionality with confirmation
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Delete') {
-    document.querySelectorAll('#input-images img.selected').forEach(img => {
-      const key = img.dataset.key;
-      if (key) addedImageKeys.delete(key);
-      img.remove();
-    });
-  }
+    const selectedInputImages = document.querySelectorAll('#input-images img.selected');
+    const selectedOutputImages = document.querySelectorAll('#output-images img.selected');
+    
+    const totalSelected = selectedInputImages.length + selectedOutputImages.length;
+    
+    if (totalSelected === 0) {
+      return; // No images selected
+    }
+    
+    // Create confirmation message
+    let message = `Are you sure you want to delete ${totalSelected} selected image${totalSelected > 1 ? 's' : ''}?`;
+    
+    if (selectedInputImages.length > 0 && selectedOutputImages.length > 0) {
+      message += `\n\n• ${selectedInputImages.length} input image${selectedInputImages.length > 1 ? 's' : ''}`;
+      message += `\n• ${selectedOutputImages.length} converted image${selectedOutputImages.length > 1 ? 's' : ''}`;
+    } else if (selectedInputImages.length > 0) {
+      message += `\n\n(${selectedInputImages.length} input image${selectedInputImages.length > 1 ? 's' : ''})`;
+    } else {
+      message += `\n\n(${selectedOutputImages.length} converted image${selectedOutputImages.length > 1 ? 's' : ''})`;
+    }
+    
+    const confirmPopup = document.createElement('div');
+Object.assign(confirmPopup.style, {
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  background: '#e0e0e0',
+  color: '#333',
+  padding: '24px',
+  borderRadius: '16px',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  zIndex: 9999,
+  minWidth: '300px',
+  maxWidth: '450px',
+  whiteSpace: 'pre-wrap',
+  textAlign: 'left'
 });
 
+const closeX = document.createElement('div');
+closeX.textContent = '✕';
+Object.assign(closeX.style, {
+  position: 'absolute',
+  top: '8px',
+  right: '12px',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  color: '#333',
+  cursor: 'pointer',
+});
+closeX.onclick = () => confirmPopup.remove();
+
+const msg = document.createElement('div');
+msg.textContent = message;
+msg.style.marginBottom = '20px';
+
+const btnRow = document.createElement('div');
+btnRow.style.display = 'flex';
+btnRow.style.justifyContent = 'center';
+btnRow.style.gap = '20px';
+
+const yesBtn = document.createElement('button');
+yesBtn.textContent = 'Yes';
+Object.assign(yesBtn.style, {
+  padding: '8px 16px',
+  borderRadius: '10px',
+  background: '#d9534f',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+});
+
+const noBtn = document.createElement('button');
+noBtn.textContent = 'No';
+Object.assign(noBtn.style, {
+  padding: '8px 16px',
+  borderRadius: '10px',
+  background: '#6c757d',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+});
+
+yesBtn.onclick = () => {
+  selectedInputImages.forEach(img => {
+    const key = img.dataset.key;
+    if (key) addedImageKeys.delete(key);
+    img.remove();
+  });
+
+  selectedOutputImages.forEach(img => {
+    if (imageNames.has(img)) imageNames.delete(img);
+    img.remove();
+  });
+
+  confirmPopup.remove();
+};
+
+noBtn.onclick = () => confirmPopup.remove();
+
+btnRow.appendChild(yesBtn);
+btnRow.appendChild(noBtn);
+confirmPopup.appendChild(closeX);
+confirmPopup.appendChild(msg);
+confirmPopup.appendChild(btnRow);
+document.body.appendChild(confirmPopup);
+  }
+});
 
 document.getElementById('reset-btn').addEventListener('click', () => {
-  if (confirm("Are you sure you want to reset? This will remove all images.")) {
-    inputBox.innerHTML = '';
-    outputBox.innerHTML = '';
-    addedImageKeys.clear();
-  }
+  const confirmPopup = document.createElement('div');
+Object.assign(confirmPopup.style, {
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  background: '#e0e0e0',
+  color: '#333',
+  padding: '24px',
+  borderRadius: '16px',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  zIndex: 9999,
+  minWidth: '300px',
+  textAlign: 'center'
 });
 
-document.getElementById('copy-btn').addEventListener('click', async () => {
-  if (namingInProgress) {
-  alert('Please finish naming images before copying.');
-  return;
-}
+const closeX = document.createElement('div');
+closeX.textContent = '✕';
+Object.assign(closeX.style, {
+  position: 'absolute',
+  top: '8px',
+  right: '12px',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  color: '#333',
+  cursor: 'pointer',
+});
+closeX.onclick = () => confirmPopup.remove();
 
-  const allOutputImages = [...document.querySelectorAll('#output-images img')];
-const selected = allOutputImages.filter(img => img.classList.contains('selected'));
-  if (selected.length !== 1) {
-    alert('Please select exactly one image to copy.');
-    return;
-  }
+const msg = document.createElement('div');
+msg.textContent = "Are you sure you want to reset? This will remove all images.";
+msg.style.marginBottom = '20px';
 
-  try {
-    const img = selected[0];
-    const blob = await fetch(img.src).then(res => res.blob());
-    const item = new ClipboardItem({ [blob.type]: blob });
-    await navigator.clipboard.write([item]);
-    alert('Image copied to clipboard!');
-  } catch (err) {
-    console.error(err);
-    alert('Failed to copy image. Clipboard permissions may be restricted.');
-  }
+const btnRow = document.createElement('div');
+btnRow.style.display = 'flex';
+btnRow.style.justifyContent = 'center';
+btnRow.style.gap = '20px';
+
+const yesBtn = document.createElement('button');
+yesBtn.textContent = 'Yes';
+Object.assign(yesBtn.style, {
+  padding: '8px 16px',
+  borderRadius: '10px',
+  background: '#d9534f',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+});
+
+const noBtn = document.createElement('button');
+noBtn.textContent = 'No';
+Object.assign(noBtn.style, {
+  padding: '8px 16px',
+  borderRadius: '10px',
+  background: '#6c757d',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+});
+
+yesBtn.onclick = () => {
+  inputBox.innerHTML = '';
+  outputBox.innerHTML = '';
+  addedImageKeys.clear();
+  confirmPopup.remove();
+};
+
+noBtn.onclick = () => confirmPopup.remove();
+
+btnRow.appendChild(yesBtn);
+btnRow.appendChild(noBtn);
+confirmPopup.appendChild(closeX);
+confirmPopup.appendChild(msg);
+confirmPopup.appendChild(btnRow);
+document.body.appendChild(confirmPopup);
 });
 
 const helpPopup = document.getElementById('help-popup');
 document.getElementById('help-btn').addEventListener('click', () => {
   helpPopup.style.display = (helpPopup.style.display === 'none') ? 'block' : 'none';
 });
+
+
+// Add this event listener after your existing naming popup code
+document.getElementById('delete-image-btn').addEventListener('click', () => {
+  if (namingIndex >= 0 && namingIndex < outputImages.length) {
+    const imageToDelete = outputImages[namingIndex];
+    
+    // Remove from imageNames map if it exists
+    if (imageNames.has(imageToDelete)) {
+      imageNames.delete(imageToDelete);
+    }
+    
+    // Remove the image from the DOM
+    imageToDelete.remove();
+    
+    // Remove from outputImages array
+    outputImages.splice(namingIndex, 1);
+    
+    // Adjust naming index and continue with next image
+    if (outputImages.length === 0) {
+      // No more images to name
+      closeNamePopup();
+      return;
+    }
+    
+    // If we deleted the last image, go back to the previous one
+    if (namingIndex >= outputImages.length) {
+      namingIndex = outputImages.length - 1;
+    }
+    
+    // Update preview with next/current image
+    input.value = '';
+    preview.src = outputImages[namingIndex].src;
+    input.focus();
+  }
+});
+
+// Previous button functionality
+document.getElementById('prev-image-btn').addEventListener('click', () => {
+  if (outputImages.length === 0) return;
+  
+  // Save current name before moving
+  const name = input.value.trim();
+  if (name) {
+    imageNames.set(outputImages[namingIndex], name);
+  }
+  
+  // Move to previous image (wrap around to end if at beginning)
+  namingIndex = namingIndex > 0 ? namingIndex - 1 : outputImages.length - 1;
+  
+  // Update preview and input with existing name (if any)
+  const existingName = imageNames.get(outputImages[namingIndex]) || '';
+  input.value = existingName;
+  preview.src = outputImages[namingIndex].src;
+  input.focus();
+});
+
+// Next button functionality  
+document.getElementById('next-image-btn').addEventListener('click', () => {
+  if (outputImages.length === 0) return;
+  
+  // Save current name before moving
+  const name = input.value.trim();
+  if (name) {
+    imageNames.set(outputImages[namingIndex], name);
+  }
+  
+  // Move to next image (wrap around to beginning if at end)
+  namingIndex = namingIndex < outputImages.length - 1 ? namingIndex + 1 : 0;
+  
+  // Update preview and input with existing name (if any)
+  const existingName = imageNames.get(outputImages[namingIndex]) || '';
+  input.value = existingName;
+  preview.src = outputImages[namingIndex].src;
+  input.focus();
+});
+
+
+// Name All functionality
+let globalBaseName = ""; // Store the global base name
+
+document.getElementById('name-all-btn').addEventListener('click', () => {
+  const allOutputImages = document.querySelectorAll('#output-images img');
+  if (!allOutputImages.length) {
+    const popup = document.createElement('div');
+    Object.assign(popup.style, {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      background: '#e0e0e0',
+      color: '#333',
+      padding: '20px 24px',
+      borderRadius: '16px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+      fontSize: '15px',
+      fontWeight: 'bold',
+      zIndex: 9999,
+      minWidth: '280px',
+      textAlign: 'center',
+    });
+
+    const closeX = document.createElement('div');
+    closeX.textContent = '✕';
+    Object.assign(closeX.style, {
+      position: 'absolute',
+      top: '8px',
+      right: '12px',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      color: '#333',
+      cursor: 'pointer',
+    });
+    closeX.onclick = () => popup.remove();
+
+    const message = document.createElement('div');
+    message.textContent = 'No output images to name.';
+
+    popup.appendChild(closeX);
+    popup.appendChild(message);
+    document.body.appendChild(popup);
+
+    setTimeout(() => popup.remove(), 2000);
+    return;
+  }
+  
+  document.getElementById('name-all-popup').style.display = 'block';
+  document.getElementById('name-all-input').focus();
+});
+
+function closeNameAllPopup() {
+  document.getElementById('name-all-popup').style.display = 'none';
+}
+
+document.getElementById('apply-name-all-btn').addEventListener('click', () => {
+  const baseName = document.getElementById('name-all-input').value.trim();
+  if (!baseName) {
+    alert('Please enter a base name.');
+    return;
+  }
+  
+  globalBaseName = baseName; // Store globally
+  
+  // Apply the base name to all output images
+  const allOutputImages = document.querySelectorAll('#output-images img');
+  allOutputImages.forEach((img, index) => {
+    imageNames.set(img, baseName);
+  });
+  
+  closeNameAllPopup();
+  
+  // Show confirmation
+  const popup = document.createElement('div');
+  Object.assign(popup.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: '#10b981',
+    color: 'white',
+    padding: '20px 24px',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    zIndex: 9999,
+    minWidth: '280px',
+    textAlign: 'center',
+  });
+
+  const message = document.createElement('div');
+  message.textContent = `All images named with base: "${baseName}"`;
+
+  popup.appendChild(message);
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 2000);
+});
+
+// Allow Enter key to apply names
+document.getElementById('name-all-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('apply-name-all-btn').click();
+  }
+});
+
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>

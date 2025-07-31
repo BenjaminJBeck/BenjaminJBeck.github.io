@@ -1,0 +1,515 @@
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  scroll-behavior: smooth;
+  background: #f8f9fa;
+  /* Hide scrollbar but keep scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Top Navigation Bar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(135deg, #00cfff 0%, #00b8e6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 999;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.navbar-left img {
+  height: 2.5vw;
+  width: auto;
+  min-height: 30px;
+}
+
+.navbar-title {
+  color: white;
+  font-size: 1.2vw;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+  margin: 0 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .navbar-links {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .navbar-links {
+    gap: 16px;
+  }
+  .navbar a {
+    padding: 22px 20px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar-links {
+    gap: 12px;
+  }
+  .navbar a {
+    padding: 22px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 800px) {
+  .navbar-links {
+    gap: 8px;
+  }
+  .navbar a {
+    padding: 22px 12px;
+    font-size: 13px;
+  }
+}
+
+.navbar a {
+  padding: 22px 1.5vw;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1vw;
+  transition: all 0.3s ease;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.navbar a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.navbar a:active {
+  transform: translateY(0);
+}
+
+/* Main content area */
+.content {
+  padding-top: 120px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* Logo row */
+.logo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 40px 20px;
+  margin-bottom: 60px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px;
+}
+
+.logo-header img {
+  height: 120px;
+  width: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.logo-header-text h1 {
+  font-size: 42px;
+  margin: 0;
+  text-align: left;
+  color: #00cfff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo-header-text h2 {
+  font-size: 18px;
+  font-style: italic;
+  margin: 10px 0 0 0;
+  color: #666;
+  text-align: left;
+  font-weight: 400;
+}
+
+.section {
+  background: white;
+  margin: 40px auto;
+  padding: 50px 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 1000px;
+  width: 90%;
+  box-sizing: border-box;
+}
+
+.section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Section headers */
+h2 {
+  font-size: 36px;
+  margin-top: 0;
+  margin-bottom: 30px;
+  color: #00cfff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+p {
+  font-size: 18px;
+  color: #555;
+  line-height: 1.8;
+  max-width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+/* Pricing special styling */
+#pricing-section p {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  line-height: 2;
+}
+
+/* Testimonials special styling */
+#testimonials-section p {
+  font-style: italic;
+  font-size: 19px;
+  color: #444;
+  line-height: 2;
+}
+
+#book {
+  background: white;
+  color: #333;
+}
+
+#book h2 {
+  color: #00cfff;
+}
+
+#book p {
+  color: #555;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.booking-form {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.contact-text {
+  font-size: 16px;
+  color: #444;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 207, 255, 0.05);
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 207, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 207, 255, 0.1);
+}
+
+.book-btn {
+  background: linear-gradient(135deg, #00cfff 0%, #00b8e6 100%);
+  color: white;
+  border: none;
+  padding: 6px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  transform: translateY(-15px);
+}
+
+.book-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.email-label {
+  color: #0077b6;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, #00cfff 0%, #00b8e6 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .navbar a {
+    padding: 15px 20px;
+    font-size: 14px;
+  }
+  
+  .logo-header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 30px 20px;
+  }
+  
+  .logo-header-text h1 {
+    font-size: 32px;
+    text-align: center;
+  }
+  
+  .logo-header-text h2 {
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  .section {
+    margin: 20px 10px;
+    padding: 30px 20px;
+  }
+  
+  h2 {
+    font-size: 28px;
+  }
+  
+  p {
+    font-size: 16px;
+    padding: 0 10px;
+  }
+  
+  .booking-form {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .contact-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+</style>
+
+<div class="navbar">
+<div class="navbar-left">
+<img src="Pictures/CCandCLogo.png" alt="CC&C Logo">
+<span class="navbar-title">Cleaning Checks & Crap</span>
+</div>
+<div class="navbar-links">
+<a href="#what">Main</a>
+<a href="#how">How It Works</a>
+<a href="#pricing">Pricing</a>
+<a href="#testimonials">Testimonials</a>
+<a href="#book">Book Now</a>
+</div>
+</div>
+
+<div class="content">
+<div class="logo-header">
+<img src="Pictures/CCandCLogo.png" alt="CC&C Logo">
+<div class="logo-header-text">
+<h1>Cleaning Checks & Crap</h1>
+<h2>– "We pass your cleaning checks so you don't have to!"</h2>
+</div>
+</div>
+
+<div class="section" id="what">
+<h2>What We Do</h2>
+<p>We take care of your apartment cleaning checks for you. Whether it's scrubbing the bathroom, vacuuming the carpet, or wiping down counters—we do it all so you don't get fined or fail your check. Our professional team ensures your space meets all inspection requirements while you focus on what matters most to you.</p>
+</div>
+
+<div class="section" id="how">
+  <h2>How It Works</h2>
+  <p>
+    Booking with us is simple and stress-free. Just schedule an appointment online or by phone, provide your address and preferred time, and our experienced team will take care of the rest. All appointments must be booked at least <strong>1 day in advance</strong> to ensure proper scheduling and preparation.
+    <br><br>
+
+    On the day of your cleaning, we ask that <strong>at least one roommate is present</strong> during the appointment. This ensures a smooth handoff, allows access to the apartment, and provides mutual protection against any potential disputes or false claims.
+    <br><br>
+
+    We bring all necessary cleaning supplies and ensure your space is thoroughly cleaned and <strong>inspection-ready</strong> according to typical student housing standards.
+    <br><br>
+
+    <strong>Customer Satisfaction Guarantee:</strong> If our cleaning does not pass inspection, we will provide a <strong>full refund</strong>, including reimbursement for any cleaning-related fees or fines you incur as a result. We stand behind the quality of our work.
+    <br><br>
+
+    <strong>Discounts & Deals:</strong><br>
+    • <strong>Bulk Deals:</strong> Discounts for multiple rooms or apartments cleaned at once<br>
+    • <strong>Time-Based Discounts:</strong> Book 10 or more days in advance and get 20% off<br>
+    • <strong>Subscription Discount:</strong> Sign up for monthly cleanings and receive a discounted rate<br><br>
+
+    Our mission is to help you pass your cleaning checks with zero hassle. Fast, affordable, and fully guaranteed.
+  </p>
+</div>
+
+<div class="section" id="pricing">
+  <h2>Pricing</h2>
+  <p id="pricing-section">
+    <strong>Individual Services:</strong><br>
+    • Room: $35<br>
+    • Bathroom: $25<br>
+    • Kitchen: $30<br>
+    • Living Room: $30<br>
+    • Deep-Cleaning Fee (if requested or required): +$30<br>
+    • Early Booking Discount (10+ days in advance): -20%<br><br>
+
+    <strong>Combo Packages:</strong><br>
+    • Room + Bathroom: $55 (save $5)<br>
+    • Kitchen + Living Room: $55 (save $5)<br>
+    • Full Apartment (Room + Bathroom + Kitchen + Living Room): $110 (save $10)<br><br>
+
+    <strong>Roommate & Group Discounts:</strong><br>
+    • 2 Rooms cleaned: $65 (save $5)<br>
+    • 3+ Rooms cleaned: $30 per room (save $15+ total)<br><br>
+
+    <strong>Additional Info:</strong><br>
+    • All cleanings are inspection-ready and tailored to typical student housing standards.<br>
+    • If ANY cleaning checks come back failed, a full refund will be made, as well as any fee paid for<br>
+    • Flexible scheduling and satisfaction guaranteed.<br><br>
+
+    Book early and save! Let us handle the mess so you can stress less.
+  </p>
+</div>
+
+<div class="section" id="testimonials">
+<h2>Testimonials</h2>
+<p id="testimonials-section">Coming Soon!</p>
+</div>
+
+<div class="section" id="book">
+<h2>Book Now</h2>
+<p>To book an appointment for us to come to your apartment to complete your cleaning check, please either contact us through email or by filling out the form below. Thank you!</p>
+
+<div class="booking-form">
+<a href="https://docs.google.com/forms/d/e/1FAIpQLSfWYVfLmmCOcZTjRhamiC-byDUJAnuUORYGc9BIxGVTzmEnqg/viewform?usp=header" target="_blank" class="book-btn">Book Now</a>
+<span class="contact-text">or contact us through our email:</span>
+<span class="email-label">cleaningchecksandcrap@gmail.com</span>
+<button class="copy-btn">Copy</button>
+</div>
+</div>
+</div>
+
+<script>
+// Smooth scrolling for navigation links
+document.querySelectorAll('.navbar a').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        if (targetSection) {
+            const offsetTop = targetSection.offsetTop - 180;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// Add subtle parallax effect
+window.addEventListener('scroll', function() {
+    const scrolled = window.pageYOffset;
+    const sections = document.querySelectorAll('.section');
+    
+    sections.forEach(section => {
+        const rate = scrolled * -0.1;
+        section.style.transform = `translateY(${rate}px)`;
+    });
+});
+
+// Copy email functionality
+document.querySelector('.copy-btn').addEventListener('click', function() {
+    const email = 'cleaningchecks@gmail.com';
+    navigator.clipboard.writeText(email).then(function() {
+        const btn = document.querySelector('.copy-btn');
+        const originalText = btn.textContent;
+        const originalBackground = btn.style.background;
+const originalColor = btn.style.color;
+
+btn.textContent = 'Copied!';
+btn.style.background = 'rgba(76, 175, 80, 0.8)';
+btn.style.color = 'white';
+
+setTimeout(function() {
+    btn.textContent = originalText;
+    btn.style.background = originalBackground;
+    btn.style.color = originalColor;
+}, 2000);
+    });
+});
+
+
+</script>
