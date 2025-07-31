@@ -48,7 +48,7 @@ body::-webkit-scrollbar {
 
 .navbar-title {
   color: white;
-  font-size: 1.2vw;
+  font-size: 18px; /* changed from 1.2vw */
   font-weight: 600;
   white-space: nowrap;
 }
@@ -156,13 +156,28 @@ body::-webkit-scrollbar {
   }
 }
 
-@media (max-width: 800px) {
-  .navbar-links {
-    display: none !important;
+/* Force hamburger to show on mobile - AGGRESSIVE APPROACH */
+@media screen and (max-width: 800px) {
+  .navbar {
+    justify-content: space-between;
   }
   
-  .hamburger {
-    display: flex !important;
+  .navbar-links {
+    display: none;
+    visibility: hidden;
+  }
+  
+.hamburger {
+  background: linear-gradient(135deg, #00cfff 0%, #00b8e6 100%) !important; /* Match tab bar */
+  border: 3px solid white !important; /* White border instead of yellow */
+  border-radius: 6px;
+}
+  
+  .hamburger span {
+    background: white !important;
+    background-color: white !important;
+    opacity: 1 !important;
+    display: block !important;
   }
   
   .navbar-title {
@@ -174,12 +189,32 @@ body::-webkit-scrollbar {
   }
 }
 
+@media screen and (max-width: 800px) {
+  .hamburger {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #00cfff 0%, #00b8e6 100%) !important;
+    border: 3px solid white !important;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+
+  .hamburger span {
+    background-color: white !important;
+  }
+
+  .navbar-links {
+    display: none !important;
+  }
+}
+
 .navbar a {
   padding: 22px 1.5vw;
   color: white;
   font-weight: 600;
   text-decoration: none;
-  font-size: 1vw;
+  font-size: 18px;
   transition: all 0.3s ease;
   line-height: 1;
   display: inline-block;
