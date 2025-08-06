@@ -334,6 +334,195 @@ p {
   line-height: 2;
 }
 
+/* Image Comparison Slider Styles */
+.image-comparison {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.comparison-container {
+  position: relative;
+  width: 400px;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  user-select: none;
+}
+
+.comparison-container:active {
+  cursor: grabbing;
+}
+
+.before-image, .after-image {
+  position: relative;
+  width: 400px;
+  height: auto;
+}
+
+.before-image img, .after-image img {
+  width: 400px;
+  height: auto;
+  display: block;
+}
+
+.after-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 100%;
+  overflow: hidden;
+  clip-path: inset(0 50% 0 0);
+  z-index: 2; /* Put the after image above the labels */
+}
+
+.image-label {
+  position: absolute;
+  top: 20px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 20px;
+  text-shadow: none;
+  z-index: 2;
+}
+
+.before-label {
+  right: 20px;
+  background: rgba(0, 207, 255, 1);
+  z-index: 1; /* Put it below the after image */
+}
+
+.after-label {
+  left: 20px;
+  background: rgba(0, 207, 255, 1);
+  z-index: 1; /* Put it below the after image */
+}
+
+.slider-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 4px;
+  height: 100%;
+  background: white;
+  transform: translateX(-50%);
+  z-index: 3;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.slider-line {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.8) 0%, 
+    rgba(255, 255, 255, 1) 50%, 
+    rgba(255, 255, 255, 0.8) 100%);
+}
+
+.slider-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  background: #00cfff;
+  border: 3px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.slider-button:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 6px 20px rgba(0, 207, 255, 0.6);
+}
+
+/* Remove the arrow styles - delete these completely */
+.slider-arrow {
+  display: none;
+}
+
+.slider-arrow.left {
+  display: none;
+}
+
+.slider-arrow.right {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .comparison-container {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .before-image, .after-image {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+  }
+  
+  .before-image img, .after-image img {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+    height: auto;
+  }
+  
+  .after-image {
+    width: calc(100vw - 40px) !important;
+    max-width: 400px !important;
+  }
+  
+  .slider-button {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .image-label {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .comparison-container {
+    width: calc(100vw - 60px);
+    max-width: 300px;
+  }
+  
+  .before-image, .after-image {
+    width: calc(100vw - 60px);
+    max-width: 300px;
+  }
+  
+  .before-image img, .after-image img {
+    width: calc(100vw - 60px);
+    max-width: 300px;
+    height: auto;
+  }
+  
+  .after-image {
+    width: calc(100vw - 60px) !important;
+    max-width: 300px !important;
+  }
+  
+  .slider-button {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .image-label {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
 #book {
   background: white;
   color: #333;
@@ -470,6 +659,43 @@ p {
     justify-content: space-between;
   }
 }
+.testimonial-row {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin: 30px 0;
+}
+
+.testimonial-text {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.testimonial-quote {
+  font-style: italic;
+  font-size: 18px;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.testimonial-author {
+  font-weight: 500;
+  color: #666;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .testimonial-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .testimonial-text {
+    padding-left: 0;
+    text-align: center;
+  }
+}
 </style>
 
 <div class="navbar">
@@ -481,7 +707,7 @@ p {
 <a href="#what">Main</a>
 <a href="#how">How It Works</a>
 <a href="#pricing">Pricing</a>
-<a href="#testimonials">Testimonials</a>
+<a href="#testimonials">Reviews & Results</a>
 <a href="#book">Book Now</a>
 </div>
 <div class="hamburger">
@@ -495,7 +721,7 @@ p {
 <a href="#what">Main</a>
 <a href="#how">How It Works</a>
 <a href="#pricing">Pricing</a>
-<a href="#testimonials">Testimonials</a>
+<a href="#testimonials">Reviews & Results</a>
 <a href="#book">Book Now</a>
 </div>
 
@@ -530,7 +756,7 @@ p {
 
     <strong>Discounts & Deals:</strong><br>
     • <strong>Bulk Deals:</strong> Discounts for multiple rooms or apartments cleaned at once<br>
-    • <strong>Time-Based Discounts:</strong> Book 10 or more days in advance and get 20% off<br>
+    • <strong>Time-Based Discounts:</strong> Book 10 or more days in advance and get 10% off<br>
     • <strong>Subscription Discount:</strong> Sign up for monthly cleanings and receive a discounted rate<br><br>
 
     Our mission is to help you pass your cleaning checks with zero hassle. Fast, affordable, and fully guaranteed.
@@ -567,8 +793,33 @@ p {
 </div>
 
 <div class="section" id="testimonials">
-<h2>Testimonials</h2>
-<p id="testimonials-section">Coming Soon!</p>
+<h2>Reviews & Results</h2>
+<p id="testimonials-section">Here is a before and after for the work we did for Carlos!</p>
+<div class="testimonial-row">
+<div class="image-comparison">
+<div class="comparison-container">
+<div class="before-image">
+<img src="pictures/BathroomAfter.jpg" alt="Bathroom Before Cleaning">
+<div class="image-label before-label">BEFORE</div>
+</div>
+<div class="after-image">
+<img src="pictures/BathroomBefore.jpg" alt="Bathroom After Cleaning">
+<div class="image-label after-label">AFTER</div>
+</div>
+<div class="slider-handle">
+<div class="slider-line"></div>
+<div class="slider-button">
+<span class="slider-arrow left">‹</span>
+<span class="slider-arrow right">›</span>
+</div>
+</div>
+</div>
+</div>
+<div class="testimonial-text">
+<div class="testimonial-quote">"Everything was awesome! I was worried about it not being perfect but the apartment really was white glove clean when I walked in to grab my stuff. 5/5!"</div>
+<div class="testimonial-author">— Carlos</div>
+</div>
+</div>
 </div>
 
 <div class="section" id="book">
@@ -668,6 +919,79 @@ setTimeout(function() {
     btn.style.background = originalBackground;
     btn.style.color = originalColor;
 }, 2000);
+    });
+});
+
+
+// Image comparison slider functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const comparisonContainer = document.querySelector('.comparison-container');
+    const afterImage = document.querySelector('.after-image');
+    const sliderHandle = document.querySelector('.slider-handle');
+    
+    if (!comparisonContainer || !afterImage || !sliderHandle) return;
+    
+    let isDragging = false;
+    
+function updateSlider(clientX) {
+    const containerRect = comparisonContainer.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    let position = ((clientX - containerRect.left) / containerWidth) * 100;
+    
+    // Constrain position between 0 and 100
+    position = Math.max(0, Math.min(100, position));
+    
+    // Get the actual image width vs container width for proper alignment
+    const image = afterImage.querySelector('img');
+    const imageWidth = image.getBoundingClientRect().width;
+    const imagePosition = (position / 100) * containerWidth;
+    const clipPosition = 100 - ((imagePosition / imageWidth) * 100);
+    
+    // Update after image clip-path and slider position
+    afterImage.style.clipPath = `inset(0 ${clipPosition}% 0 0)`;
+    sliderHandle.style.left = position + '%';
+}
+    
+    // Mouse events
+    comparisonContainer.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        updateSlider(e.clientX);
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+            updateSlider(e.clientX);
+        }
+    });
+    
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+    
+    // Touch events for mobile
+    comparisonContainer.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        updateSlider(e.touches[0].clientX);
+        e.preventDefault();
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (isDragging) {
+            updateSlider(e.touches[0].clientX);
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('touchend', function() {
+        isDragging = false;
+    });
+    
+    // Click anywhere to move slider
+    comparisonContainer.addEventListener('click', function(e) {
+        if (!isDragging) {
+            updateSlider(e.clientX);
+        }
     });
 });
 </script>

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Conversation Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr 250px;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .header-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, textarea, button, select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .folder-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .folder-panel h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .folder-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .folder-item:hover {
+            background: #e9ecef;
+            border-left-color: #667eea;
+        }
+
+        .folder-item.active {
+            background: #667eea;
+            color: white;
+            border-left-color: #764ba2;
+        }
+
+        .conversation-item {
+            padding: 8px 10px;
+            margin: 3px 0;
+            background: #f1f3f4;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: #e8f0fe;
+            border-left-color: #667eea;
+        }
+
+        .conversation-item.active {
+            background: #e8f0fe;
+            border-left-color: #764ba2;
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .chat-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.gpt {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input {
+            width: 100%;
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .tags-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .tags-panel h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .tag-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 10px;
+            margin: 3px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .folder-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .folder-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GPT Conversation Manager</h1>
+            <div class="header-controls">
+                <div class="control-group">
+                    <label for="ollamaUrl">Ollama URL:</label>
+                    <input type="text" id="ollamaUrl" placeholder="http://localhost:11434" value="http://localhost:11434">
+                </div>
+                <div class="control-group">
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect">
+                        <option value="">Select a model...</option>
+                    </select>
+                    <button onclick="refreshModels()" style="margin-top: 5px; width: 100%;">Refresh Models</button>
+                </div>
+                <div class="control-group">
+                    <label for="systemPrompt">System Prompt:</label>
+                    <textarea id="systemPrompt" rows="2" placeholder="Tell the AI what to ask you about..."></textarea>
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button onclick="startConversation()">Start Conversation</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="folder-panel">
+            <h3>Folders</h3>
+            <div class="folder-actions">
+                <button onclick="createFolder()">New Folder</button>
+                <button onclick="openFolder()">Open Folder</button>
+            </div>
+            <div id="folderList">
+                <div class="folder-item active" onclick="selectFolder(this)" data-folder="default">
+                    📁 Default Folder
+                </div>
+            </div>
+            <div class="saved-conversations">
+                <h4 style="color: #764ba2; margin: 15px 0 10px 0; font-size: 14px;">Saved Conversations</h4>
+                <div id="conversationsList">
+                    <!-- Saved conversations will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-header">
+                <span id="chatTitle">Conversation</span>
+                <div class="chat-controls">
+                    <button onclick="newConversation()" class="chat-btn">New</button>
+                    <button onclick="clearConversation()" class="chat-btn">Clear</button>
+                    <button onclick="saveConversation()" class="chat-btn">Save</button>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message gpt">
+                    Welcome! Make sure Ollama is running, select a model, set your system prompt, then click "Start Conversation" to begin.
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <textarea id="chatInput" class="chat-input" placeholder="Type your response here..." disabled></textarea>
+                <button onclick="sendMessage()" style="width: 100%; margin-top: 10px;" disabled id="sendBtn">Send Message</button>
+            </div>
+        </div>
+
+        <div class="tags-panel">
+            <h3>Tags</h3>
+            <input type="text" id="tagInput" class="tag-input" placeholder="Add tag (e.g., #memory)" onkeypress="handleTagInput(event)">
+            <button onclick="addTag()" style="width: 100%; margin-bottom: 15px;">Add Tag</button>
+            <div id="tagsList">
+                <div class="tag" onclick="removeTag(this)">#example</div>
+            </div>
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFolder = 'default';
+        let folders = { default: { conversations: [], tags: ['#example'] } };
+        let currentConversation = [];
+        let currentConversationId = null;
+        let isWaitingForGPT = false;
+        let conversationCounter = 0;
+
+        async function refreshModels() {
+            const ollamaUrl = document.getElementById('ollamaUrl').value;
+            const modelSelect = document.getElementById('modelSelect');
+            
+            try {
+                const response = await fetch(`${ollamaUrl}/api/tags`);
+                const data = await response.json();
+                
+                modelSelect.innerHTML = '<option value="">Select a model...</option>';
+                
+                if (data.models && data.models.length > 0) {
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.name;
+                        option.textContent = model.name;
+                        modelSelect.appendChild(option);
+                    });
+                    showStatus(`Found ${data.models.length} models!`, 'success');
+                } else {
+                    showStatus('No models found. Make sure you have models installed in Ollama.', 'error');
+                }
+            } catch (error) {
+                showStatus(`Error connecting to Ollama: ${error.message}`, 'error');
+                console.error('Ollama connection error:', error);
+            }
+        }
+            const folderName = prompt('Enter folder name:');
+            if (folderName && !folders[folderName]) {
+                folders[folderName] = { conversations: [], tags: [] };
+                updateFolderList();
+                showStatus(`Folder "${folderName}" created!`, 'success');
+            } else if (folders[folderName]) {
+                showStatus('Folder already exists!', 'error');
+            }
+        
+
+        function openFolder() {
+            const folderName = prompt('Enter folder name to open:');
+            if (folderName && folders[folderName]) {
+                currentFolder = folderName;
+                updateFolderList();
+                updateTagsList();
+                showStatus(`Opened folder "${folderName}"`, 'success');
+            } else {
+                showStatus('Folder not found!', 'error');
+            }
+        }
+
+        function selectFolder(element) {
+            document.querySelectorAll('.folder-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            currentFolder = element.dataset.folder;
+            updateTagsList();
+        }
+
+        function updateFolderList() {
+            const folderList = document.getElementById('folderList');
+            folderList.innerHTML = '';
+            
+            Object.keys(folders).forEach(folderName => {
+                const folderItem = document.createElement('div');
+                folderItem.className = 'folder-item';
+                if (folderName === currentFolder) folderItem.classList.add('active');
+                folderItem.setAttribute('data-folder', folderName);
+                folderItem.onclick = () => selectFolder(folderItem);
+                folderItem.innerHTML = `📁 ${folderName}`;
+                folderList.appendChild(folderItem);
+            });
+            
+            updateConversationsList();
+        }
+
+        function updateConversationsList() {
+            const conversationsList = document.getElementById('conversationsList');
+            conversationsList.innerHTML = '';
+            
+            folders[currentFolder].conversations.forEach((conv, index) => {
+                const convItem = document.createElement('div');
+                convItem.className = 'conversation-item';
+                if (conv.id === currentConversationId) convItem.classList.add('active');
+                convItem.onclick = () => loadConversation(conv.id);
+                
+                // Create a preview of the conversation
+                const preview = conv.messages.length > 1 ? 
+                    conv.messages[1].content.substring(0, 30) + '...' : 
+                    'Empty conversation';
+                
+                convItem.innerHTML = `
+                    <div style="font-weight: 600;">${conv.title}</div>
+                    <div style="color: #666; font-size: 11px;">${preview}</div>
+                `;
+                conversationsList.appendChild(convItem);
+            });
+        }
+
+        function updateTagsList() {
+            const tagsList = document.getElementById('tagsList');
+            tagsList.innerHTML = '';
+            
+            folders[currentFolder].tags.forEach(tag => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag';
+                tagElement.textContent = tag;
+                tagElement.onclick = () => removeTag(tagElement);
+                tagsList.appendChild(tagElement);
+            });
+        }
+
+        function addTag() {
+            const tagInput = document.getElementById('tagInput');
+            let tag = tagInput.value.trim();
+            
+            if (tag) {
+                if (!tag.startsWith('#')) tag = '#' + tag;
+                
+                if (!folders[currentFolder].tags.includes(tag)) {
+                    folders[currentFolder].tags.push(tag);
+                    updateTagsList();
+                    tagInput.value = '';
+                    showStatus(`Tag "${tag}" added!`, 'success');
+                } else {
+                    showStatus('Tag already exists!', 'error');
+                }
+            }
+        }
+
+        function removeTag(tagElement) {
+            const tag = tagElement.textContent;
+            folders[currentFolder].tags = folders[currentFolder].tags.filter(t => t !== tag);
+            updateTagsList();
+            showStatus(`Tag "${tag}" removed!`, 'success');
+        }
+
+        function handleTagInput(event) {
+            if (event.key === 'Enter') {
+                addTag();
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        async function startConversation() {
+            const ollamaUrl = document.getElementById('ollamaUrl').value;
+            const selectedModel = document.getElementById('modelSelect').value;
+            const systemPrompt = document.getElementById('systemPrompt').value;
+            
+            if (!ollamaUrl) {
+                showStatus('Please enter Ollama URL!', 'error');
+                return;
+            }
+            
+            if (!selectedModel) {
+                showStatus('Please select a model!', 'error');
+                return;
+            }
+            
+            if (!systemPrompt) {
+                showStatus('Please enter a system prompt!', 'error');
+                return;
+            }
+
+            document.getElementById('chatInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            
+            currentConversation = [
+                { role: 'system', content: systemPrompt }
+            ];
+            
+            // Get initial message from Ollama
+            await sendToOllama();
+        }
+
+        async function sendToOllama() {
+            const ollamaUrl = document.getElementById('ollamaUrl').value;
+            const selectedModel = document.getElementById('modelSelect').value;
+            isWaitingForGPT = true;
+            
+            try {
+                const response = await fetch(`${ollamaUrl}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        messages: currentConversation,
+                        stream: false
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.message && data.message.content) {
+                    const aiMessage = data.message.content;
+                    currentConversation.push({ role: 'assistant', content: aiMessage });
+                    addMessageToChat(aiMessage, 'gpt');
+                } else {
+                    throw new Error(data.error || 'Unknown error from Ollama');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                addMessageToChat(`Error: ${error.message}`, 'gpt');
+            }
+            
+            isWaitingForGPT = false;
+        }
+
+        async function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            
+            if (!message || isWaitingForGPT) return;
+            
+            // Add user message to conversation and display
+            currentConversation.push({ role: 'user', content: message });
+            addMessageToChat(message, 'user');
+            chatInput.value = '';
+            
+            // Get AI response from Ollama
+            await sendToOllama();
+        }
+
+        function addMessageToChat(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle Enter key in chat input
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function newConversation() {
+            currentConversation = [];
+            currentConversationId = null;
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="message gpt">
+                    Welcome! Make sure Ollama is running, select a model, set your system prompt, then click "Start Conversation" to begin.
+                </div>
+            `;
+            document.getElementById('chatInput').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('chatTitle').textContent = 'New Conversation';
+            updateConversationsList();
+            showStatus('Started new conversation!', 'success');
+        }
+
+        function clearConversation() {
+            if (currentConversation.length === 0) {
+                showStatus('No conversation to clear!', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear this conversation?')) {
+                const systemMessage = currentConversation.find(msg => msg.role === 'system');
+                currentConversation = systemMessage ? [systemMessage] : [];
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="message gpt">
+                        Conversation cleared. Click "Start Conversation" to begin again.
+                    </div>
+                `;
+                showStatus('Conversation cleared!', 'success');
+            }
+        }
+
+        function saveConversation() {
+            if (currentConversation.length < 2) {
+                showStatus('No conversation to save!', 'error');
+                return;
+            }
+            
+            const title = prompt('Enter a title for this conversation:', `Conversation ${++conversationCounter}`);
+            if (!title) return;
+            
+            const conversationToSave = {
+                id: Date.now(),
+                title: title,
+                messages: [...currentConversation],
+                timestamp: new Date().toISOString(),
+                folder: currentFolder
+            };
+            
+            // If this conversation already has an ID, update it
+            if (currentConversationId) {
+                const existingIndex = folders[currentFolder].conversations.findIndex(c => c.id === currentConversationId);
+                if (existingIndex !== -1) {
+                    folders[currentFolder].conversations[existingIndex] = conversationToSave;
+                    conversationToSave.id = currentConversationId;
+                } else {
+                    folders[currentFolder].conversations.push(conversationToSave);
+                }
+            } else {
+                folders[currentFolder].conversations.push(conversationToSave);
+                currentConversationId = conversationToSave.id;
+            }
+            
+            updateConversationsList();
+            showStatus(`Conversation "${title}" saved!`, 'success');
+        }
+
+        function loadConversation(conversationId) {
+            const conversation = folders[currentFolder].conversations.find(c => c.id === conversationId);
+            if (!conversation) return;
+            
+            currentConversation = [...conversation.messages];
+            currentConversationId = conversationId;
+            
+            // Clear and rebuild chat messages
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            conversation.messages.forEach(msg => {
+                if (msg.role !== 'system') {
+                    addMessageToChat(msg.content, msg.role === 'assistant' ? 'gpt' : 'user');
+                }
+            });
+            
+            document.getElementById('chatTitle').textContent = conversation.title;
+            document.getElementById('chatInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            updateConversationsList();
+            showStatus(`Loaded conversation "${conversation.title}"`, 'success');
+        }
+
+        // Initialize and load models on page load
+        updateFolderList();
+        updateTagsList();
+        
+        // Auto-load models when page loads
+        window.addEventListener('load', () => {
+            setTimeout(refreshModels, 1000); // Give the page a moment to fully load
+        });
+    </script>
+</body>
+</html>

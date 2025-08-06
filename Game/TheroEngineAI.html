@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Selection System</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #left-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 170px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 20px;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-button {
+            width: 150px;
+            height: 35px;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            border-radius: 8px;
+            margin: 3px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .sidebar-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        #scene-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+        }
+
+        #canvas-wrapper {
+            width: 1365px;
+            height: 100vh;
+            transform-origin: 0 0;
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin-right: 0;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #actual-canvas {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            position: relative;
+            border-radius: 0px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .selectable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .selectable.selected {
+            position: relative;
+        }
+
+        /* Professional selection outline */
+        .selection-outline {
+    position: absolute;
+    pointer-events: none;
+    z-index: 999;
+    border: 2px solid #1976d2;
+    border-radius: 4px;
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 2px 8px rgba(25, 118, 210, 0.2);
+    background: none;
+    transition: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+        /* Professional selection handles - these are the resize handlers */
+        .selection-handle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #1976d2;
+            border: 2px solid white;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .selection-handle:hover {
+            background: #1565c0;
+            transform: scale(1.2);
+        }
+
+        /* Handle positions - these define the resize directions */
+        .handle-nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .handle-n  { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .handle-ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .handle-e  { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
+        .handle-se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .handle-s  { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .handle-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .handle-w  { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
+
+        img.selectable {
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Professional selection box for area selection */
+        .selection-box {
+            position: fixed;
+            border: 1px solid #1976d2;
+            background: linear-gradient(135deg, rgba(25, 118, 210, 0.06) 0%, rgba(25, 118, 210, 0.12) 100%);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+            z-index: 10000;
+            border-radius: 3px;
+            box-shadow: 
+                0 0 0 1px rgba(25, 118, 210, 0.2),
+                0 2px 8px rgba(25, 118, 210, 0.15);
+            transition: none;
+        }
+
+        /* Test image styles */
+        .test-image {
+            position: absolute;
+            width: 15%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease;
+        }
+
+        .test-image:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        #page-label {
+  width: 100px;
+  height: 35px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  margin: 15px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-button {
+  width: 150px;
+  height: 35px;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border-radius: 8px;
+  margin: 3px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sidebar-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.sidebar-button:hover::before {
+  left: 100%;
+}
+
+.sidebar-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+.sidebar-button:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding-left: 130px;
+  padding-right: 120px; /* Enough space to avoid trash can */
+  z-index: 2;
+  overflow: hidden; /* Hide scrollbars */
+  backdrop-filter: blur(10px);
+}
+
+#page-buttons {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-right: 180px; /* Prevents pages from going under trash can */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  gap: 8px;
+}
+#page-buttons::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.page-button {
+  min-width: 65px;
+  height: 65px;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border-radius: 14px;
+  margin: 0 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  /* Enable dragging for page buttons specifically */
+  -webkit-user-drag: element;
+  /* Allow pointer events for dragging */
+  pointer-events: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.page-button:hover::before {
+  left: 100%;
+}
+
+.page-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.page-button.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 0 25px rgba(102, 126, 234, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.page-button.dragging {
+  cursor: grabbing;
+  opacity: 0.8;
+  transform: scale(1.1) rotate(2deg);
+  z-index: 1000;
+  /* Maintain dragging capability during drag state */
+  -webkit-user-drag: element;
+  pointer-events: auto;
+}
+
+#trash-can {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 65px;
+  height: 65px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 26px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+#trash-can:hover {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+}
+
+#trash-can.drag-over {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: 2px solid #fff;
+  animation: trashPulse 0.6s infinite;
+  box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+}
+
+@keyframes trashPulse {
+  0% { transform: scale(1.05); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1.05); }
+}
+
+.page-button.to-delete {
+  border: 3px dashed #e74c3c !important;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+  animation: deleteWarning 1s infinite;
+}
+
+@keyframes deleteWarning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+#corner-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 120px;
+  height: 100px;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  backdrop-filter: blur(10px);
+}
+
+#corner-button {
+  width: 100px;
+  height: 35px;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#corner-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+#corner-button:hover::before {
+  left: 100%;
+}
+
+#corner-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+    </style>
+</head>
+<body>
+    <!-- MAIN INTERFACE -->
+<div id="left-box">
+<div id="file-tab" onclick="toggleSlidingFileMenu()">
+<img src="Images/TheroSpyIcon.png" alt="File" style="height: 90px; margin-top: 15px;">
+</div>
+<div id="scroll-buttons">
+<div id="page-label">PAGE 1</div>
+<div class="sidebar-button" onclick="addBackground()">Add Background</div>
+<div class="sidebar-button" onclick="addImage()">Add Image/Video</div>
+<div class="sidebar-button" onclick="showTextboxPopup()">Add Shape</div>
+<div class="sidebar-button" onclick="showButtonPopup()">GUI Editor</div>
+<div class="sidebar-button" onclick="addMusic()">Add Audio</div>
+<div class="sidebar-button" onclick="openInteractionConfig()">Effects Editor</div>
+<div class="sidebar-button" onclick="CursorSettings()">Cursor Editor</div>
+</div>
+</div>
+
+<!-- NEW SLIDING FILE MENU -->
+<div id="file-menu-overlay" onclick="closeSlidingFileMenu()"></div>
+<div id="file-sliding-menu">
+<button class="file-menu-item" onclick="event.stopPropagation(); saveAs()">Save As</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); saveFile()">Save</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); uploadFile()">Upload</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); openFile()">Open</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); shareFile()">Share</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); ExportFile()">Export</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); ImportFile()">Import</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); viewCode()">View Code</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); ToolsFile()">Tools</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); openHelpPopup()">Help</button>
+<button class="file-menu-item" onclick="event.stopPropagation(); previewGame()">Preview Game</button>
+</div>
+
+<div id="scene-area">
+<div id="canvas-wrapper">
+<div id="actual-canvas"></div>
+</div>
+</div>
+
+<div id="bottom-bar">
+<div id="page-buttons"></div>
+</div>
+
+<div id="trash-can">🗑️</div>
+
+<div id="reset-view-button" onclick="resetCanvasView()" title="Reset View">⌂</div>
+<div id="zoom-indicator">100%</div>
+
+<div id="corner-box">
+<div id="corner-button" onclick="openGlobalProcedures()">
+<img src="Images/GlobalIcon.png" alt="Global Icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;">Global</div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="Scripts/textboxPopup.js"></script>
+<script src="Scripts/addImage.js"></script>
+<script src="Scripts/PreviewGame.js"></script>
+<script src="Scripts/helpPopup.js"></script>
+<script src="Scripts/clickableButton.js"></script>
+<script src="Scripts/addBackground.js"></script>
+<script src="Scripts/page.js"></script>
+<script src="Scripts/viewCode.js"></script>
+<script src="Scripts/openInteractionConfig.js"></script>
+<script src="Scripts/addMusic.js"></script>
+<script src="Scripts/ImagePreviewFunctions.js"></script>
+<script src="Scripts/fileuploadsave.js"></script>
+<script src="Scripts/cursorsettings.js"></script>
+<script src="https://unpkg.com/blockly/blockly.min.js"></script>
+
+    <script>
+        //
+        // Variables
+        //
+        let selectedElements = [];
+        let interactionMode = null; // 'move' | 'scale' | 'rotate'
+        let isMouseDown = false;
+        let resizing = false;
+        let resizeSide = null;
+        let startX, startY, startWidth, startHeight, startLeft, startTop;
+        let initialMouseX = 0;
+        let initialMouseY = 0;
+        let initialScale = 1;
+        let initialRotation = 0;
+        let initialDistance = 0;
+        let initialAngle = 0;
+        let isCtrlPressed = false;
+        let isShiftPressed = false;
+        let rotationDisplay = null;
+        let justInteracted = false;
+
+        // Store initial states for multi-element operations
+        let initialStates = [];
+
+        // Select box variables
+        let isSelectBoxActive = false;
+        let selectBoxStart = { x: 0, y: 0 };
+        let selectBoxEnd = { x: 0, y: 0 };
+        let selectBox = null;
+        let initialSelectedElements = [];
+
+        // Professional selection outline system
+        let selectionOutlines = new Map();
+
+        //
+        // Functions
+        //
+
+        function getSelectedElement() {
+            return selectedElements.length > 0 ? selectedElements[0] : null;
+        }
+
+        function showRotationDisplay(element, rotation) {
+            if (rotationDisplay) {
+                rotationDisplay.remove();
+            }
+            
+            rotationDisplay = document.createElement('div');
+            rotationDisplay.style.position = 'absolute';
+            rotationDisplay.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            rotationDisplay.style.color = 'white';
+            rotationDisplay.style.padding = '8px 16px';
+            rotationDisplay.style.borderRadius = '20px';
+            rotationDisplay.style.fontSize = '14px';
+            rotationDisplay.style.fontWeight = '600';
+            rotationDisplay.style.zIndex = '10000';
+            rotationDisplay.style.pointerEvents = 'none';
+            rotationDisplay.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+            rotationDisplay.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+            rotationDisplay.style.backdropFilter = 'blur(10px)';
+            rotationDisplay.textContent = `${Math.round(rotation)}°`;
+            
+            const rect = element.getBoundingClientRect();
+            rotationDisplay.style.left = (rect.left + rect.width / 2 - 30) + 'px';
+            rotationDisplay.style.top = (rect.top - 50) + 'px';
+            
+            document.body.appendChild(rotationDisplay);
+        }
+
+        function hideRotationDisplay() {
+            if (rotationDisplay) {
+                rotationDisplay.remove();
+                rotationDisplay = null;
+            }
+        }
+
+        function snapToInterval(angle, interval = 15) {
+            return Math.round(angle / interval) * interval;
+        }
+
+        function getScale(el) {
+            const match = el.style.transform.match(/scale\(([^)]+)\)/);
+            return match ? parseFloat(match[1]) : 1;
+        }
+
+        function getRotation(el) {
+            const match = el.style.transform.match(/rotate\(([^)]+)deg\)/);
+            return match ? parseFloat(match[1]) : 0;
+        }
+
+        function createSelectionOutline(element) {
+            // Remove existing outline if any
+            if (selectionOutlines.has(element)) {
+                const existingOutline = selectionOutlines.get(element);
+                existingOutline.remove();
+            }
+            
+            const outline = document.createElement('div');
+            outline.className = 'selection-outline';
+            
+            // Create resize handles for single selection
+            if (selectedElements.length === 1) {
+                const handlePositions = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+                handlePositions.forEach(position => {
+                    const handle = document.createElement('div');
+                    handle.className = `selection-handle handle-${position}`;
+                    handle.dataset.handle = position;
+                    outline.appendChild(handle);
+                });
+            }
+            
+            // Position the outline
+            updateSelectionOutline(element, outline);
+            
+            // Add to DOM
+            document.getElementById('actual-canvas').appendChild(outline);
+            selectionOutlines.set(element, outline);
+            
+            return outline;
+        }
+
+        function updateSelectionOutline(element, outline) {
+    const canvas = document.getElementById('actual-canvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    
+    // Calculate position relative to canvas
+    const left = elementRect.left - canvasRect.left;
+    const top = elementRect.top - canvasRect.top;
+    const width = elementRect.width;
+    const height = elementRect.height;
+    
+    // Position outline to exactly match element bounds, accounting for border
+    outline.style.left = (left - 3) + 'px';
+    outline.style.top = (top - 3) + 'px';
+    outline.style.width = (width + 4) + 'px';
+    outline.style.height = (height + 4) + 'px';
+}
+
+        function updateAllSelectionOutlines() {
+            selectionOutlines.forEach((outline, element) => {
+                updateSelectionOutline(element, outline);
+            });
+        }
+
+        function removeSelectionOutlines() {
+            selectionOutlines.forEach(outline => outline.remove());
+            selectionOutlines.clear();
+        }
+
+        function selectElement(element, addToSelection = false) {
+            if (!addToSelection) {
+                // Clear previous selection
+                selectedElements.forEach(el => el.classList.remove("selected"));
+                selectedElements = [];
+                removeSelectionOutlines();
+            }
+            
+            if (!selectedElements.includes(element)) {
+                selectedElements.push(element);
+                element.classList.add("selected");
+                createSelectionOutline(element);
+            }
+        }
+
+        function deselectElement(element) {
+            const index = selectedElements.indexOf(element);
+            if (index > -1) {
+                selectedElements.splice(index, 1);
+                element.classList.remove("selected");
+                
+                // Remove outline
+                if (selectionOutlines.has(element)) {
+                    selectionOutlines.get(element).remove();
+                    selectionOutlines.delete(element);
+                }
+                
+                // Recreate outlines for remaining selected elements (to update handles)
+                const remainingElements = [...selectedElements];
+                removeSelectionOutlines();
+                remainingElements.forEach(el => {
+                    el.classList.add("selected");
+                    createSelectionOutline(el);
+                });
+                selectedElements = remainingElements;
+            }
+        }
+
+        function clearSelection() {
+            selectedElements.forEach(el => el.classList.remove("selected"));
+            selectedElements = [];
+            removeSelectionOutlines();
+        }
+
+        function getGroupCenter() {
+            if (selectedElements.length === 0) return { x: 0, y: 0 };
+            
+            let totalX = 0, totalY = 0;
+            
+            selectedElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                totalX += rect.left + rect.width / 2;
+                totalY += rect.top + rect.height / 2;
+            });
+            
+            return {
+                x: totalX / selectedElements.length,
+                y: totalY / selectedElements.length
+            };
+        }
+
+        function storeInitialStates() {
+            initialStates = selectedElements.map(el => {
+                const rect = el.getBoundingClientRect();
+                const canvas = document.getElementById("actual-canvas");
+                const canvasRect = canvas.getBoundingClientRect();
+                
+                return {
+                    element: el,
+                    left: parseFloat(el.style.left) || ((rect.left - canvasRect.left) / canvasRect.width) * 100,
+                    top: parseFloat(el.style.top) || ((rect.top - canvasRect.top) / canvasRect.height) * 100,
+                    scale: getScale(el),
+                    rotation: getRotation(el)
+                };
+            });
+        }
+
+        function createSelectBox() {
+            if (selectBox) {
+                selectBox.remove();
+            }
+            
+            selectBox = document.createElement('div');
+            selectBox.className = 'selection-box';
+            document.body.appendChild(selectBox);
+        }
+
+        function updateSelectBox(startX, startY, endX, endY) {
+            if (!selectBox) return;
+            
+            const left = Math.min(startX, endX);
+            const top = Math.min(startY, endY);
+            const width = Math.abs(endX - startX);
+            const height = Math.abs(endY - startY);
+            
+            selectBox.style.left = left + 'px';
+            selectBox.style.top = top + 'px';
+            selectBox.style.width = width + 'px';
+            selectBox.style.height = height + 'px';
+            selectBox.style.display = (width > 3 || height > 3) ? 'block' : 'none';
+        }
+
+        function removeSelectBox() {
+            if (selectBox) {
+                selectBox.remove();
+                selectBox = null;
+            }
+        }
+
+        function getElementsInSelectBox(boxLeft, boxTop, boxRight, boxBottom) {
+            const selectableElements = document.querySelectorAll('.selectable');
+            const elementsInBox = [];
+            
+            selectableElements.forEach(element => {
+                const rect = element.getBoundingClientRect();
+                
+                // For Canva-like behavior, use intersection (partial overlap)
+                const overlaps = !(rect.right < boxLeft || 
+                                 rect.left > boxRight || 
+                                 rect.bottom < boxTop || 
+                                 rect.top > boxBottom);
+                
+                if (overlaps) {
+                    elementsInBox.push(element);
+                }
+            });
+            
+            return elementsInBox;
+        }
+
+        function showDeleteConfirmation() {
+    if (selectedElements.length === 0) return;
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'delete-confirmation-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    `;
+    
+    // Create popup
+    const popup = document.createElement('div');
+    const elementCount = selectedElements.length;
+    const elementText = elementCount === 1 ? 'element' : 'elements';
+    
+    popup.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    popup.innerHTML = `
+        <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 15px;">
+            Delete ${elementCount} ${elementText}?
+        </div>
+        <div style="font-size: 14px; color: #666; margin-bottom: 25px;">
+            This action cannot be undone.
+        </div>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button id="delete-cancel-btn" style="
+                padding: 10px 20px;
+                border: 1px solid #ddd;
+                background: white;
+                color: #666;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+            ">Cancel</button>
+            <button id="delete-confirm-btn" style="
+                padding: 10px 20px;
+                border: none;
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+            ">Delete</button>
+        </div>
+    `;
+    
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    
+    // Add hover effects
+    const cancelBtn = popup.querySelector('#delete-cancel-btn');
+    const confirmBtn = popup.querySelector('#delete-confirm-btn');
+    
+    cancelBtn.addEventListener('mouseenter', () => {
+        cancelBtn.style.background = '#f5f5f5';
+        cancelBtn.style.borderColor = '#ccc';
+    });
+    
+    cancelBtn.addEventListener('mouseleave', () => {
+        cancelBtn.style.background = 'white';
+        cancelBtn.style.borderColor = '#ddd';
+    });
+    
+    confirmBtn.addEventListener('mouseenter', () => {
+        confirmBtn.style.transform = 'translateY(-1px)';
+        confirmBtn.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.4)';
+    });
+    
+    confirmBtn.addEventListener('mouseleave', () => {
+        confirmBtn.style.transform = 'translateY(0)';
+        confirmBtn.style.boxShadow = 'none';
+    });
+    
+    // Handle button clicks
+    cancelBtn.addEventListener('click', () => {
+        closeDeleteConfirmation();
+    });
+    
+    confirmBtn.addEventListener('click', () => {
+        deleteSelectedElements();
+        closeDeleteConfirmation();
+    });
+    
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeDeleteConfirmation();
+        }
+    });
+    
+    // Close on Escape key
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeDeleteConfirmation();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+}
+
+function closeDeleteConfirmation() {
+    const overlay = document.getElementById('delete-confirmation-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function deleteSelectedElements() {
+    if (selectedElements.length === 0) return;
+    
+    // Remove elements from DOM
+    selectedElements.forEach(element => {
+        element.remove();
+    });
+    
+    // Clear selection and outlines
+    removeSelectionOutlines();
+    selectedElements = [];
+}
+
+        function updateSelectionDuringDrag() {
+            if (!isSelectBoxActive) return;
+            
+            const boxLeft = Math.min(selectBoxStart.x, selectBoxEnd.x);
+            const boxTop = Math.min(selectBoxStart.y, selectBoxEnd.y);
+            const boxRight = Math.max(selectBoxStart.x, selectBoxEnd.x);
+            const boxBottom = Math.max(selectBoxStart.y, selectBoxEnd.y);
+            
+            // Only update if box is big enough
+            if (Math.abs(selectBoxEnd.x - selectBoxStart.x) < 3 && Math.abs(selectBoxEnd.y - selectBoxStart.y) < 3) {
+                return;
+            }
+            
+            const elementsInBox = getElementsInSelectBox(boxLeft, boxTop, boxRight, boxBottom);
+            
+            // Start with initial selection if Shift/Ctrl is held
+            let newSelection = [];
+            if (isShiftPressed || isCtrlPressed) {
+                newSelection = [...initialSelectedElements];
+            }
+            
+            // Add elements in selection box
+            elementsInBox.forEach(element => {
+                if (!newSelection.includes(element)) {
+                    newSelection.push(element);
+                }
+            });
+            
+            // Update visual selection
+            selectedElements.forEach(el => el.classList.remove("selected"));
+            removeSelectionOutlines();
+            selectedElements = newSelection;
+            selectedElements.forEach(el => {
+                el.classList.add("selected");
+                createSelectionOutline(el);
+            });
+        }
+
+        
+
+        //
+        // Event Listeners
+        //
+
+        document.addEventListener("click", (e) => {
+            if (justInteracted) return;
+
+            if (e.target.classList.contains("selectable")) {
+                if (isShiftPressed || isCtrlPressed) {
+                    // Multi-select mode - toggle selection
+                    if (selectedElements.includes(e.target)) {
+                        deselectElement(e.target);
+                    } else {
+                        selectElement(e.target, true);
+                    }
+                } else {
+                    // Single select mode
+                    selectElement(e.target, false);
+                }
+                e.stopPropagation();
+            } else {
+                // Clicked on empty space
+                if (!isShiftPressed && !isCtrlPressed) {
+                    clearSelection();
+                }
+            }
+        });
+
+        document.addEventListener("keydown", (e) => {
+            const key = e.key.toLowerCase();
+
+            if (selectedElements.length > 0) {
+                if (key === "m") interactionMode = "move";
+                if (key === "r") interactionMode = "rotate";
+                if (key === "s") interactionMode = "scale";
+            }
+
+            if (e.key === "Control" || e.key === "Meta") {
+                isCtrlPressed = true;
+            }
+
+            // Ctrl + A to select all
+            if (e.key.toLowerCase() === "a" && isCtrlPressed) {
+                e.preventDefault();
+                clearSelection();
+                document.querySelectorAll(".selectable").forEach(el => selectElement(el, true));
+            }
+            
+            if (e.key === "Shift") {
+                isShiftPressed = true;
+            }
+            
+            // Handle escape key to clear selection
+            if (e.key === "Escape") {
+                clearSelection();
+                if (isSelectBoxActive) {
+                    isSelectBoxActive = false;
+                    removeSelectBox();
+                    initialSelectedElements = [];
+                }
+            }
+            // Handle delete key
+if ((e.key === "Delete" || e.key === "Backspace") && selectedElements.length > 0) {
+    e.preventDefault();
+    showDeleteConfirmation();
+}
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "Control" || e.key === "Meta") {
+                isCtrlPressed = false;
+            }
+            
+            if (e.key === "Shift") {
+                isShiftPressed = false;
+            }
+        });
+
+        document.getElementById("canvas-wrapper").addEventListener("click", function (e) {
+            if (!justInteracted && (e.target.id === "canvas-wrapper" || e.target.id === "actual-canvas")) {
+                if (!isShiftPressed && !isCtrlPressed) {
+                    clearSelection();
+                }
+            }
+        });
+
+        document.getElementById("canvas-wrapper").addEventListener("mousedown", function (e) {
+            // Only start select box if clicking on canvas or canvas wrapper, not on elements
+            if ((e.target.id === "canvas-wrapper" || e.target.id === "actual-canvas") && 
+                !resizing && 
+                interactionMode === null &&
+                e.button === 0) {
+                isSelectBoxActive = true;
+                selectBoxStart.x = e.clientX;
+                selectBoxStart.y = e.clientY;
+                selectBoxEnd.x = e.clientX;
+                selectBoxEnd.y = e.clientY;
+                
+                // Store initial selection for additive selection
+                initialSelectedElements = (isShiftPressed || isCtrlPressed) ? [...selectedElements] : [];
+                
+                createSelectBox();
+                updateSelectBox(selectBoxStart.x, selectBoxStart.y, selectBoxEnd.x, selectBoxEnd.y);
+                
+                // Don't clear selection if shift/ctrl is held
+                if (!isShiftPressed && !isCtrlPressed) {
+                    clearSelection();
+                }
+                
+                e.preventDefault();
+                justInteracted = true;
+            }
+        });
+
+        document.addEventListener("mousedown", function (e) {
+            // Handle resize handle clicks - THIS IS THE KEY INTEGRATION
+            if (e.target.classList.contains('selection-handle')) {
+                resizing = true;
+                resizeSide = e.target.dataset.handle;
+                const selectedElement = selectedElements[0]; // Only works with single selection
+                e.preventDefault();
+
+                const rect = selectedElement.getBoundingClientRect();
+                const canvasRect = document.getElementById("actual-canvas").getBoundingClientRect();
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = rect.width;
+                startHeight = rect.height;
+                startLeft = rect.left - canvasRect.left;
+                startTop = rect.top - canvasRect.top;
+                
+                justInteracted = true;
+                return;
+            }
+
+            // Handle interaction mode activation
+            if (interactionMode === null && selectedElements.includes(e.target)) {
+                interactionMode = "move";
+            }
+
+            // Only proceed with interaction if we have selected elements and a valid interaction mode
+            if (selectedElements.length === 0 || !["move", "scale", "rotate"].includes(interactionMode)) return;
+
+            isMouseDown = true;
+            justInteracted = true;
+            
+            initialMouseX = e.clientX;
+            initialMouseY = e.clientY;
+            
+            storeInitialStates();
+            
+            if (interactionMode === "scale" || interactionMode === "rotate") {
+                const groupCenter = getGroupCenter();
+                initialDistance = Math.hypot(e.clientX - groupCenter.x, e.clientY - groupCenter.y);
+                initialAngle = Math.atan2(e.clientY - groupCenter.y, e.clientX - groupCenter.x) * (180 / Math.PI);
+            }
+        });
+
+        document.addEventListener("mouseup", function (e) {
+            if (["move", "scale", "rotate"].includes(interactionMode)) {
+                isMouseDown = false;
+                interactionMode = null;
+                hideRotationDisplay();
+                updateAllSelectionOutlines(); // Update outlines after transformation
+                setTimeout(() => { justInteracted = false; }, 50);
+            }
+            
+            // Handle select box completion
+            if (isSelectBoxActive && e.button === 0) {
+                const boxWidth = Math.abs(selectBoxEnd.x - selectBoxStart.x);
+                const boxHeight = Math.abs(selectBoxEnd.y - selectBoxStart.y);
+                
+                // If it was just a small click (not a drag), don't process as selection box
+                if (boxWidth < 3 && boxHeight < 3) {
+                    // Restore initial selection if it was a small click with modifier keys
+                    if (isShiftPressed || isCtrlPressed) {
+                        selectedElements.forEach(el => el.classList.remove("selected"));
+                        removeSelectionOutlines();
+                        selectedElements = [...initialSelectedElements];
+                        selectedElements.forEach(el => {
+                            el.classList.add("selected");
+                            createSelectionOutline(el);
+                        });
+                    }
+                } else {
+                    // It was a proper selection box - final selection is already set by updateSelectionDuringDrag
+                }
+                
+                isSelectBoxActive = false;
+                removeSelectBox();
+                initialSelectedElements = [];
+                
+                // Reset interaction flag after a short delay
+                setTimeout(() => { 
+                    justInteracted = false; 
+                }, 10);
+            }
+            
+            // Handle resize completion
+            if (resizing) {
+                resizing = false;
+                updateAllSelectionOutlines(); // Update outlines after resize
+                setTimeout(() => { justInteracted = false; }, 50);
+            }
+            hideRotationDisplay();
+            resizeSide = null;
+        });
+
+        document.addEventListener("mousemove", function (e) {
+            // Handle select box dragging
+            if (isSelectBoxActive) {
+                selectBoxEnd.x = e.clientX;
+                selectBoxEnd.y = e.clientY;
+                updateSelectBox(selectBoxStart.x, selectBoxStart.y, selectBoxEnd.x, selectBoxEnd.y);
+                updateSelectionDuringDrag();
+                e.preventDefault();
+                return;
+            }
+            
+            // Handle resize handle dragging - THIS IS THE RESIZE FUNCTIONALITY
+            if (resizing && selectedElements.length === 1) {
+                const selectedElement = selectedElements[0];
+                const canvas = document.getElementById("actual-canvas");
+                const canvasRect = canvas.getBoundingClientRect();
+                const percent = (val, total) => (val / total) * 100;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                // Handle different resize directions based on handle
+                if (resizeSide === "w" || resizeSide === "nw" || resizeSide === "sw") {
+                    let newLeft = startLeft + dx;
+                    let newWidth = startWidth - dx;
+
+                    if (Math.abs(percent(newLeft, canvasRect.width)) < 1) {
+                        newLeft = 0;
+                        newWidth = startWidth + startLeft;
+                    }
+
+                    if (newWidth >= 20) {
+                        selectedElement.style.left = percent(newLeft, canvasRect.width) + "%";
+                        selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
+                    }
+                }
+
+                if (resizeSide === "e" || resizeSide === "ne" || resizeSide === "se") {
+                    let newWidth = startWidth + dx;
+
+                    let rightEdge = startLeft + newWidth;
+                    if (Math.abs(percent(rightEdge, canvasRect.width) - 100) < 1) {
+                        newWidth = canvasRect.width - startLeft;
+                    }
+
+                    if (newWidth >= 20) {
+                        selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
+                    }
+                }
+
+                if (resizeSide === "n" || resizeSide === "nw" || resizeSide === "ne") {
+                    let newHeight = startHeight - dy;
+                    let newTop = startTop + dy;
+
+                    if (Math.abs(percent(newTop, canvasRect.height)) < 1) {
+                        newTop = 0;
+                        newHeight = startTop + startHeight;
+                    }
+
+                    if (newHeight >= 20) {
+                        selectedElement.style.top = percent(newTop, canvasRect.height) + "%";
+                        selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
+                    }
+                }
+
+                if (resizeSide === "s" || resizeSide === "sw" || resizeSide === "se") {
+                    let newHeight = startHeight + dy;
+
+                    const currentTop = parseFloat(selectedElement.style.top || "0");
+                    const newBottom = currentTop + percent(newHeight, canvasRect.height);
+
+                    if (Math.abs(newBottom - 100) < 1) {
+                        newHeight = (100 - currentTop) * canvasRect.height / 100;
+                    }
+
+                    if (newHeight >= 20) {
+                        selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
+                    }
+                }
+                
+                // Update selection outline during resize
+                updateAllSelectionOutlines();
+                return;
+            }
+            
+            // Handle element transformation (move, scale, rotate)
+            if (selectedElements.length === 0 || !isMouseDown || !["move", "scale", "rotate"].includes(interactionMode)) return;
+            
+            const canvas = document.getElementById("actual-canvas");
+            const rect = canvas.getBoundingClientRect();
+            
+            if (interactionMode === "move") {
+                const canvasWidth = rect.width;
+                const canvasHeight = rect.height;
+
+                const offsetX = (e.movementX / canvasWidth) * 100;
+                const offsetY = (e.movementY / canvasHeight) * 100;
+                
+                selectedElements.forEach(el => {
+                    let currentLeft = parseFloat(el.style.left);
+                    let currentTop = parseFloat(el.style.top);
+
+                    if (isNaN(currentLeft) || isNaN(currentTop)) {
+                        const elRect = el.getBoundingClientRect();
+                        const canvasRect = canvas.getBoundingClientRect();
+                        currentLeft = ((elRect.left - canvasRect.left) / canvasRect.width) * 100;
+                        currentTop = ((elRect.top - canvasRect.top) / canvasRect.height) * 100;
+                    }
+
+                    let newLeft = currentLeft + offsetX;
+                    let newTop = currentTop + offsetY;
+
+                    const currentScale = getScale(el);
+                    const baseWidth = (el.offsetWidth / canvasWidth) * 100;
+                    const baseHeight = (el.offsetHeight / canvasHeight) * 100;
+                    const visualWidth = baseWidth * currentScale;
+                    const visualHeight = baseHeight * currentScale;
+
+                    const scaleOffsetX = (baseWidth - visualWidth) / 2;
+                    const scaleOffsetY = (baseHeight - visualHeight) / 2;
+
+                    const visualLeft = newLeft + scaleOffsetX;
+                    const visualTop = newTop + scaleOffsetY;
+                    const visualRight = visualLeft + visualWidth;
+                    const visualBottom = visualTop + visualHeight;
+
+                    const snapThreshold = 1;
+
+                    if (Math.abs(visualLeft) < snapThreshold) {
+                        newLeft = -scaleOffsetX;
+                    } else if (Math.abs(visualRight - 100) < snapThreshold) {
+                        newLeft = 100 - visualWidth - scaleOffsetX;
+                    }
+
+                    if (Math.abs(visualTop) < snapThreshold) {
+                        newTop = -scaleOffsetY;
+                    } else if (Math.abs(visualBottom - 100) < snapThreshold) {
+                        newTop = 100 - visualHeight - scaleOffsetY;
+                    }
+
+                    el.style.left = `${newLeft}%`;
+                    el.style.top = `${newTop}%`;
+                });
+                
+                // Update selection outlines during move
+                updateAllSelectionOutlines();
+            }
+            
+            if (interactionMode === "scale") {
+                const groupCenter = getGroupCenter();
+                const currentDistance = Math.hypot(e.clientX - groupCenter.x, e.clientY - groupCenter.y);
+                
+                const distanceChange = currentDistance - initialDistance;
+                const scaleChange = distanceChange / 150;
+                
+                selectedElements.forEach((el, index) => {
+                    const initialState = initialStates[index];
+                    const newScale = Math.max(0.05, initialState.scale + scaleChange);
+                    el.style.transform = `scale(${newScale}) rotate(${getRotation(el)}deg)`;
+                });
+                
+                // Update selection outlines during scale
+                updateAllSelectionOutlines();
+            }
+            
+            if (interactionMode === "rotate") {
+                const groupCenter = getGroupCenter();
+                const currentAngle = Math.atan2(e.clientY - groupCenter.y, e.clientX - groupCenter.x) * (180 / Math.PI);
+                
+                const angleChange = currentAngle - initialAngle;
+                
+                selectedElements.forEach((el, index) => {
+                    const initialState = initialStates[index];
+                    let newRotation = initialState.rotation + angleChange;
+                    
+                    if (isCtrlPressed) {
+                        newRotation = snapToInterval(newRotation, 15);
+                    }
+                    
+                    if (index === 0) { // Show rotation display for first element
+                        showRotationDisplay(el, newRotation);
+                    }
+                    
+                    el.style.transform = `rotate(${newRotation}deg) scale(${getScale(el)})`;
+                });
+                
+                // Update selection outlines during rotate
+                updateAllSelectionOutlines();
+            }
+        });
+
+        // Prevent context menu during selection
+        document.addEventListener("contextmenu", function (e) {
+            if (isSelectBoxActive) {
+                e.preventDefault();
+            }
+        });
+
+        // Update selection outlines on window resize
+        window.addEventListener('resize', () => {
+            updateAllSelectionOutlines();
+        });
+
+    </script>
+</body>
+</html>
