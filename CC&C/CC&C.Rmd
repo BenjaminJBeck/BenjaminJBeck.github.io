@@ -458,24 +458,24 @@ p {
 
 @media (max-width: 768px) {
   .comparison-container {
-    width: calc(100vw - 40px);
+    width: calc(100vw - 60px);
     max-width: 400px;
     margin: 0 auto;
   }
   
   .before-image, .after-image {
-    width: calc(100vw - 40px);
+    width: calc(100vw - 60px);
     max-width: 400px;
   }
   
   .before-image img, .after-image img {
-    width: calc(100vw - 40px);
+    width: calc(100vw - 60px);
     max-width: 400px;
     height: auto;
   }
   
   .after-image {
-    width: calc(100vw - 40px) !important;
+    width: calc(100vw - 60px) !important;
     max-width: 400px !important;
   }
   
@@ -492,23 +492,23 @@ p {
 
 @media (max-width: 480px) {
   .comparison-container {
-    width: calc(100vw - 60px);
+    width: calc(100vw - 80px);
     max-width: 300px;
   }
   
   .before-image, .after-image {
-    width: calc(100vw - 60px);
+    width: calc(100vw - 80px);
     max-width: 300px;
   }
   
   .before-image img, .after-image img {
-    width: calc(100vw - 60px);
+    width: calc(100vw - 80px);
     max-width: 300px;
     height: auto;
   }
   
   .after-image {
-    width: calc(100vw - 60px) !important;
+    width: calc(100vw - 80px) !important;
     max-width: 300px !important;
   }
   
