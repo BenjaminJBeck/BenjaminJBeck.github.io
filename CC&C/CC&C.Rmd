@@ -800,11 +800,11 @@ p {
 <div class="comparison-container">
 <div class="before-image">
 <img src="pictures/BathroomAfter.jpg" alt="Bathroom Before Cleaning">
-<div class="image-label before-label">BEFORE</div>
+<div class="image-label before-label">AFTER</div>
 </div>
 <div class="after-image">
 <img src="pictures/BathroomBefore.jpg" alt="Bathroom After Cleaning">
-<div class="image-label after-label">AFTER</div>
+<div class="image-label after-label">BEFORE</div>
 </div>
 <div class="slider-handle">
 <div class="slider-line"></div>
