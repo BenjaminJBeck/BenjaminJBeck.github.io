@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My AI Web Tool</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+    }
+
+    /* Top Navigation Tabs */
+    .top-nav {
+      display: flex;
+      justify-content: center;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .tab-button {
+      color: white;
+      background: transparent;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .tab-button:hover, .tab-button.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      padding: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <button class="tab-button active" onclick="switchTab('chat')">Chat</button>
+    <button class="tab-button" onclick="switchTab('journal')">Journal</button>
+    <button class="tab-button" onclick="switchTab('people')">People</button>
+    <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+    <button class="tab-button" onclick="switchTab('beliefs')">Beliefs</button>
+    <button class="tab-button" onclick="switchTab('tags')">Tags</button>
+    <button class="tab-button" onclick="switchTab('knowledge')">Knowledge</button>
+    <button class="tab-button" onclick="switchTab('media')">Media</button>
+    <button class="tab-button" onclick="switchTab('mind')">Mind</button>
+  </div>
+
+  <!-- Tab Content -->
+  <div id="chat" class="tab-content active">
+    <h2>Chat</h2>
+    <p>This is your AI chat interface.</p>
+  </div>
+
+  <div id="journal" class="tab-content">
+    <h2>Journal</h2>
+    <p>Write, analyze, and view journal entries here.</p>
+  </div>
+
+  <div id="people" class="tab-content">
+    <h2>People</h2>
+    <p>Manage people and relationships.</p>
+  </div>
+
+  <div id="locations" class="tab-content">
+    <h2>Locations</h2>
+    <p>Track important places and memories.</p>
+  </div>
+
+  <div id="beliefs" class="tab-content">
+    <h2>Beliefs</h2>
+    <p>View and update your core beliefs.</p>
+  </div>
+
+  <div id="tags" class="tab-content">
+    <h2>Tags</h2>
+    <p>Manage your tagging system.</p>
+  </div>
+
+  <div id="knowledge" class="tab-content">
+    <h2>Knowledge</h2>
+    <p>Store and view core knowledge.</p>
+  </div>
+
+  <div id="media" class="tab-content">
+    <h2>Media</h2>
+    <p>Access images, videos, and files.</p>
+  </div>
+
+  <div id="mind" class="tab-content">
+    <h2>Mind</h2>
+    <p>View internal states, emotions, memory links.</p>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(div => {
+        div.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
