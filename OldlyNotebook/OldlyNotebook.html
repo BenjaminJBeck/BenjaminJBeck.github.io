@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OldlyNotebook</title>
+    <style>
+        @font-face {
+            font-family: 'Khand';
+            src: url('Khand/Khand.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Khand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-image: url('Desk.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .app-icon:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: white;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .download-section {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 3rem;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .version-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .update-item {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .update-date {
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section {
+                padding: 2rem 1.5rem;
+                margin: 1rem 0;
+            }
+            
+            .section h2 {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .version-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        .scroll-animation {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-animation.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .view-pictures-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .view-pictures-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 95%;
+            max-height: 95%;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slider-container {
+            position: relative;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .slider-image {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .slider-nav:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slider-nav.prev {
+            left: -60px;
+        }
+
+        .slider-nav.next {
+            right: -60px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+            z-index: 20;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .slider-description {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .slider-counter {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 15;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                max-width: 98%;
+                max-height: 98%;
+                padding: 1rem;
+            }
+            
+            .slider-nav.prev {
+                left: 10px;
+            }
+            
+            .slider-nav.next {
+                right: 10px;
+            }
+            
+            .slider-image {
+                max-height: 60vh;
+            }
+            
+            .slider-container {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
+                <img src="Book5.png" alt="OldlyNotebook Icon" style="width: 120px; height: 120px;">
+                <h1 style="margin: 0; font-size: 3.5rem; font-weight: 700; color: white; text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);">OldlyNotebook</h1>
+            </div>
+            <p class="tagline">Your digital Old Notebook</p>
+        </header>
+
+        <section class="section scroll-animation" id="description">
+            <h2>About the Application</h2>
+            <p>Oldly Notebook is a playful desktop journal that makes note-taking, journaling, and doodling fun and effortless. Import photos and videos and watch them take on a cozy, vintage-journal style. Sketch with the Draw tool, add unlimited pages and chapters, and navigate with tabs or a built-in Table of Contents. Simple, visual, and organized—your memories, your way. This is a first version, so it's not perfect yet! It is a work in progress, but I have lots of future update plans.</p>
+            
+            <div style="text-align: center; margin: 2rem 0;">
+                <button id="viewPicturesBtn" class="view-pictures-btn">📸 View Application Pictures</button>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Optimized performance for quick response times</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Beautiful Design</h3>
+                    <p>Simple, beautiful and intuitive layout, easy and fun to use!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">➦</div>
+                    <h3>Importing and Exporting</h3>
+                    <p>Designed for easy transfering and copying of Notebooks!</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section scroll-animation" id="usage">
+            <h2>How to Use</h2>
+            <p>Getting started with OldlyNotebook is incredibly simple. Follow these easy steps to begin your journey:</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">1️⃣</div>
+                    <h3>Download & Install</h3>
+                    <p>Download the application from the link below, it will automatically install on your desktop!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">2️⃣</div>
+                    <h3>Open application</h3>
+                    <p>Open up the application!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">3️⃣</div>
+                    <h3>Start Using</h3>
+                    <p>Start creating notebooks and journals!</p>
+                </div>
+            </div>
+            
+            <p>To begin creating notebooks, click the stack of book making supplies in the top left. This will lead you to be able to change the name of the book and style. To open a book, simply click on it and follow the "Open Book" Button. To delete, drag the book over the trashcan.</p>
+        </section>
+
+        <section class="section scroll-animation" id="updates">
+            <h2>Future Updates</h2>
+            <p>We're committed to continuously improving OldlyNotebook. Here's what's coming in future releases:</p>
+            
+            <div class="update-item">
+                <div class="update-date">Coming Soon - Version 2.0</div>
+                <p><strong>Major UI Overhaul:</strong> A completely redesigned interface with improved accessibility and enhanced user experience. This will also include functionality to insert sticky notes, audio files, as well as others!</p>
+            </div>
+            
+            <div class="update-item">
+                <div class="update-date">Q1 2025 - Version 3.0</div>
+                <p><strong>Better Importing/Exporting:</strong> This update will include abilities to import and share media embedded within each notebook, as well as a way to convert word doc/pdf into Oldly Notebooks and vis versa!</p>
+            </div>
+            
+            <div class="update-item">
+                <div class="update-date">Q2 2025 - Version 4.0</div>
+                <p><strong>Two Page Notebook!</strong> In this update, the notebook will feel more like a real notebook. The tools panel will be an optional setting that can be opened and closed!</p>
+            </div>
+
+            <div class="update-item">
+                <div class="update-date">Q3 2026 - Version 5.0</div>
+                <p><strong>View Mode:</strong> View mode will allow you to easily view anybook, with cool animations - straight from the main page. The editor will still be separate.</p>
+            </div>
+            
+        </section>
+
+        <section class="section download-section scroll-animation" id="download">
+            <h2>Download OldlyNotebook</h2>
+            <p>Ready to transform your productivity? Download the latest version now and experience the difference.</p>
+            
+            <div class="version-info">
+                <div style="color: black;">
+                    <strong>Current Version:</strong> 1.5.2
+                </div>
+                <div style="color: black;">
+                    <strong>Release Date:</strong> September 2025
+                </div>
+                <div style="color: black;">
+                    <strong>File Size:</strong> 45 MB
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <a href="https://github.com/BenjaminJBeck/BenjaminJBeck.github.io/releases/download/OldlyNotebook/Oldly.Notebook-1.0.0.Setup.exe" class="download-btn">📥 Download for Windows</a>
+            </div>
+            
+            <p style="margin-top: 2rem; opacity: 0.9;">System Requirements: Windows 10 or later</p>
+            <p style="opacity: 0.8; font-size: 0.95rem;">macOS and Linux versions coming soon!</p>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 OldlyNotebook. All rights reserved. | Built with ❤️ for amazing users like you.</p>
+        </footer>
+    </div>
+
+    <div id="pictureModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModal">&times;</button>
+            <div class="slider-counter">
+                <span id="currentSlide">1</span> / <span id="totalSlides">5</span>
+            </div>
+            <div class="slider-container">
+                <button class="slider-nav prev" id="prevBtn">❮</button>
+                <img id="sliderImage" src="SliderPicture1.png" alt="Application Screenshot" class="slider-image">
+                <button class="slider-nav next" id="nextBtn">❯</button>
+            </div>
+            <div class="slider-description" id="sliderDescription">
+                Main dashboard view showing your collection of notebooks with beautiful cover designs and easy navigation options.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Picture slider data
+        const sliderData = [
+            {
+                image: "SliderPicture1.png",
+                description: "Main dashboard view showing your collection of notebooks with beautiful cover designs and easy navigation options."
+            },
+            {
+                image: "SliderPicture2.png",
+                description: "This is the editor for your notebook! On the left is your Book Tools—save, share, go back to the main screen, add images or videos, and switch to Draw. Across the top you can jump to the Table of Contents or Last Page and quickly add/delete pages or chapters. The middle is your page canvas: type your entry, move/resize photos and film strips, and jot annotations. On the right, the Tools Panel lets you style text (font, size, line height, highlight), tweak drawings (color, size, pen/eraser, undo/redo), and edit images (opacity, saturation, warmth, B/W/Vintage/Frame, reset)."
+            },
+            {
+                image: "SliderPicture3.png",
+                description: "When you have an image or video selected, you can use the selection visuals and buttons to resize, rotate, delete, duplicate, or enlarge the selected component. Pressing 'p' while you have something selected will allow you to change the image inside the frame, resize it, scale it."
+            },
+            {
+                image: "SliderPicture4.png",
+                description: "This is your table of contents! This is where you can navigate through your book, or you can use the tabs at the top of the book!"
+            },
+            {
+                image: "SliderPicture5.png",
+                description: "This is the tools panel. You can change your font and its settings, as well as highlight certain things in your notes. Under Drawing Tools, change the size of your pen and its color, or use the eraser! Under Image tools, change the way it looks or the frame its in. Video settings coming soon!"
+            }
+        ];
+
+        let currentSlideIndex = 0;
+
+        // Modal controls
+        const modal = document.getElementById('pictureModal');
+        const viewBtn = document.getElementById('viewPicturesBtn');
+        const closeBtn = document.getElementById('closeModal');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const sliderImage = document.getElementById('sliderImage');
+        const sliderDescription = document.getElementById('sliderDescription');
+        const currentSlideSpan = document.getElementById('currentSlide');
+
+        // Open modal
+        viewBtn.addEventListener('click', function() {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            updateSlider();
+        });
+
+        // Close modal
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Navigation
+        nextBtn.addEventListener('click', function() {
+            currentSlideIndex = (currentSlideIndex + 1) % sliderData.length;
+            updateSlider();
+        });
+
+        prevBtn.addEventListener('click', function() {
+            currentSlideIndex = (currentSlideIndex - 1 + sliderData.length) % sliderData.length;
+            updateSlider();
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (modal.style.display === 'flex') {
+                if (e.key === 'ArrowRight') nextBtn.click();
+                if (e.key === 'ArrowLeft') prevBtn.click();
+                if (e.key === 'Escape') closeModal();
+            }
+        });
+
+        function updateSlider() {
+            const currentData = sliderData[currentSlideIndex];
+            sliderImage.src = currentData.image;
+            sliderImage.alt = `Application Screenshot ${currentSlideIndex + 1}`;
+            sliderDescription.textContent = currentData.description;
+            currentSlideSpan.textContent = currentSlideIndex + 1;
+        }
+
+        // Smooth scrolling animation on scroll
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.scroll-animation');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Add smooth scrolling to navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize animations
+        window.addEventListener('scroll', handleScrollAnimations);
+        window.addEventListener('load', handleScrollAnimations);
+
+        // Add some interactive hover effects
+        document.querySelectorAll('.section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+        });
+    </script>
+</body>
+</html>
