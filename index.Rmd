@@ -685,6 +685,53 @@ padding: 12px;
 padding: 12px;
 }
 }
+
+/* --- Oldly Notebook collage --- */
+.oldly-collage {
+  position: relative;
+  margin: 24px 0 10px;
+  height: 320px;                /* desktop canvas height */
+  border-radius: 14px;
+  overflow: visible;
+}
+
+.oldly-collage .shot {
+  position: absolute;
+  width: 240px;                 /* base size per photo */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* individual transforms/positions */
+.shot.s1 { left: 0;    top: 0;     transform: rotate(-6deg); width: 230px; }
+.shot.s2 { left: 180px; top: 40px;  transform: rotate(4deg);  width: 250px; }
+.shot.s3 { left: 360px; top: -10px; transform: rotate(-2deg); width: 260px; }
+.shot.s4 { left: 540px; top: 60px;  transform: rotate(7deg);  width: 240px; }
+
+/* subtle hover pop */
+.oldly-collage .shot:hover {
+  transform: translateY(-4px) scale(1.06) rotate(0deg);
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+
+/* Mobile/tablet: stack nicely */
+@media (max-width: 900px) {
+  .oldly-collage {
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .oldly-collage .shot {
+    position: static;
+    width: 100%;
+    transform: none !important; /* drop rotations on small screens */
+    box-shadow: 0 8px 22px rgba(0,0,0,.28);
+  }
+}
 </style>
 
 <div class="top-bar">
@@ -756,7 +803,26 @@ padding: 12px;
 </div>
 <p>Hi, I'm Benjamin Beck, and I'm from American Fork, Utah. Ever since I was young, I've been passionate about biology—especially evolutionary science. That passion led me to pursue a career in the biological sciences, starting with participation in the STEM science fair during high school. My project focused on the effects of Nicotinamide Riboside (NR) on cell growth and proliferation, for which I received the Reoch Award.</p>
 <p>After high school, I began my college journey at Utah Valley University, where I earned my Associate's Degree in 2022. From 2022 to 2023, I served a full-time LDS mission, which was a meaningful and transformative experience. Upon returning, I resumed my education and made the decision to shift my focus from Biology to Bioinformatics, combining my love for science with a growing interest in computers and data analysis.</p>
-<p>I'm currently working toward my Bachelor's degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology. Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I'll be sharing some of my artwork on this site—feel free to check it out! <br> <br> I also just recently finished a project I have been working on, a new electron app I call Oldly Notebook. It is an interactive, stylish notebook made to be as simple and intuitive as possible. Nobody likes journaling or writing notes in a word doc - hopefully this makes it fun! It is free and avaliable for windows. The link to the website is under "Projects". Feel free to install and use it! <br> <br>
+<p>I'm currently working toward my Bachelor's degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology. Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I'll be sharing some of my artwork on this site—feel free to check it out! <br></p>
+
+<div class="oldly-collage">
+  <img class="shot s3" src="Pictures/Art_1.jpg" alt="Oldly Notebook – main dashboard" loading="lazy">
+  <img class="shot s2" src="Pictures/Art_2.jpg" alt="Oldly Notebook – editor view" loading="lazy">
+  <img class="shot s1" src="Pictures/Art_3.jpg" alt="Oldly Notebook – tools panel" loading="lazy">
+</div>
+
+<br><p> I also just recently finished a project I have been working on, a new electron app I call <strong><em>Oldly Notebook</em></strong>. It is an interactive, stylish notebook made to be as simple and intuitive as possible. Nobody likes journaling or writing notes in a word doc - hopefully this makes it fun! It is free and avaliable for windows. The link to the website is under "Projects". Feel free to install and use it! <br><br></p>
+
+
+<div class="oldly-collage">
+  <img class="shot s1" src="Pictures/oldly_1.jpg" alt="Oldly Notebook – main dashboard" loading="lazy">
+  <img class="shot s2" src="Pictures/oldly_2.jpg" alt="Oldly Notebook – editor view" loading="lazy">
+  <img class="shot s3" src="Pictures/oldly_3.jpg" alt="Oldly Notebook – tools panel" loading="lazy">
+  <img class="shot s4" src="Pictures/oldly_4.jpg" alt="Oldly Notebook – table of contents" loading="lazy">
+</div>
+
+
+<p>
 CC&C is a project I am currently developing to support college students with one of the most time-consuming aspects of campus life—cleaning checks. As students, we juggle demanding coursework, exams, and part-time jobs just to manage the cost of living and tuition. For those living on or near campus, regular cleaning checks are a standard requirement, but finding the time to prepare for them can be a real challenge. CC&C is designed to ease that burden by handling cleaning checks on behalf of students, helping them save time and reduce stress. The project is still in development, and I am continuing to refine it as I balance it with my own college schedule.</p>
 <p>In terms of work experience, I spent five years at Carson Meats (now Mosida Market) in Lehi, where I developed a strong work ethic. I now work at Panda Express and plan to continue working there while I complete my degree and build a career in bioinformatics.</p>
 
