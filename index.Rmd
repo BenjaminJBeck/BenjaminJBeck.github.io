@@ -743,7 +743,7 @@ padding: 12px;
 <div class="profile-info">
 <p><strong>University:</strong> Utah Valley University</p>
 <p><strong>Expected Graduation:</strong> 2027</p>
-<p><strong>Last Updated:</strong> July 31, 2025</p>
+<p><strong>Last Updated:</strong> September 4, 2025</p>
 </div>
 </div>
 <div class="scrollable-section">
@@ -756,7 +756,8 @@ padding: 12px;
 </div>
 <p>Hi, I'm Benjamin Beck, and I'm from American Fork, Utah. Ever since I was young, I've been passionate about biology—especially evolutionary science. That passion led me to pursue a career in the biological sciences, starting with participation in the STEM science fair during high school. My project focused on the effects of Nicotinamide Riboside (NR) on cell growth and proliferation, for which I received the Reoch Award.</p>
 <p>After high school, I began my college journey at Utah Valley University, where I earned my Associate's Degree in 2022. From 2022 to 2023, I served a full-time LDS mission, which was a meaningful and transformative experience. Upon returning, I resumed my education and made the decision to shift my focus from Biology to Bioinformatics, combining my love for science with a growing interest in computers and data analysis.</p>
-<p>I'm currently working toward my Bachelor's degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology. Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I'll be sharing some of my artwork on this site—feel free to check it out!</p>
+<p>I'm currently working toward my Bachelor's degree in Bioinformatics, with the goal of developing innovative research projects that integrate biology and technology. Outside of academics, I enjoy movies, video games, weightlifting, exploring the outdoors, and creating digital and traditional art. I'll be sharing some of my artwork on this site—feel free to check it out! <br> <br> I also just recently finished a project I have been working on, a new electron app I call Oldly Notebook. It is an interactive, stylish notebook made to be as simple and intuitive as possible. Nobody likes journaling or writing notes in a word doc - hopefully this makes it fun! It is free and avaliable for windows. The link to the website is under "Projects". Feel free to install and use it! <br> <br>
+CC&C is a project I am currently developing to support college students with one of the most time-consuming aspects of campus life—cleaning checks. As students, we juggle demanding coursework, exams, and part-time jobs just to manage the cost of living and tuition. For those living on or near campus, regular cleaning checks are a standard requirement, but finding the time to prepare for them can be a real challenge. CC&C is designed to ease that burden by handling cleaning checks on behalf of students, helping them save time and reduce stress. The project is still in development, and I am continuing to refine it as I balance it with my own college schedule.</p>
 <p>In terms of work experience, I spent five years at Carson Meats (now Mosida Market) in Lehi, where I developed a strong work ethic. I now work at Panda Express and plan to continue working there while I complete my degree and build a career in bioinformatics.</p>
 
 <h3>Education</h3>
@@ -809,6 +810,10 @@ padding: 12px;
 <div class="project-card">
 <h4>Text Encryption</h4>
 <p>Security-focused application for encrypting and decrypting text using various cryptographic methods.</p>
+</div>
+<div class="project-card">
+<h4>Oldly Notebook</h4>
+<p>Interactive Windows application built with electron for a stylish note-taking/journaling experience!</p>
 </div>
 </div>
 
