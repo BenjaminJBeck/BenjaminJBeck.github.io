@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-panel {
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 25px;
+            height: calc(100vh - 150px);
+            min-height: 600px;
+        }
+
+        /* Left Panel Styles */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-align: center;
+        }
+
+        .cropped-images-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .cropped-images-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cropped-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .cropped-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .cropped-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            max-height: 120px;
+            object-fit: cover;
+        }
+
+        .crop-name {
+            color: #ffffff;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6);
+        }
+
+        .side-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .side-button {
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .side-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Right Panel Styles */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .tool-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tool-button {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tool-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .tool-button.active-tool {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-button {
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-button:hover {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        }
+
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+        }
+
+        #canvas-area {
+            display: block;
+            cursor: grab;
+            width: 100%;
+            height: 100%;
+        }
+
+        #canvas-area:active {
+            cursor: grabbing;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .zoom-btn:hover {
+            background: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .zoom-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10;
+            font-weight: 500;
+        }
+
+        #eraser-cursor {
+            position: absolute;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 20px;
+            padding: 30px;
+            width: 500px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .modal-counter {
+            color: #a0a9b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 15px auto;
+            display: block;
+        }
+
+        .modal-input {
+            width: 100%;
+            height: 45px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 0 18px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.2s ease;
+            margin: 15px 0;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-input::placeholder {
+            color: #a0a9b8;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .modal-button.primary:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-button.secondary {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .modal-button.secondary:hover {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 85, 104, 0.4);
+        }
+
+        .modal-button.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .modal-button.danger:hover {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .modal-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .crop-selection {
+            position: absolute;
+            border: 2px dashed #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-panel {
+                grid-template-columns: 250px 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .left-panel {
+                order: 2;
+                max-height: 300px;
+            }
+            
+            .toolbar {
+                flex-wrap: wrap;
+            }
+            
+            .tool-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1 class="app-title">🎨 Image Cropper</h1>
+        
+        <div class="main-panel">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <div class="panel-title">Cropped Images</div>
+                
+                <div class="cropped-images-container" id="cropped-images">
+                    <!-- Cropped images will appear here -->
+                </div>
+                
+                <div class="side-buttons">
+                    <button id="name-button" class="side-button">📝 Name All</button>
+                    <button id="download-button" class="side-button">💾 Download ZIP</button>
+                </div>
+            </div>
+            
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="toolbar">
+                    <div class="tool-buttons">
+                        <button id="cursor-button" class="tool-button">🖱️</button>
+                        <button id="crop-button" class="tool-button">✂️</button>
+                        <button id="eraser-button" class="tool-button">🧽</button>
+                    </div>
+                    
+                    <button id="upload-button" class="upload-button">📤 Upload Image</button>
+                    <input type="file" id="upload-input" accept="image/*" style="display: none">
+                </div>
+                
+                <div class="canvas-container">
+                    <div class="zoom-controls">
+                        <button id="zoom-in" class="zoom-btn">+</button>
+                        <button id="zoom-out" class="zoom-btn">-</button>
+                        <button id="zoom-reset" class="zoom-btn">⌂</button>
+                    </div>
+                    
+                    <div id="zoom-info" class="zoom-info">
+                        Zoom: 100% | Use mouse wheel to zoom, drag to pan
+                    </div>
+                    
+                    <canvas id="canvas-area"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="eraser-cursor"></div>
+
+    <!-- Naming Modal -->
+    <div id="naming-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Name Your Cropped Images</h3>
+            <p id="naming-counter" class="modal-counter">Image 1 of 1</p>
+            <img id="naming-preview" class="modal-preview" src="" alt="Preview">
+            <input type="text" id="naming-input" class="modal-input" placeholder="Enter name for this image...">
+            
+            <div class="modal-buttons">
+                <button id="prev-btn" class="modal-button secondary">← Previous</button>
+                <button id="skip-btn" class="modal-button danger">Skip</button>
+                <button id="next-btn" class="modal-button primary">Next →</button>
+                <button id="finish-btn" class="modal-button primary" style="display: none;">Finish</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // Variables
+        let uploadedImage = new Image();
+        const canvas = document.getElementById("canvas-area");
+        const ctx = canvas.getContext("2d");
+        const canvasContainer = document.querySelector(".canvas-container");
+        const croppedImages = [];
+        const cropNames = [];
+        const eraserCursor = document.getElementById("eraser-cursor");
+        let eraserSize = 20;
+        let activeTool = null;
+        let isErasing = false;
+        let actionHistory = [];
+
+        // Zoom and pan variables
+        let zoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let lastPanX = 0;
+        let lastPanY = 0;
+
+        // Crop variables
+        let isCropping = false;
+        let cropStartX = 0;
+        let cropStartY = 0;
+        let cropPath = [];
+        let currentCropSelection = null;
+
+        // Store current canvas state
+        let currentCanvasState = null;
+
+        // Naming modal variables
+        let currentNamingIndex = 0;
+        let isNamingModalOpen = false;
+
+        // Functions
+        function updateZoomInfo() {
+            document.getElementById('zoom-info').textContent = 
+                `Zoom: ${Math.round(zoom * 100)}% | Use mouse wheel to zoom, drag to pan`;
+        }
+
+        function resizeCanvas() {
+            const rect = canvasContainer.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            redrawCanvas();
+        }
+
+        function redrawCanvas() {
+            if (!uploadedImage.src) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate image dimensions to fit canvas while maintaining aspect ratio
+            const imgRatio = uploadedImage.width / uploadedImage.height;
+            const canvasRatio = canvas.width / canvas.height;
+            
+            let baseWidth, baseHeight;
+            if (imgRatio > canvasRatio) {
+                baseWidth = canvas.width;
+                baseHeight = baseWidth / imgRatio;
+            } else {
+                baseHeight = canvas.height;
+                baseWidth = baseHeight * imgRatio;
+            }
+            
+            // Apply zoom
+            const drawWidth = baseWidth * zoom;
+            const drawHeight = baseHeight * zoom;
+            
+            // Center the image and apply pan
+            const offsetX = (canvas.width - drawWidth) / 2 + panX;
+            const offsetY = (canvas.height - drawHeight) / 2 + panY;
+            
+            ctx.drawImage(uploadedImage, offsetX, offsetY, drawWidth, drawHeight);
+            
+            currentCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        function setActiveTool(toolId) {
+            document.querySelectorAll('.tool-button').forEach(btn => {
+                btn.classList.remove('active-tool');
+            });
+            
+            if (toolId) {
+                document.getElementById(toolId).classList.add('active-tool');
+                activeTool = toolId;
+            } else {
+                activeTool = null;
+            }
+            
+            if (activeTool === 'cursor-button') {
+                canvas.style.cursor = 'grab';
+            } else if (activeTool === 'crop-button') {
+                canvas.style.cursor = 'crosshair';
+            } else if (activeTool === 'eraser-button') {
+                canvas.style.cursor = 'none';
+            }
+        }
+
+        function updateEraserSize() {
+            eraserCursor.style.width = `${eraserSize}px`;
+            eraserCursor.style.height = `${eraserSize}px`;
+            eraserCursor.style.marginLeft = `${-eraserSize / 2}px`;
+            eraserCursor.style.marginTop = `${-eraserSize / 2}px`;
+        }
+
+        function eraseAtPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, eraserSize / 2, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.clearRect(x - eraserSize, y - eraserSize, eraserSize * 2, eraserSize * 2);
+            ctx.restore();
+        }
+
+        function saveState() {
+            actionHistory.push(canvas.toDataURL());
+            if (actionHistory.length > 50) actionHistory.shift();
+        }
+
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function drawCropPath() {
+            if (cropPath.length < 2) return;
+            
+            ctx.save();
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            ctx.beginPath();
+            ctx.moveTo(cropPath[0].x, cropPath[0].y);
+            
+            for (let i = 1; i < cropPath.length; i++) {
+                ctx.lineTo(cropPath[i].x, cropPath[i].y);
+            }
+            
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function cropSelectedArea() {
+            if (cropPath.length < 3) return;
+            
+            let minX = Math.min(...cropPath.map(p => p.x));
+            let maxX = Math.max(...cropPath.map(p => p.x));
+            let minY = Math.min(...cropPath.map(p => p.y));
+            let maxY = Math.max(...cropPath.map(p => p.y));
+            
+            minX = Math.max(0, minX - 2);
+            minY = Math.max(0, minY - 2);
+            maxX = Math.min(canvas.width, maxX + 2);
+            maxY = Math.min(canvas.height, maxY + 2);
+            
+            const cropWidth = maxX - minX;
+            const cropHeight = maxY - minY;
+            
+            const croppedCanvas = document.createElement('canvas');
+            const croppedCtx = croppedCanvas.getContext('2d');
+            croppedCanvas.width = cropWidth;
+            croppedCanvas.height = cropHeight;
+            
+            const cleanImageData = currentCanvasState.data.slice();
+            const cleanCanvas = document.createElement('canvas');
+            const cleanCtx = cleanCanvas.getContext('2d');
+            cleanCanvas.width = canvas.width;
+            cleanCanvas.height = canvas.height;
+            
+            const cleanImageDataObj = new ImageData(cleanImageData, canvas.width, canvas.height);
+            cleanCtx.putImageData(cleanImageDataObj, 0, 0);
+            
+            croppedCtx.save();
+            croppedCtx.beginPath();
+            croppedCtx.moveTo(cropPath[0].x - minX, cropPath[0].y - minY);
+            
+            for (let i = 1; i < cropPath.length; i++) {
+                croppedCtx.lineTo(cropPath[i].x - minX, cropPath[i].y - minY);
+            }
+            
+            croppedCtx.closePath();
+            croppedCtx.clip();
+            
+            croppedCtx.drawImage(cleanCanvas, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+            croppedCtx.restore();
+            
+            const dataURL = croppedCanvas.toDataURL('image/png');
+            croppedImages.push(dataURL);
+            
+            const defaultName = `Crop ${croppedImages.length}`;
+            cropNames.push(defaultName);
+            
+            addCropToPanel(dataURL, defaultName);
+        }
+
+        function addCropToPanel(dataURL, name) {
+            const croppedContainer = document.getElementById('cropped-images');
+            const cropItem = document.createElement('div');
+            cropItem.className = 'cropped-item';
+            
+            const img = document.createElement('img');
+            img.src = dataURL;
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'crop-name';
+            nameDiv.textContent = name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = () => deleteCrop(croppedImages.length - 1);
+            
+            cropItem.appendChild(img);
+            cropItem.appendChild(nameDiv);
+            cropItem.appendChild(deleteBtn);
+            croppedContainer.appendChild(cropItem);
+        }
+
+        function deleteCrop(index) {
+            if (index < 0 || index >= croppedImages.length) return;
+            
+            croppedImages.splice(index, 1);
+            cropNames.splice(index, 1);
+            
+            const croppedContainer = document.getElementById('cropped-images');
+            croppedContainer.innerHTML = '';
+            
+            for (let i = 0; i < croppedImages.length; i++) {
+                const cropItem = document.createElement('div');
+                cropItem.className = 'cropped-item';
+                
+                const img = document.createElement('img');
+                img.src = croppedImages[i];
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'crop-name';
+                nameDiv.textContent = cropNames[i];
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.onclick = () => deleteCrop(i);
+                
+                cropItem.appendChild(img);
+                cropItem.appendChild(nameDiv);
+                cropItem.appendChild(deleteBtn);
+                croppedContainer.appendChild(cropItem);
+            }
+        }
+
+        function openNamingModal() {
+            if (croppedImages.length === 0) {
+                alert("No crops to name.");
+                return;
+            }
+            
+            currentNamingIndex = 0;
+            isNamingModalOpen = true;
+            document.getElementById('naming-modal').style.display = 'block';
+            updateNamingModal();
+        }
+
+        function updateNamingModal() {
+            const preview = document.getElementById('naming-preview');
+            const input = document.getElementById('naming-input');
+            const counter = document.getElementById('naming-counter');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const finishBtn = document.getElementById('finish-btn');
+            
+            preview.src = croppedImages[currentNamingIndex];
+            input.value = cropNames[currentNamingIndex];
+            counter.textContent = `Image ${currentNamingIndex + 1} of ${croppedImages.length}`;
+            
+            prevBtn.disabled = currentNamingIndex === 0;
+            
+            if (currentNamingIndex === croppedImages.length - 1) {
+                nextBtn.style.display = 'none';
+                finishBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                finishBtn.style.display = 'none';
+            }
+            
+            input.focus();
+            input.select();
+        }
+
+        function saveCurrentName() {
+            const input = document.getElementById('naming-input');
+            const name = input.value.trim() || `Crop ${currentNamingIndex + 1}`;
+            cropNames[currentNamingIndex] = name;
+            
+            const cropItems = document.querySelectorAll('.cropped-item');
+            if (cropItems[currentNamingIndex]) {
+                const nameDiv = cropItems[currentNamingIndex].querySelector('.crop-name');
+                nameDiv.textContent = name;
+            }
+        }
+
+        function closeNamingModal() {
+            isNamingModalOpen = false;
+            document.getElementById('naming-modal').style.display = 'none';
+        }
+
+        async function downloadAllAsZip() {
+            if (croppedImages.length === 0) {
+                alert("No cropped images to download.");
+                return;
+            }
+
+            const zip = new JSZip();
+            
+            for (let i = 0; i < croppedImages.length; i++) {
+                const dataURL = croppedImages[i];
+                const name = cropNames[i] || `Crop ${i + 1}`;
+                
+                const response = await fetch(dataURL);
+                const blob = await response.blob();
+                
+                const filename = `${name.replace(/[^a-zA-Z0-9\-_]/g, '_')}.png`;
+                zip.file(filename, blob);
+            }
+            
+            const zipBlob = await zip.generateAsync({type: "blob"});
+            const url = URL.createObjectURL(zipBlob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "cropped_images.zip";
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Event Listeners
+        document.getElementById("upload-button").onclick = () => {
+            document.getElementById("upload-input").click();
+        };
+
+        document.getElementById("upload-input").onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                uploadedImage.src = ev.target.result;
+                uploadedImage.onload = () => {
+                    zoom = 1;
+                    panX = 0;
+                    panY = 0;
+                    currentCanvasState = null;
+                    resizeCanvas();
+                    updateZoomInfo();
+                };
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Tool buttons
+        document.getElementById("cursor-button").onclick = () => {
+            setActiveTool("cursor-button");
+            eraserCursor.style.display = "none";
+        };
+
+        document.getElementById("crop-button").onclick = () => {
+            setActiveTool("crop-button");
+            eraserCursor.style.display = "none";
+            cropPath = [];
+            isCropping = false;
+        };
+
+        document.getElementById("eraser-button").onclick = () => {
+            setActiveTool("eraser-button");
+            eraserCursor.style.display = "block";
+            updateEraserSize();
+        };
+
+        // Zoom controls
+        document.getElementById("zoom-in").onclick = () => {
+            zoom = Math.min(zoom * 1.2, 5);
+            redrawCanvas();
+            updateZoomInfo();
+        };
+
+        document.getElementById("zoom-out").onclick = () => {
+            zoom = Math.max(zoom / 1.2, 0.5);
+            redrawCanvas();
+            updateZoomInfo();
+        };
+
+        document.getElementById("zoom-reset").onclick = () => {
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            redrawCanvas();
+            updateZoomInfo();
+        };
+
+        // Naming modal
+        document.getElementById("name-button").onclick = openNamingModal;
+
+        document.getElementById("prev-btn").onclick = () => {
+            saveCurrentName();
+            currentNamingIndex = Math.max(0, currentNamingIndex - 1);
+            updateNamingModal();
+        };
+
+        document.getElementById("next-btn").onclick = () => {
+            saveCurrentName();
+            currentNamingIndex = Math.min(croppedImages.length - 1, currentNamingIndex + 1);
+            updateNamingModal();
+        };
+
+        document.getElementById("skip-btn").onclick = () => {
+            if (currentNamingIndex < croppedImages.length - 1) {
+                currentNamingIndex++;
+                updateNamingModal();
+            } else {
+                closeNamingModal();
+            }
+        };
+
+        document.getElementById("finish-btn").onclick = () => {
+            saveCurrentName();
+            closeNamingModal();
+        };
+
+        document.getElementById("naming-input").onkeydown = (e) => {
+            if (e.key === "Enter") {
+                if (currentNamingIndex < croppedImages.length - 1) {
+                    document.getElementById("next-btn").click();
+                } else {
+                    document.getElementById("finish-btn").click();
+                }
+            }
+        };
+
+        // Download
+        document.getElementById("download-button").onclick = downloadAllAsZip;
+
+        // Canvas events
+        canvas.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            if (!uploadedImage.src) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            const newZoom = Math.min(Math.max(zoom * zoomFactor, 0.5), 5);
+
+            // Calculate zoom point to keep mouse position stable
+            const zoomChange = newZoom / zoom;
+            panX = mouseX - (mouseX - panX) * zoomChange;
+            panY = mouseY - (mouseY - panY) * zoomChange;
+
+            zoom = newZoom;
+            redrawCanvas();
+            updateZoomInfo();
+            updateEraserSize();
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (activeTool === "eraser-button") {
+                eraserCursor.style.left = `${e.clientX}px`;
+                eraserCursor.style.top = `${e.clientY}px`;
+                if (isErasing) {
+                    eraseAtPosition(e);
+                }
+            } else if (activeTool === "cursor-button" && isPanning) {
+                const deltaX = e.clientX - lastPanX;
+                const deltaY = e.clientY - lastPanY;
+                panX += deltaX;
+                panY += deltaY;
+                lastPanX = e.clientX;
+                lastPanY = e.clientY;
+                redrawCanvas();
+            } else if (activeTool === "crop-button" && isCropping) {
+                const coords = getCanvasCoordinates(e);
+                cropPath.push(coords);
+                if (currentCanvasState) {
+                    ctx.putImageData(currentCanvasState, 0, 0);
+                }
+                drawCropPath();
+            }
+        });
+
+        canvas.addEventListener("mousedown", (e) => {
+            if (activeTool === "eraser-button") {
+                saveState();
+                isErasing = true;
+                eraseAtPosition(e);
+            } else if (activeTool === "cursor-button") {
+                isPanning = true;
+                lastPanX = e.clientX;
+                lastPanY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            } else if (activeTool === "crop-button") {
+                const coords = getCanvasCoordinates(e);
+                isCropping = true;
+                cropPath = [coords];
+                cropStartX = coords.x;
+                cropStartY = coords.y;
+                if (currentCanvasState) {
+                    currentCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                }
+            }
+        });
+
+        canvas.addEventListener("mouseup", (e) => {
+            if (activeTool === "eraser-button") {
+                isErasing = false;
+                currentCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            } else if (activeTool === "cursor-button") {
+                isPanning = false;
+                canvas.style.cursor = 'grab';
+            } else if (activeTool === "crop-button" && isCropping) {
+                isCropping = false;
+                if (cropPath.length > 2) {
+                    cropPath.push({x: cropStartX, y: cropStartY});
+                    if (currentCanvasState) {
+                        ctx.putImageData(currentCanvasState, 0, 0);
+                    }
+                    drawCropPath();
+                    setTimeout(() => {
+                        cropSelectedArea();
+                        cropPath = [];
+                        redrawCanvas();
+                    }, 500);
+                }
+            }
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+            isErasing = false;
+            isPanning = false;
+            isCropping = false;
+            if (activeTool === "cursor-button") {
+                canvas.style.cursor = 'grab';
+            }
+            eraserCursor.style.display = "none";
+        });
+
+        canvas.addEventListener("mouseenter", () => {
+            if (activeTool === "eraser-button") {
+                eraserCursor.style.display = "block";
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+            if (isNamingModalOpen) return;
+            
+            if (e.ctrlKey && e.key.toLowerCase() === "z") {
+                e.preventDefault();
+                // Undo functionality can be added here
+            }
+
+            if (activeTool === "eraser-button") {
+                if (e.key === "+" || e.key === "=") {
+                    eraserSize = Math.min(eraserSize + 5, 100);
+                    updateEraserSize();
+                } else if (e.key === "-") {
+                    eraserSize = Math.max(eraserSize - 5, 5);
+                    updateEraserSize();
+                }
+            }
+        });
+
+        // Window resize
+        window.addEventListener("resize", () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        // Initialize
+        window.addEventListener("load", () => {
+            resizeCanvas();
+            setActiveTool("cursor-button");
+            updateZoomInfo();
+        });
+    </script>
+</body>
+</html>

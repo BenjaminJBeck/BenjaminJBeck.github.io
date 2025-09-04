@@ -270,7 +270,7 @@ html, body {
 
 #corner-button {
   width: 100px;
-  height: 35px;
+  height: 65px;
   background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
   border-radius: 8px;
   display: flex;
@@ -283,7 +283,7 @@ html, body {
   position: relative;
   overflow: hidden;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -379,12 +379,10 @@ html, body {
 }
 
 .selectable.selected {
-  outline: 2px solid #4a90e2;
-  outline-offset: 3px;
+  outline: 3px dashed purple;
+  outline-offset: 2px;
   position: relative;
-  box-shadow: 0 0 8px rgba(74, 144, 226, 0.6);
-  border-radius: 6px;
-  transition: box-shadow 0.2s ease, outline-color 0.2s ease;
+  box-shadow: 0 0 10px 2px purple;
 }
 
 .preview-fullscreen #actual-canvas img {
@@ -1097,7 +1095,6 @@ body[data-has-cursor-image="true"].in-preview-mode * {
 <script src="Scripts/ImagePreviewFunctions.js"></script>
 <script src="Scripts/fileuploadsave.js"></script>
 <script src="Scripts/cursorsettings.js"></script>
-<script src="Scripts/CanvasFunctions.js"></script>
 <script src="https://unpkg.com/blockly/blockly.min.js"></script>
 
 
@@ -1114,10 +1111,13 @@ body[data-has-cursor-image="true"].in-preview-mode * {
 //
 
 let isFileMenuOpen = false;
+let selectedElement = null;
 let currentPage = 1;
 let totalPages = 1;
 let pages = { 1: [] };
 let selectedPageForDelete = null;
+let interactionMode = null; // 'move' | 'scale' | 'rotate'
+let isMouseDown = false;
 let copiedButtonLayout = null;
 let savedTextboxLayout = null;
 if (!pages[currentPage]) pages[currentPage] = [];
@@ -1125,14 +1125,45 @@ if (!pages[currentPage].meta) pages[currentPage].meta = {};
 let inPreviewMode = false;
 let justInteracted = false;
 let remainingAssignedImages = (pages[currentPage]?.meta?.textboxConfig?.assignedNames || []).length;
+let resizing = false;
+let resizeSide = null;
+let copiedElement = null;
+let startX, startY, startWidth, startHeight, startLeft, startTop;
 let actionHistory = [];
 let redoHistory = [];
-let maxHistorySize = 20;
+let maxHistorySize = 20; // Limit history to prevent memory issues
 let savedEventListeners = [];
 let globalImages = [];
+let initialMouseX = 0;
+let initialMouseY = 0;
+let initialScale = 1;
+let initialRotation = 0;
+let initialDistance = 0;
+let initialAngle = 0;
+let isCtrlPressed = false;
+let rotationDisplay = null;
 let currentEditingImage = null;
 let currentTool = 'select';
 let originalImageFilters = {};
+// Zoom and pan variables
+const ZOOM_CONFIG = {
+  min: 0.1,
+  max: 10,
+  step: 0.1,
+  keyboardStep: 0.2,
+  sensitivity: 0.001,
+  smoothness: 0.15
+};
+
+let canvasZoom = 1;
+let canvasPanX = 0;
+let canvasPanY = 0;
+let isPanning = false;
+let lastPanX = 0;
+let lastPanY = 0;
+let zoomIndicatorTimeout;
+let isPanningWithMiddle = false;
+let isPanningWithRight = false;
 
 
 //
@@ -1146,10 +1177,55 @@ let originalImageFilters = {};
 //
 //
 
+
+
+
+function showRotationDisplay(element, rotation) {
+  // Remove existing display
+  if (rotationDisplay) {
+    rotationDisplay.remove();
+  }
+  
+  // Create rotation display
+  rotationDisplay = document.createElement('div');
+  rotationDisplay.style.position = 'absolute';
+  rotationDisplay.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  rotationDisplay.style.color = 'white';
+  rotationDisplay.style.padding = '8px 16px';
+  rotationDisplay.style.borderRadius = '20px';
+  rotationDisplay.style.fontSize = '14px';
+  rotationDisplay.style.fontWeight = '600';
+  rotationDisplay.style.zIndex = '10000';
+  rotationDisplay.style.pointerEvents = 'none';
+  rotationDisplay.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+  rotationDisplay.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+  rotationDisplay.style.backdropFilter = 'blur(10px)';
+  rotationDisplay.textContent = `${Math.round(rotation)}°`;
+  
+  // Position above the element
+  const rect = element.getBoundingClientRect();
+  rotationDisplay.style.left = (rect.left + rect.width / 2 - 30) + 'px';
+  rotationDisplay.style.top = (rect.top - 50) + 'px';
+  
+  document.body.appendChild(rotationDisplay);
+}
+
+function hideRotationDisplay() {
+  if (rotationDisplay) {
+    rotationDisplay.remove();
+    rotationDisplay = null;
+  }
+}
+
+function snapToInterval(angle, interval = 15) {
+  return Math.round(angle / interval) * interval;
+}
+
+
 function toggleSlidingFileMenu() {
   const menu = document.getElementById('file-sliding-menu');
   const overlay = document.getElementById('file-menu-overlay');
-
+  
   if (isFileMenuOpen) {
     closeSlidingFileMenu();
   } else {
@@ -1160,7 +1236,7 @@ function toggleSlidingFileMenu() {
 function openSlidingFileMenu() {
   const menu = document.getElementById('file-sliding-menu');
   const overlay = document.getElementById('file-menu-overlay');
-
+  
   menu.classList.add('open');
   overlay.classList.add('active');
   isFileMenuOpen = true;
@@ -1169,7 +1245,7 @@ function openSlidingFileMenu() {
 function closeSlidingFileMenu() {
   const menu = document.getElementById('file-sliding-menu');
   const overlay = document.getElementById('file-menu-overlay');
-
+  
   menu.classList.remove('open');
   overlay.classList.remove('active');
   isFileMenuOpen = false;
@@ -1200,6 +1276,7 @@ function shareFile() {
   closeSlidingFileMenu();
 }
 
+
 function saveState() {
   const state = {
     canvas: document.getElementById("actual-canvas").innerHTML,
@@ -1207,18 +1284,23 @@ function saveState() {
     currentPage: currentPage,
     totalPages: totalPages
   };
-
+  
   actionHistory.push(state);
+  
+  // Clear redo history when a new action is performed
   redoHistory = [];
-
+  
+  // Limit history size
   if (actionHistory.length > maxHistorySize) {
     actionHistory.shift();
   }
 }
 
+// Updated undo function
 function undoLastAction() {
   if (actionHistory.length === 0) return;
 
+  // Save current state to redo history before undoing
   const currentState = {
     canvas: document.getElementById("actual-canvas").innerHTML,
     pages: JSON.parse(JSON.stringify(pages)),
@@ -1229,23 +1311,30 @@ function undoLastAction() {
 
   const canvas = document.getElementById("actual-canvas");
   const previousState = actionHistory.pop();
-
+  
+  // Restore canvas content
   canvas.innerHTML = previousState.canvas;
+  
+  // Restore page data
   pages = previousState.pages;
   currentPage = previousState.currentPage;
   totalPages = previousState.totalPages;
-
+  
+  // Clear selection
   selectedElement = null;
   removeResizeBars();
-
+  
+  // CRITICAL: Rebind events for all elements
   rebindElementEvents();
   renderPageButtons();
   updatePageLabel();
 }
 
+// Updated redo function
 function redoLastAction() {
   if (redoHistory.length === 0) return;
 
+  // Save current state to action history before redoing
   const currentState = {
     canvas: document.getElementById("actual-canvas").innerHTML,
     pages: JSON.parse(JSON.stringify(pages)),
@@ -1256,18 +1345,55 @@ function redoLastAction() {
 
   const canvas = document.getElementById("actual-canvas");
   const nextState = redoHistory.pop();
-
+  
+  // Restore canvas content
   canvas.innerHTML = nextState.canvas;
+  
+  // Restore page data
   pages = nextState.pages;
   currentPage = nextState.currentPage;
   totalPages = nextState.totalPages;
-
+  
+  // Clear selection
   selectedElement = null;
   removeResizeBars();
-
+  
+  // CRITICAL: Rebind events for all elements
   rebindElementEvents();
   renderPageButtons();
   updatePageLabel();
+}
+
+function clearGuides() {
+  document.querySelectorAll('.guide-line').forEach(g => g.remove());
+}
+
+function showGuideLine(x, y) {
+  const canvas = document.getElementById("actual-canvas");
+  const canvasRect = canvas.getBoundingClientRect();
+
+  if (y !== null) {
+    const h = document.createElement("div");
+    h.className = "guide-line h";
+    h.style.top = ((y - canvasRect.top) / canvasRect.height) * 100 + "%";
+    canvas.appendChild(h);
+  }
+  if (x !== null) {
+    const v = document.createElement("div");
+    v.className = "guide-line v";
+    v.style.left = ((x - canvasRect.left) / canvasRect.width) * 100 + "%";
+    canvas.appendChild(v);
+  }
+}
+
+function getScale(el) {
+  const match = el.style.transform.match(/scale\(([^)]+)\)/);
+  return match ? parseFloat(match[1]) : 1;
+}
+
+function getRotation(el) {
+  const match = el.style.transform.match(/rotate\(([^)]+)deg\)/);
+  return match ? parseFloat(match[1]) : 0;
 }
 
 function isClickOnOpaquePixel(img, event, callback) {
@@ -1300,26 +1426,263 @@ function isClickOnOpaquePixel(img, event, callback) {
   }
 }
 
+function addResizeBars(el) {
+  removeResizeBars();
+
+  const canvas = document.getElementById('actual-canvas');
+  const rect = el.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+
+  // Create selection overlay container
+  const selectionOverlay = document.createElement('div');
+  selectionOverlay.className = 'selection-overlay';
+  selectionOverlay.style.position = 'absolute';
+  selectionOverlay.style.pointerEvents = 'none';
+  selectionOverlay.style.zIndex = '10000';
+  
+  // Calculate position relative to canvas
+  const left = ((rect.left - canvasRect.left) / canvasRect.width) * 100;
+  const top = ((rect.top - canvasRect.top) / canvasRect.height) * 100;
+  const width = (rect.width / canvasRect.width) * 100;
+  const height = (rect.height / canvasRect.height) * 100;
+  
+  selectionOverlay.style.left = left + '%';
+  selectionOverlay.style.top = top + '%';
+  selectionOverlay.style.width = width + '%';
+  selectionOverlay.style.height = height + '%';
+
+  // Create border
+  const border = document.createElement('div');
+  border.className = 'selection-border';
+  border.style.position = 'absolute';
+  border.style.top = '0';
+  border.style.left = '0';
+  border.style.width = '100%';
+  border.style.height = '100%';
+  border.style.border = '2px solid #667eea';
+  border.style.pointerEvents = 'none';
+  selectionOverlay.appendChild(border);
+
+  // Create corner handles
+  const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+  corners.forEach(corner => {
+    const handle = document.createElement('div');
+    handle.className = `resize-handle corner-${corner}`;
+    handle.dataset.side = corner;
+    handle.style.position = 'absolute';
+    handle.style.width = '8px';
+    handle.style.height = '8px';
+    handle.style.background = '#667eea';
+    handle.style.border = '2px solid white';
+    handle.style.borderRadius = '50%';
+    handle.style.cursor = corner.includes('top') && corner.includes('left') || corner.includes('bottom') && corner.includes('right') ? 'nw-resize' : 'ne-resize';
+    handle.style.pointerEvents = 'auto';
+    handle.style.zIndex = '10001';
+    
+    // Position corners
+    if (corner.includes('top')) handle.style.top = '-4px';
+    if (corner.includes('bottom')) handle.style.bottom = '-4px';
+    if (corner.includes('left')) handle.style.left = '-4px';
+    if (corner.includes('right')) handle.style.right = '-4px';
+    
+    selectionOverlay.appendChild(handle);
+  });
+
+  // Create side handles
+  const sides = ['top', 'right', 'bottom', 'left'];
+  sides.forEach(side => {
+    const handle = document.createElement('div');
+    handle.className = `resize-handle side-${side}`;
+    handle.dataset.side = side;
+    handle.style.position = 'absolute';
+    handle.style.background = '#667eea';
+    handle.style.border = '2px solid white';
+    handle.style.borderRadius = '3px';
+    handle.style.pointerEvents = 'auto';
+    handle.style.zIndex = '10001';
+    
+    if (side === 'top' || side === 'bottom') {
+      handle.style.width = '20px';
+      handle.style.height = '6px';
+      handle.style.left = '50%';
+      handle.style.transform = 'translateX(-50%)';
+      handle.style.cursor = 'ns-resize';
+      if (side === 'top') handle.style.top = '-3px';
+      if (side === 'bottom') handle.style.bottom = '-3px';
+    } else {
+      handle.style.width = '6px';
+      handle.style.height = '20px';
+      handle.style.top = '50%';
+      handle.style.transform = 'translateY(-50%)';
+      handle.style.cursor = 'ew-resize';
+      if (side === 'left') handle.style.left = '-3px';
+      if (side === 'right') handle.style.right = '-3px';
+    }
+    
+    selectionOverlay.appendChild(handle);
+  });
+
+  canvas.appendChild(selectionOverlay);
+}
+
+function removeResizeBars() {
+  document.querySelectorAll('.selection-overlay').forEach(overlay => overlay.remove());
+}
+
+// Helper function to check if element should participate in snapping
+function isSnappableElement(el) {
+  // Exclude images from snapping
+  if (el.tagName === 'IMG' || el.classList.contains('image-preview')) {
+    return false;
+  }
+  return el.classList.contains('selectable') || 
+         el.classList.contains('selectable-button') ||
+         el.classList.contains('selectable-textbox');
+}
+
+// Enhanced snapping logic with canvas center support
+function applySnapGuides(selectedElement) {
+  clearGuides();
+  
+  const canvas = document.getElementById('actual-canvas');
+  const canvasRect = canvas.getBoundingClientRect();
+  
+  const get = (el, prop) => parseFloat(el.style[prop] || 0);
+  
+  const b1 = {
+    top: get(selectedElement, 'top'),
+    left: get(selectedElement, 'left'),
+    width: get(selectedElement, 'width'),
+    height: get(selectedElement, 'height'),
+  };
+  
+  const cX1 = b1.left + b1.width / 2;
+  const cY1 = b1.top + b1.height / 2;
+  
+  const threshold = 0.5;
+  let snapped = false;
+  
+  // Canvas center snapping (50% marks)
+  const canvasCenterX = 50;
+  const canvasCenterY = 50;
+  
+  // Snap to canvas center X
+  if (Math.abs(cX1 - canvasCenterX) < threshold) {
+    selectedElement.style.left = (canvasCenterX - b1.width / 2) + "%";
+    showGuideLine(canvasRect.left + canvasRect.width / 2, null);
+    snapped = true;
+  }
+  
+  // Snap to canvas center Y
+  if (Math.abs(cY1 - canvasCenterY) < threshold) {
+    selectedElement.style.top = (canvasCenterY - b1.height / 2) + "%";
+    showGuideLine(null, canvasRect.top + canvasRect.height / 2);
+    snapped = true;
+  }
+  
+  // Element-to-element snapping
+  document.querySelectorAll('#actual-canvas *').forEach(otherEl => {
+    if (otherEl === selectedElement || !isSnappableElement(otherEl)) return;
+    
+    const b2 = {
+      top: get(otherEl, 'top'),
+      left: get(otherEl, 'left'),
+      width: get(otherEl, 'width'),
+      height: get(otherEl, 'height'),
+    };
+    
+    const cX2 = b2.left + b2.width / 2;
+    const cY2 = b2.top + b2.height / 2;
+    
+    const rect2 = otherEl.getBoundingClientRect();
+    const rCenterX = rect2.left + rect2.width / 2;
+    const rCenterY = rect2.top + rect2.height / 2;
+    
+    // Vertical snapping (X-axis)
+    if (Math.abs(b1.left - b2.left) < threshold) {
+      selectedElement.style.left = b2.left + "%";
+      showGuideLine(rect2.left, null);
+      snapped = true;
+    }
+    if (Math.abs(b1.left + b1.width - (b2.left + b2.width)) < threshold) {
+      selectedElement.style.left = (b2.left + b2.width - b1.width) + "%";
+      showGuideLine(rect2.right, null);
+      snapped = true;
+    }
+    if (Math.abs(cX1 - cX2) < threshold) {
+      selectedElement.style.left = (cX2 - b1.width / 2) + "%";
+      showGuideLine(rCenterX, null);
+      snapped = true;
+    }
+    
+    // Horizontal snapping (Y-axis)
+    if (Math.abs(b1.top - b2.top) < threshold) {
+      selectedElement.style.top = b2.top + "%";
+      showGuideLine(null, rect2.top);
+      snapped = true;
+    }
+    if (Math.abs(b1.top + b1.height - (b2.top + b2.height)) < threshold) {
+      selectedElement.style.top = (b2.top + b2.height - b1.height) + "%";
+      showGuideLine(null, rect2.bottom);
+      snapped = true;
+    }
+    if (Math.abs(cY1 - cY2) < threshold) {
+      selectedElement.style.top = (cY2 - b1.height / 2) + "%";
+      showGuideLine(null, rCenterY);
+      snapped = true;
+    }
+    
+    // Edge-to-edge snapping
+    if (Math.abs(b1.left + b1.width - b2.left) < threshold) {
+      selectedElement.style.left = (b2.left - b1.width) + "%";
+      showGuideLine(rect2.left, null);
+      snapped = true;
+    }
+    if (Math.abs(b1.left - (b2.left + b2.width)) < threshold) {
+      selectedElement.style.left = (b2.left + b2.width) + "%";
+      showGuideLine(rect2.right, null);
+      snapped = true;
+    }
+    if (Math.abs(b1.top + b1.height - b2.top) < threshold) {
+      selectedElement.style.top = (b2.top - b1.height) + "%";
+      showGuideLine(null, rect2.top);
+      snapped = true;
+    }
+    if (Math.abs(b1.top - (b2.top + b2.height)) < threshold) {
+      selectedElement.style.top = (b2.top + b2.height) + "%";
+      showGuideLine(null, rect2.bottom);
+      snapped = true;
+    }
+  });
+}
+
+
+// Add this missing function to rebind all event listeners after undo/redo
 function rebindElementEvents() {
+  // Rebind image click events
   document.querySelectorAll('#actual-canvas img.selectable').forEach(img => {
+    // Remove any existing listeners to prevent duplicates
     img.replaceWith(img.cloneNode(true));
     const newImg = document.querySelector(`#actual-canvas img[src="${img.src}"]`);
-
-    newImg.addEventListener("dblclick", function (e) {
+    
+    // Rebind the double-click event for naming
+    newImg.addEventListener("dblclick", function(e) {
       if (this.classList.contains("selectable")) {
         openNamePopupForImage(this);
       }
     });
-
-    newImg.addEventListener("click", function (e) {
+    
+    // Rebind click event for selection
+    newImg.addEventListener("click", function(e) {
       if (!inPreviewMode && !justInteracted) {
-        newImg.addEventListener("contextmenu", function (e) {
-          e.preventDefault();
-          if (!inPreviewMode) {
-            openImageVisualsPopup(this);
-          }
-        });
-
+      // Add double-click to open visuals popup
+newImg.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+  if (!inPreviewMode) {
+    openImageVisualsPopup(this);
+  }
+});
+        // Handle image transparency check if needed
         if (this.style.clipPath || this.dataset.hasTransparency === 'true') {
           isClickOnOpaquePixel(this, e, () => {
             document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
@@ -1340,22 +1703,84 @@ function rebindElementEvents() {
       }
     });
   });
-
+  
+  // Rebind textbox double-click events
   document.querySelectorAll('#actual-canvas .selectable[data-box-type="textbox"]').forEach(textbox => {
-    textbox.addEventListener("dblclick", function (e) {
+    textbox.addEventListener("dblclick", function(e) {
       if (this.classList.contains("selectable") && this.dataset.boxType === 'textbox') {
         openTextboxEditorGUI(this);
       }
     });
   });
-
+  
+  // Rebind button events if you have any
   document.querySelectorAll('#actual-canvas .selectable-button').forEach(button => {
     // Add any specific button event handlers here
   });
 }
 
+function clampZoom(zoom) {
+  return Math.max(ZOOM_CONFIG.min, Math.min(ZOOM_CONFIG.max, zoom));
+}
 
+function showZoomIndicator() {
+  const indicator = document.getElementById('zoom-indicator');
+  indicator.textContent = Math.round(canvasZoom * 100) + '%';
+  indicator.style.opacity = '1';
+  
+  clearTimeout(zoomIndicatorTimeout);
+  zoomIndicatorTimeout = setTimeout(() => {
+    indicator.style.opacity = '0';
+  }, 1500);
+}
 
+function updateCanvasTransform(smooth = true) {
+  const canvasWrapper = document.getElementById('canvas-wrapper');
+  if (canvasWrapper) {
+    canvasWrapper.style.transformOrigin = '0 0';
+    canvasWrapper.style.transition = smooth ? `transform ${ZOOM_CONFIG.smoothness}s cubic-bezier(0.4, 0, 0.2, 1)` : 'none';
+    canvasWrapper.style.transform = `translate(${canvasPanX}px, ${canvasPanY}px) scale(${canvasZoom})`;
+  }
+  showZoomIndicator();
+}
+
+function resetCanvasView() {
+  canvasZoom = 1;
+  canvasPanX = 0;
+  canvasPanY = 0;
+  updateCanvasTransform();
+}
+
+function zoomToPoint(mouseX, mouseY, newZoom, smooth = true) {
+  // Calculate the point in canvas coordinates before zoom
+  const canvasPointX = (mouseX - canvasPanX) / canvasZoom;
+  const canvasPointY = (mouseY - canvasPanY) / canvasZoom;
+  
+  // Apply new zoom
+  canvasZoom = clampZoom(newZoom);
+  
+  // Adjust pan to keep the same point under the mouse
+  canvasPanX = mouseX - (canvasPointX * canvasZoom);
+  canvasPanY = mouseY - (canvasPointY * canvasZoom);
+  
+  updateCanvasTransform(smooth);
+}
+
+function zoomToFit() {
+  const windowWidth = window.innerWidth - 170; // Account for left sidebar
+  const windowHeight = window.innerHeight - 100; // Account for bottom bar
+  const canvasWidth = 1365;
+  const canvasHeight = window.innerHeight - 100;
+  
+  const scaleX = windowWidth / canvasWidth;
+  const scaleY = windowHeight / canvasHeight;
+  const optimalZoom = Math.min(scaleX, scaleY) * 0.9; // 90% of optimal for padding
+  
+  canvasZoom = clampZoom(optimalZoom);
+  canvasPanX = 0;
+  canvasPanY = 0;
+  updateCanvasTransform();
+}
 
 //
 //
@@ -1390,13 +1815,469 @@ document.getElementById("actual-canvas").addEventListener("dblclick", function (
   }
 });
 
+document.addEventListener("click", (e) => {
+  if (inPreviewMode) {
+    if (selectedElement) {
+      selectedElement.classList.remove("selected");
+      selectedElement = null;
+    }
+    return;
+  }
 
-document.addEventListener("keydown", (e) => {
-  if (e.key.toLowerCase() === "escape") {
-    exitPreview();
+  if (justInteracted) return;
+
+  // Always clear any existing selections
+  document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
+  removeResizeBars();
+  selectedElement = null;
+
+  // Select new element if applicable
+  if (isSnappableElement(e.target)) {
+    selectedElement = e.target;
+    selectedElement.classList.add("selected");
+    addResizeBars(selectedElement);
+    e.stopPropagation();
   }
 });
 
+document.addEventListener("keydown", (e) => {
+  const key = e.key.toLowerCase();
+
+  if (key === "escape") {
+    exitPreview();
+    return;
+  }
+
+  if (inPreviewMode) return;
+
+  if (selectedElement) {
+    if (key === "m") interactionMode = "move";
+    if (key === "r") interactionMode = "rotate";
+    if (key === "s") interactionMode = "scale";
+  }
+
+  if ((key === "delete" || key === "backspace") && selectedPageForDelete !== null) {
+    saveState();
+    deleteCurrentPage();
+    return;
+  }
+
+  if (key === "delete" && selectedElement) {
+    const popupVisible = document.getElementById("button-popup");
+    if (!popupVisible || getComputedStyle(popupVisible).display === "none") {
+      if (confirm("Do you want to delete this element?")) {
+        saveState();
+        const index = pages[currentPage].indexOf(selectedElement);
+        if (index !== -1) pages[currentPage].splice(index, 1);
+        selectedElement.remove();
+        selectedElement = null;
+        removeResizeBars();
+      }
+    }
+  }
+
+  if (e.ctrlKey && e.shiftKey && key === "z") {
+    e.preventDefault();
+    redoLastAction();
+  } else if (e.ctrlKey && key === "z") {
+    e.preventDefault();
+    undoLastAction();
+  }
+});
+
+document.getElementById("canvas-wrapper").addEventListener("click", function (e) {
+  if (!justInteracted && (e.target.id === "canvas-wrapper" || e.target.id === "actual-canvas")) {
+    document.querySelectorAll(".selectable").forEach((el) => el.classList.remove("selected"));
+    selectedElement = null;
+    removeResizeBars();
+  }
+});
+
+document.addEventListener("mousedown", function (e) {
+  if (inPreviewMode) return;
+
+  if (interactionMode === null && selectedElement && e.target === selectedElement) {
+    interactionMode = "move";
+  }
+
+  if (!selectedElement || !["move", "scale", "rotate"].includes(interactionMode)) return;
+
+  saveState();
+  isMouseDown = true;
+  justInteracted = true;
+  
+  // Store initial mouse position
+  initialMouseX = e.clientX;
+  initialMouseY = e.clientY;
+  
+  // Store initial element state for scaling and rotation
+  if (interactionMode === "scale" || interactionMode === "rotate") {
+    initialScale = getScale(selectedElement);
+    initialRotation = getRotation(selectedElement);
+    
+    // Calculate initial distance and angle from element center
+    const box = selectedElement.getBoundingClientRect();
+    const centerX = box.left + box.width / 2;
+    const centerY = box.top + box.height / 2;
+    
+    initialDistance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+    initialAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+  }
+});
+
+document.addEventListener("mouseup", function () {
+  if (["move", "scale", "rotate"].includes(interactionMode)) {
+    isMouseDown = false;
+    interactionMode = null;
+    clearGuides();
+    hideRotationDisplay(); // Hide rotation display when done
+    setTimeout(() => { justInteracted = false; }, 50);
+  }
+});
+
+// Replace the mousemove event listener section for "move" interaction mode
+document.addEventListener("mousemove", function (e) {
+  if (inPreviewMode) return;
+  if (!selectedElement || !isMouseDown || !["move", "scale", "rotate"].includes(interactionMode)) return;
+  
+  const canvas = document.getElementById("actual-canvas");
+  const rect = canvas.getBoundingClientRect();
+  
+  if (interactionMode === "move") {
+    const el = selectedElement;
+    
+    // FIXED: Account for canvas zoom when calculating movement
+    // The canvas is transformed, so we need to adjust movement by the zoom factor
+    const adjustedMovementX = e.movementX / canvasZoom;
+    const adjustedMovementY = e.movementY / canvasZoom;
+    
+    // Get the actual canvas dimensions (1365px width as defined in CSS)
+    const actualCanvasWidth = 1365;
+    const actualCanvasHeight = window.innerHeight - 100; // Canvas height from CSS calc
+    
+    // Convert movement to percentage based on actual canvas dimensions
+    const offsetX = (adjustedMovementX / actualCanvasWidth) * 100;
+    const offsetY = (adjustedMovementY / actualCanvasHeight) * 100;
+    
+    let currentLeft = parseFloat(el.style.left);
+    let currentTop = parseFloat(el.style.top);
+
+    if (isNaN(currentLeft) || isNaN(currentTop)) {
+      const elRect = el.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      currentLeft = ((elRect.left - canvasRect.left) / canvasRect.width) * 100;
+      currentTop = ((elRect.top - canvasRect.top) / canvasRect.height) * 100;
+    }
+
+    let newLeft = currentLeft + offsetX;
+    let newTop = currentTop + offsetY;
+
+    // Get the current scale factor
+    const currentScale = getScale(el);
+
+    // Calculate the actual visual dimensions accounting for scale
+    const baseWidth = (el.offsetWidth / actualCanvasWidth) * 100;
+    const baseHeight = (el.offsetHeight / actualCanvasHeight) * 100;
+    const visualWidth = baseWidth * currentScale;
+    const visualHeight = baseHeight * currentScale;
+
+    // Calculate the offset caused by scaling from center (transform-origin: 50% 50%)
+    const scaleOffsetX = (baseWidth - visualWidth) / 2;
+    const scaleOffsetY = (baseHeight - visualHeight) / 2;
+
+    // Adjust the visual bounds accounting for scale offset
+    const visualLeft = newLeft + scaleOffsetX;
+    const visualTop = newTop + scaleOffsetY;
+    const visualRight = visualLeft + visualWidth;
+    const visualBottom = visualTop + visualHeight;
+
+    const snapThreshold = 1;
+
+    // Canvas edge snapping using logical bounds (percentage-based)
+    // These calculations are now zoom-independent
+    
+    // Left edge snapping (0%)
+    if (Math.abs(visualLeft) < snapThreshold) {
+      newLeft = -scaleOffsetX;
+    }
+    
+    // Right edge snapping (100%)
+    if (Math.abs(visualRight - 100) < snapThreshold) {
+      newLeft = 100 - visualWidth - scaleOffsetX;
+    }
+
+    // Top edge snapping (0%)
+    if (Math.abs(visualTop) < snapThreshold) {
+      newTop = -scaleOffsetY;
+    }
+    
+    // Bottom edge snapping (100%)
+    if (Math.abs(visualBottom - 100) < snapThreshold) {
+      newTop = 100 - visualHeight - scaleOffsetY;
+    }
+
+    el.style.left = `${newLeft}%`;
+    el.style.top = `${newTop}%`;
+    
+    // Apply enhanced snapping (only if not an image)
+    if (selectedElement.tagName !== 'IMG' && !selectedElement.classList.contains('image-preview')) {
+      applySnapGuides(selectedElement);
+    }
+  }
+  
+  // ... rest of the rotation and scale logic remains the same
+  if (interactionMode === "scale") {
+    const box = selectedElement.getBoundingClientRect();
+    const centerX = box.left + box.width / 2;
+    const centerY = box.top + box.height / 2;
+    
+    // Calculate current distance from center
+    const currentDistance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+    
+    // Calculate scale change based on distance change from initial
+    const distanceChange = currentDistance - initialDistance;
+    const scaleChange = distanceChange / 150; // Adjust sensitivity here
+    const newScale = Math.max(0.05, initialScale + scaleChange);
+    
+    selectedElement.style.transform = `scale(${newScale}) rotate(${getRotation(selectedElement)}deg)`;
+  }
+  
+  if (interactionMode === "rotate") {
+    const box = selectedElement.getBoundingClientRect();
+    const centerX = box.left + box.width / 2;
+    const centerY = box.top + box.height / 2;
+    
+    // Calculate current angle from center
+    const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    
+    // Calculate rotation change from initial angle
+    const angleChange = currentAngle - initialAngle;
+    let newRotation = initialRotation + angleChange;
+    
+    // Apply snapping if Ctrl is held down
+    if (isCtrlPressed) {
+      newRotation = snapToInterval(newRotation, 15);
+    }
+    
+    // Show rotation display
+    showRotationDisplay(selectedElement, newRotation);
+    
+    selectedElement.style.transform = `rotate(${newRotation}deg) scale(${getScale(selectedElement)})`;
+  }
+});
+
+document.addEventListener("mousedown", (e) => {
+  if (e.target.classList.contains("resize-bar")) {
+    resizing = true;
+    resizeSide = e.target.dataset.side;
+    selectedElement = e.target.parentElement;
+    e.preventDefault();
+
+    saveState(); // Save state before resizing
+
+    const rect = selectedElement.getBoundingClientRect();
+    const canvasRect = document.getElementById("actual-canvas").getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = rect.width;
+    startHeight = rect.height;
+    startLeft = rect.left - canvasRect.left;
+    startTop = rect.top - canvasRect.top;
+    
+    justInteracted = true;
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  if (resizing) {
+    resizing = false;
+    clearGuides();
+    setTimeout(() => { justInteracted = false; }, 50);
+  }
+  hideRotationDisplay(); // Also hide when resizing ends
+  resizeSide = null;
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!resizing || !selectedElement) return;
+
+  const canvas = document.getElementById("actual-canvas");
+  const canvasRect = canvas.getBoundingClientRect();
+  const percent = (val, total) => (val / total) * 100;
+
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+
+  const applyScalingSnapGuides = () => {
+    clearGuides();
+    const get = (el, prop) => parseFloat(el.style[prop] || 0);
+    const b1 = {
+      top: get(selectedElement, 'top'),
+      left: get(selectedElement, 'left'),
+      width: get(selectedElement, 'width'),
+      height: get(selectedElement, 'height'),
+    };
+
+    document.querySelectorAll('#actual-canvas *').forEach(otherEl => {
+      if (otherEl === selectedElement || !isSnappableElement(otherEl)) return;
+
+      const b2 = {
+        top: get(otherEl, 'top'),
+        left: get(otherEl, 'left'),
+        width: get(otherEl, 'width'),
+        height: get(otherEl, 'height'),
+      };
+
+      const cX1 = b1.left + b1.width / 2;
+      const cX2 = b2.left + b2.width / 2;
+      const cY1 = b1.top + b1.height / 2;
+      const cY2 = b2.top + b2.height / 2;
+
+      const rect2 = otherEl.getBoundingClientRect();
+      const rCenterX = rect2.left + rect2.width / 2;
+      const rCenterY = rect2.top + rect2.height / 2;
+      const threshold = 0.5;
+
+      // All the existing scaling snap logic...
+      if (Math.abs(b1.left - b2.left) < threshold && resizeSide === "left") {
+        const diff = b1.left - b2.left;
+        selectedElement.style.left = b2.left + "%";
+        selectedElement.style.width = (b1.width + diff) + "%";
+        showGuideLine(rect2.left, null);
+      }
+
+      if (Math.abs(b1.left + b1.width - (b2.left + b2.width)) < threshold && resizeSide === "right") {
+        selectedElement.style.width = (b2.left + b2.width - b1.left) + "%";
+        showGuideLine(rect2.right, null);
+      }
+
+      if (Math.abs(cX1 - cX2) < threshold) {
+        const diff = cX1 - cX2;
+        if (resizeSide === "left") {
+          selectedElement.style.left = (b1.left - diff) + "%";
+          selectedElement.style.width = (b1.width + diff) + "%";
+        } else if (resizeSide === "right") {
+          selectedElement.style.width = (b1.width - diff) + "%";
+        }
+        showGuideLine(rCenterX, null);
+      }
+
+      if (Math.abs(b1.top - b2.top) < threshold && resizeSide === "top") {
+        const diff = b1.top - b2.top;
+        selectedElement.style.top = b2.top + "%";
+        selectedElement.style.height = (b1.height + diff) + "%";
+        showGuideLine(null, rect2.top);
+      }
+
+      if (Math.abs(b1.top + b1.height - (b2.top + b2.height)) < threshold && resizeSide === "bottom") {
+        selectedElement.style.height = (b2.top + b2.height - b1.top) + "%";
+        showGuideLine(null, rect2.bottom);
+      }
+
+      if (Math.abs(cY1 - cY2) < threshold) {
+        const diff = cY1 - cY2;
+        if (resizeSide === "top") {
+          selectedElement.style.top = (b1.top - diff) + "%";
+          selectedElement.style.height = (b1.height + diff) + "%";
+        } else if (resizeSide === "bottom") {
+          selectedElement.style.height = (b1.height - diff) + "%";
+        }
+        showGuideLine(null, rCenterY);
+      }
+
+      if (resizeSide === "left" && Math.abs(b1.left + b1.width - b2.left) < threshold) {
+        selectedElement.style.width = (b2.left - b1.left) + "%";
+        showGuideLine(rect2.left, null);
+      }
+
+      if (resizeSide === "top" && Math.abs(b1.top + b1.height - b2.top) < threshold) {
+        selectedElement.style.height = (b2.top - b1.top) + "%";
+        showGuideLine(null, rect2.top);
+      }
+
+      if (resizeSide === "left" && Math.abs(b1.left - (b2.left + b2.width)) < threshold) {
+        const diff = b1.left - (b2.left + b2.width);
+        selectedElement.style.left = (b2.left + b2.width) + "%";
+        selectedElement.style.width = (b1.width + diff) + "%";
+        showGuideLine(rect2.right, null);
+      }
+
+      if (resizeSide === "top" && Math.abs(b1.top - (b2.top + b2.height)) < threshold) {
+        const diff = b1.top - (b2.top + b2.height);
+        selectedElement.style.top = (b2.top + b2.height) + "%";
+        selectedElement.style.height = (b1.height + diff) + "%";
+        showGuideLine(null, rect2.bottom);
+      }
+    });
+  };
+
+  if (resizeSide === "left") {
+    let newLeft = startLeft + dx;
+    let newWidth = startWidth - dx;
+
+    if (Math.abs(percent(newLeft, canvasRect.width)) < 1) {
+      newLeft = 0;
+      newWidth = startWidth + startLeft;
+    }
+
+    if (newWidth >= 20) {
+      selectedElement.style.left = percent(newLeft, canvasRect.width) + "%";
+      selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
+      clearGuides();
+      applyScalingSnapGuides();
+    }
+  }
+
+  if (resizeSide === "right") {
+    let newWidth = startWidth + dx;
+
+    let rightEdge = startLeft + newWidth;
+    if (Math.abs(percent(rightEdge, canvasRect.width) - 100) < 1) {
+      newWidth = canvasRect.width - startLeft;
+    }
+
+    if (newWidth >= 20) {
+      selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
+      applyScalingSnapGuides();
+    }
+  }
+
+  if (resizeSide === "top") {
+    let newHeight = startHeight - dy;
+    let newTop = startTop + dy;
+
+    if (Math.abs(percent(newTop, canvasRect.height)) < 1) {
+      newTop = 0;
+      newHeight = startTop + startHeight;
+    }
+
+    if (newHeight >= 20) {
+      selectedElement.style.top = percent(newTop, canvasRect.height) + "%";
+      selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
+      clearGuides();
+      applyScalingSnapGuides();
+    }
+  }
+
+  if (resizeSide === "bottom") {
+    let newHeight = startHeight + dy;
+    let snapped = false;
+
+    const currentTop = parseFloat(selectedElement.style.top || "0");
+    const newBottom = currentTop + percent(newHeight, canvasRect.height);
+
+    if (Math.abs(newBottom - 100) < 1) {
+      newHeight = (100 - currentTop) * canvasRect.height / 100;
+      snapped = true;
+    }
+
+    if (newHeight >= 20) {
+      selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
+      applyScalingSnapGuides();
+      if (snapped) showGuideLine(null, canvasRect.bottom);
+    }
+  }
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key.toLowerCase() === 'c') {
@@ -1419,6 +2300,12 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+document.getElementById('page-buttons').addEventListener('wheel', function (e) {
+  if (e.deltaY !== 0) {
+    e.preventDefault();
+    this.scrollLeft += e.deltaY;
+  }
+});
 renderPageButtons();
 loadScene(currentPage);
 updatePageLabel();
@@ -1432,5 +2319,145 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Control") {
+    isCtrlPressed = true;
+  }
+});
 
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Control") {
+    isCtrlPressed = false;
+  }
+});
+
+
+// Zoom and Pan Event Listeners
+const canvasWrapper = document.getElementById('canvas-wrapper');
+
+// Professional wheel zoom handling
+canvasWrapper.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  // Get mouse position relative to the canvas
+  const rect = canvasWrapper.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  
+  // Calculate zoom delta with improved sensitivity
+  const delta = -e.deltaY * ZOOM_CONFIG.sensitivity;
+  const zoomFactor = Math.exp(delta);
+  const newZoom = canvasZoom * zoomFactor;
+  
+  zoomToPoint(mouseX, mouseY, newZoom, false);
+});
+
+// Mouse panning setup
+canvasWrapper.addEventListener('mousedown', function(e) {
+  if (e.button === 1) { // Middle mouse button
+    e.preventDefault();
+    e.stopPropagation();
+    isPanningWithMiddle = true;
+    lastPanX = e.clientX;
+    lastPanY = e.clientY;
+    document.body.style.cursor = 'grabbing';
+  }
+});
+
+document.getElementById('actual-canvas').addEventListener('mousedown', function(e) {
+  if (e.button === 2) { // Right mouse button
+    e.preventDefault();
+    e.stopPropagation();
+    isPanningWithRight = true;
+    isPanning = true;
+    lastPanX = e.clientX;
+    lastPanY = e.clientY;
+    document.body.style.cursor = 'grabbing';
+  }
+});
+
+document.getElementById('actual-canvas').addEventListener('contextmenu', function(e) {
+  if (isPanningWithRight || isPanning) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+});
+
+document.addEventListener('mouseup', function(e) {
+  if ((e.button === 2 && isPanningWithRight) || (e.button === 1 && isPanningWithMiddle)) {
+    isPanningWithRight = false;
+    isPanningWithMiddle = false;
+    isPanning = false;
+    document.body.style.cursor = '';
+  }
+});
+
+document.addEventListener('mousemove', function(e) {
+  if (isPanningWithMiddle || isPanningWithRight) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const deltaX = e.clientX - lastPanX;
+    const deltaY = e.clientY - lastPanY;
+    
+    canvasPanX += deltaX;
+    canvasPanY += deltaY;
+    
+    lastPanX = e.clientX;
+    lastPanY = e.clientY;
+    
+    updateCanvasTransform(false);
+    
+    isPanning = true;
+  }
+});
+
+// Enhanced keyboard zoom controls
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === '=' || e.key === '+') {
+      e.preventDefault();
+      const rect = canvasWrapper.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const newZoom = canvasZoom + ZOOM_CONFIG.keyboardStep;
+      zoomToPoint(centerX, centerY, newZoom);
+      
+    } else if (e.key === '-') {
+      e.preventDefault();
+      const rect = canvasWrapper.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const newZoom = canvasZoom - ZOOM_CONFIG.keyboardStep;
+      zoomToPoint(centerX, centerY, newZoom);
+      
+    } else if (e.key === '0') {
+      e.preventDefault();
+      resetCanvasView();
+    } else if (e.key === '9') {
+      e.preventDefault();
+      zoomToFit();
+    }
+  }
+});
+
+// Double-click to reset view
+canvasWrapper.addEventListener('dblclick', function(e) {
+  if (e.target === canvasWrapper || e.target === document.getElementById('actual-canvas')) {
+    resetCanvasView();
+  }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+  updateCanvasTransform(false);
+});
+
+// Initialize canvas transform
+document.addEventListener('DOMContentLoaded', function() {
+  updateCanvasTransform();
+});
 </script>

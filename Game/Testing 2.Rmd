@@ -16,7 +16,7 @@ html, body {
   top: 0;
   left: 0;
   width: 170px;
-  height: calc(100vh - 100px); /* Subtract bottom bar height */
+  height: calc(100vh - 100px);
   background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
@@ -25,18 +25,16 @@ html, body {
   align-items: center;
   justify-content: flex-start;
   padding-top: 0px;
-  z-index: 100; /* Higher than menu but lower than file tab */
+  z-index: 100;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   backdrop-filter: blur(10px);
-
-  /* Hide scrollbar visually */
-  -ms-overflow-style: none;  /* IE/Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 #left-box::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Edge */
+  display: none;
 }
 
 #page-label {
@@ -116,9 +114,9 @@ html, body {
   display: flex;
   align-items: center;
   padding-left: 130px;
-  padding-right: 120px; /* Enough space to avoid trash can */
+  padding-right: 120px;
   z-index: 2;
-  overflow: hidden; /* Hide scrollbars */
+  overflow: hidden;
   backdrop-filter: blur(10px);
 }
 
@@ -127,13 +125,14 @@ html, body {
   align-items: center;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-right: 180px; /* Prevents pages from going under trash can */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  padding-right: 180px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   gap: 8px;
 }
+
 #page-buttons::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .page-button {
@@ -152,10 +151,6 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
-  /* Enable dragging for page buttons specifically */
-  -webkit-user-drag: element;
-  /* Allow pointer events for dragging */
-  pointer-events: auto;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
@@ -191,16 +186,6 @@ html, body {
   transform: scale(1.05);
 }
 
-.page-button.dragging {
-  cursor: grabbing;
-  opacity: 0.8;
-  transform: scale(1.1) rotate(2deg);
-  z-index: 1000;
-  /* Maintain dragging capability during drag state */
-  -webkit-user-drag: element;
-  pointer-events: auto;
-}
-
 #trash-can {
   position: fixed;
   bottom: 20px;
@@ -226,30 +211,6 @@ html, body {
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
   transform: scale(1.05);
   box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
-}
-
-#trash-can.drag-over {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-  border: 2px solid #fff;
-  animation: trashPulse 0.6s infinite;
-  box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
-}
-
-@keyframes trashPulse {
-  0% { transform: scale(1.05); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1.05); }
-}
-
-.page-button.to-delete {
-  border: 3px dashed #e74c3c !important;
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-  animation: deleteWarning 1s infinite;
-}
-
-@keyframes deleteWarning {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
 }
 
 #corner-box {
@@ -312,33 +273,24 @@ html, body {
 #scene-area {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  left: 170px;
+  width: calc(100% - 170px);
+  height: calc(100% - 100px);
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#canvas-wrapper {
-  width: 1365px;
-  height: calc(100vh - 100px); /* Full height minus bottom bar */
-  transform-origin: 0 0;
-  position: fixed;
-  top: 0;
-  right: 0; /* Move to right side */
-  margin-right: 0;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#actual-canvas {
+#fabric-canvas-container {
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  position: relative;
+  background: white;
   border-radius: 0px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  position: relative;
 }
 
 .preview-fullscreen #scene-area {
@@ -351,231 +303,11 @@ html, body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.preview-fullscreen #canvas-wrapper {
-  transform: scale(1);
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  right: auto;
-}
-
-.preview-fullscreen #actual-canvas {
+.preview-fullscreen #fabric-canvas-container {
   margin: auto;
   border-radius: 0;
-}
-
-.preview-fullscreen #actual-canvas img {
-  pointer-events: auto;       /* still clickable */
-  user-select: none;          /* can't select */
-  cursor: default !important; /* no move/pointer/crosshair */
-}
-
-.selectable {
-  cursor: pointer;
-}
-
-.selectable.selected {
-  outline: 3px dashed purple;
-  outline-offset: 2px;
-  position: relative;
-  box-shadow: 0 0 10px 2px purple;
-}
-
-.preview-fullscreen #actual-canvas img {
-  pointer-events: auto;
-  user-select: none;
-  cursor: default !important;
-}
-
-.sidebar-button, .page-button, #corner-button, .popup-btn {
-  pointer-events: auto !important;
-  user-select: auto !important;
-}
-
-img.selectable {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-#code-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  padding: 35px;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  z-index: 3000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  width: 650px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
-}
-
-
-<div id="image-visuals-popup">
-<div class="popup-title">Image Visuals</div>
-
-<div class="visuals-section">
-<div class="visuals-grid">
-<div class="visual-control">
-<label>Brightness</label>
-<input type="range" id="brightness" min="0" max="200" value="100">
-<span id="brightness-value">100%</span>
-</div>
-
-<div class="visual-control">
-<label>Contrast</label>
-<input type="range" id="contrast" min="0" max="200" value="100">
-<span id="contrast-value">100%</span>
-</div>
-
-<div class="visual-control">
-<label>Saturation</label>
-<input type="range" id="saturation" min="0" max="200" value="100">
-<span id="saturation-value">100%</span>
-</div>
-
-<div class="visual-control">
-<label>Hue Rotation</label>
-<input type="range" id="hue-rotate" min="0" max="360" value="0">
-<span id="hue-rotate-value">0°</span>
-</div>
-
-<div class="visual-control">
-<label>Grayscale</label>
-<input type="range" id="grayscale" min="0" max="100" value="0">
-<span id="grayscale-value">0%</span>
-</div>
-
-<div class="visual-control">
-<label>Sepia</label>
-<input type="range" id="sepia" min="0" max="100" value="0">
-<span id="sepia-value">0%</span>
-</div>
-
-<div class="visual-control">
-<label>Invert</label>
-<input type="range" id="invert" min="0" max="100" value="0">
-<span id="invert-value">0%</span>
-</div>
-
-<div class="visual-control">
-<label>Blur</label>
-<input type="range" id="blur" min="0" max="10" value="0" step="0.1">
-<span id="blur-value">0px</span>
-</div>
-
-<div class="visual-control">
-<label>Opacity</label>
-<input type="range" id="opacity" min="0" max="100" value="100">
-<span id="opacity-value">100%</span>
-</div>
-
-<div class="visual-control">
-<label>Tint Color</label>
-<input type="color" id="tint-color" value="#ffffff">
-<input type="range" id="tint-opacity" min="0" max="100" value="0">
-<span id="tint-opacity-value">0%</span>
-</div>
-</div>
-</div>
-
-<div class="tools-section">
-<h3 style="margin: 0 0 15px 0; color: #2d3748;">Drawing Tools</h3>
-<div class="tools-grid">
-<button class="tool-button" data-tool="select">Select</button>
-<button class="tool-button" data-tool="glow">Glow Draw</button>
-<button class="tool-button" data-tool="shadow">Shadow Draw</button>
-<button class="tool-button" data-tool="eraser">Eraser</button>
-</div>
-
-<div class="tool-controls">
-<div class="visual-control">
-<label>Tool Size</label>
-<input type="range" id="tool-size" min="1" max="50" value="10">
-<span id="tool-size-value">10px</span>
-</div>
-
-<div class="visual-control">
-<label>Tool Intensity</label>
-<input type="range" id="tool-intensity" min="0" max="100" value="50">
-<span id="tool-intensity-value">50%</span>
-</div>
-
-<div class="visual-control">
-<label>Tool Color</label>
-<input type="color" id="tool-color" value="#ffffff">
-</div>
-</div>
-</div>
-
-<div class="popup-buttons">
-<button class="popup-btn cancel" onclick="closeImageVisualsPopup()">Cancel</button>
-<button class="popup-btn" onclick="applyImageVisuals()">Apply</button>
-</div>
-</div>
-
-#code-popup textarea {
   width: 100%;
-  height: 320px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 18px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
-  font-size: 14px;
-  resize: none;
-  background: #f8fafc;
-  color: #2d3748;
-  transition: all 0.2s ease;
-}
-
-#code-popup textarea:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.code-popup-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.code-popup-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-#textbox-popup-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  padding: 15px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  text-align: center;
-  width: 100%;
+  height: 100%;
 }
 
 #file-tab {
@@ -592,7 +324,7 @@ img.selectable {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
-  z-index: 200; /* Higher than everything else - always on top */
+  z-index: 200;
   margin: 0;
   padding: 0;
   margin-top: 10px;
@@ -605,29 +337,28 @@ img.selectable {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* NEW SLIDING FILE MENU STYLES */
 #file-sliding-menu {
   position: fixed;
   top: 10px;
-  left: 34px; /* Start from behind the file button */
+  left: 34px;
   height: 90px;
   background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  z-index: 50; /* Lower than file tab - stays behind */
+  z-index: 50;
   backdrop-filter: blur(10px);
-  transform: translateX(0); /* Start at the same position as file button */
+  transform: translateX(0);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   align-items: center;
-  width: 136px; /* Same width as file button initially */
+  width: 136px;
 }
 
 #file-sliding-menu.open {
-  transform: translateX(120px); /* Slide out to the right */
-  width: 1005px; /* Expand to fit all items horizontally */
+  transform: translateX(120px);
+  width: 1005px;
 }
 
 .file-menu-item {
@@ -678,7 +409,6 @@ img.selectable {
   border-right: none;
 }
 
-/* Overlay to close menu when clicking outside */
 #file-menu-overlay {
   position: fixed;
   top: 0;
@@ -686,107 +416,14 @@ img.selectable {
   width: 100%;
   height: 100%;
   background: transparent;
-  z-index: 49; /* Lower than menu */
+  z-index: 49;
   display: none;
-  pointer-events: none; /* Don't interfere with menu interactions */
+  pointer-events: none;
 }
 
 #file-menu-overlay.active {
   display: block;
-  pointer-events: auto; /* Only active when menu is open */
-}
-
-.file-dropdown-item {
-  width: 100%;
-  padding: 12px 0;
-  text-align: center;
-  color: white;
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.file-dropdown-item:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transform: translateX(2px);
-}
-
-.file-dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.sidebar-button,
-.sidebar-button * {
-  user-select: none;
-}
-
-/* Modified: Allow dragging for page buttons but prevent for other bottom bar elements */
-#bottom-bar {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-#bottom-bar *:not(.page-button) {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-#corner-box,
-#corner-box * {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-#file-tab {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-#page-label {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.page-button.drag-over {
-  border: 2px dashed rgba(255, 255, 255, 0.6);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 0 25px rgba(102, 126, 234, 0.6);
-}
-
-#actual-canvas {
-  position: relative;
-}
-
-.resize-bar {
-  position: absolute;
-  background: transparent !important;
-  z-index: 1000;
-  opacity: 0; /* full invisibility */
-}
-
-.resize-top, .resize-bottom {
-  height: 6px;
-  width: 100%;
-  left: 0;
-  cursor: ns-resize;
-}
-.resize-top { top: -3px; }
-.resize-bottom { bottom: -3px; }
-
-.resize-left, .resize-right {
-  width: 6px;
-  height: 100%;
-  top: 0;
-  cursor: ew-resize;
-}
-.resize-left { left: -3px; }
-.resize-right { right: -3px; }
-
-body[data-has-cursor-image="true"].in-preview-mode * {
-  cursor: none !important;
+  pointer-events: auto;
 }
 
 #scroll-buttons {
@@ -798,234 +435,7 @@ body[data-has-cursor-image="true"].in-preview-mode * {
   width: 100%;
   padding-top: 10px;
 }
-
-.guide-line {
-  position: absolute;
-  background: #667eea;
-  z-index: 9999;
-  pointer-events: none;
-  box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
-}
-
-.guide-line.h {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 0;
-  border-top: 2px dashed #667eea;
-  z-index: 9999;
-}
-
-.guide-line.v {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 0;
-  border-left: 2px dashed #667eea;
-  z-index: 9999;
-}
-
-
-#image-visuals-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  z-index: 4000;
-  display: none;
-  flex-direction: column;
-  gap: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  width: 800px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
-}
-
-.visuals-section {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.visuals-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.visual-control {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.visual-control label {
-  font-weight: 600;
-  color: #2d3748;
-  font-size: 14px;
-}
-
-.visual-control input[type="range"] {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #e2e8f0;
-  outline: none;
-  -webkit-appearance: none;
-}
-
-.visual-control input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-.visual-control input[type="color"] {
-  width: 50px;
-  height: 30px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.tools-section {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 20px;
-}
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-}
-
-.tool-button {
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-
-.tool-button:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transform: translateY(-1px);
-}
-
-.tool-button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
-}
-
-.tool-controls {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.popup-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  padding: 15px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  text-align: center;
-}
-
-.popup-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 20px;
-}
-
-.popup-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.popup-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.popup-btn.cancel {
-  background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
-}
-
-#reset-view-button {
-  position: fixed;
-  bottom: 120px; /* Above the bottom bar */
-  right: 20px;
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-#reset-view-button:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-}
-
-#zoom-indicator {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  z-index: 100;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
 </style>
-
 <!-- MAIN INTERFACE -->
 <div id="left-box">
 <div id="file-tab" onclick="toggleSlidingFileMenu()">
@@ -1043,7 +453,7 @@ body[data-has-cursor-image="true"].in-preview-mode * {
 </div>
 </div>
 
-<!-- NEW SLIDING FILE MENU -->
+<!-- SLIDING FILE MENU -->
 <div id="file-menu-overlay" onclick="closeSlidingFileMenu()"></div>
 <div id="file-sliding-menu">
 <button class="file-menu-item" onclick="event.stopPropagation(); saveAs()">Save As</button>
@@ -1059,169 +469,257 @@ body[data-has-cursor-image="true"].in-preview-mode * {
 <button class="file-menu-item" onclick="event.stopPropagation(); previewGame()">Preview Game</button>
 </div>
 
+<!-- MAIN CANVAS AREA -->
 <div id="scene-area">
-<div id="canvas-wrapper">
-<div id="actual-canvas"></div>
+<div id="fabric-canvas-container">
+<canvas id="fabric-canvas"></canvas>
 </div>
 </div>
 
+<!-- BOTTOM BAR -->
 <div id="bottom-bar">
 <div id="page-buttons"></div>
 </div>
 
+<!-- TRASH CAN -->
 <div id="trash-can">🗑️</div>
 
-<div id="reset-view-button" onclick="resetCanvasView()" title="Reset View">⌂</div>
-<div id="zoom-indicator">100%</div>
-
+<!-- CORNER BOX -->
 <div id="corner-box">
 <div id="corner-button" onclick="openGlobalProcedures()">
-<img src="Images/GlobalIcon.png" alt="Global Icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;">Global</div>
+<img src="Images/GlobalIcon.png" alt="Global Icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;">Global
+</div>
 </div>
 
-
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-<script src="Scripts/textboxPopup.js"></script>
-<script src="Scripts/addImage.js"></script>
-<script src="Scripts/PreviewGame.js"></script>
-<script src="Scripts/helpPopup.js"></script>
-<script src="Scripts/clickableButton.js"></script>
-<script src="Scripts/addBackground.js"></script>
-<script src="Scripts/page.js"></script>
-<script src="Scripts/viewCode.js"></script>
-<script src="Scripts/openInteractionConfig.js"></script>
-<script src="Scripts/addMusic.js"></script>
-<script src="Scripts/ImagePreviewFunctions.js"></script>
-<script src="Scripts/fileuploadsave.js"></script>
-<script src="Scripts/cursorsettings.js"></script>
-<script src="https://unpkg.com/blockly/blockly.min.js"></script>
-
+<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 
 <script>
-
-//
-//
-//
-//
-// Variables
-//
-//
-//
-//
-
+// Basic variables for UI state
 let isFileMenuOpen = false;
-let selectedElement = null;
 let currentPage = 1;
 let totalPages = 1;
-let pages = { 1: [] };
-let selectedPageForDelete = null;
-let interactionMode = null; // 'move' | 'scale' | 'rotate'
-let isMouseDown = false;
-let copiedButtonLayout = null;
-let savedTextboxLayout = null;
-if (!pages[currentPage]) pages[currentPage] = [];
-if (!pages[currentPage].meta) pages[currentPage].meta = {};
+let pages = { 1: { objects: [] } };
 let inPreviewMode = false;
-let justInteracted = false;
-let remainingAssignedImages = (pages[currentPage]?.meta?.textboxConfig?.assignedNames || []).length;
-let resizing = false;
-let resizeSide = null;
-let copiedElement = null;
-let startX, startY, startWidth, startHeight, startLeft, startTop;
-let actionHistory = [];
-let redoHistory = [];
-let maxHistorySize = 20; // Limit history to prevent memory issues
-let savedEventListeners = [];
-let globalImages = [];
-let initialMouseX = 0;
-let initialMouseY = 0;
-let initialScale = 1;
-let initialRotation = 0;
-let initialDistance = 0;
-let initialAngle = 0;
-let isCtrlPressed = false;
-let rotationDisplay = null;
-let currentEditingImage = null;
-let currentTool = 'select';
-let originalImageFilters = {};
-// Zoom and pan variables
-const ZOOM_CONFIG = {
-  min: 0.1,
-  max: 10,
-  step: 0.1,
-  keyboardStep: 0.2,
-  sensitivity: 0.001,
-  smoothness: 0.15
-};
+let fabricCanvas = null;
 
-let canvasZoom = 1;
-let canvasPanX = 0;
-let canvasPanY = 0;
-let isPanning = false;
-let lastPanX = 0;
-let lastPanY = 0;
-let zoomIndicatorTimeout;
-let isPanningWithMiddle = false;
-let isPanningWithRight = false;
+// Initialize Fabric.js Canvas
+function initializeFabricCanvas() {
+  const container = document.getElementById('fabric-canvas-container');
+  const canvasElement = document.getElementById('fabric-canvas');
+  
+  fabricCanvas = new fabric.Canvas('fabric-canvas', {
+    width: container.clientWidth,
+    height: container.clientHeight,
+    backgroundColor: '#ffffff',
+    selection: true,
+    preserveObjectStacking: true,
+    renderOnAddRemove: true,
+    enableRetinaScaling: true,
+    imageSmoothingEnabled: true
+  });
 
+  // Enable zoom with mouse wheel
+  fabricCanvas.on('mouse:wheel', function(opt) {
+    var delta = opt.e.deltaY;
+    var zoom = fabricCanvas.getZoom();
+    zoom *= 0.999 ** delta;
+    if (zoom > 20) zoom = 20;
+    if (zoom < 0.01) zoom = 0.01;
+    fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+    opt.e.preventDefault();
+    opt.e.stopPropagation();
+  });
 
-//
-//
-//
-//
-//
-// Functions
-//
-//
-//
-//
+  // Enable panning with middle mouse button or right click
+  let isDragging = false;
+  let lastPosX = 0;
+  let lastPosY = 0;
 
+  fabricCanvas.on('mouse:down', function(opt) {
+    var evt = opt.e;
+    if (evt.button === 1 || (evt.button === 2 && !fabricCanvas.getActiveObject())) { // Middle click or right click on empty space
+      isDragging = true;
+      fabricCanvas.selection = false;
+      lastPosX = evt.clientX;
+      lastPosY = evt.clientY;
+      fabricCanvas.setCursor('grab');
+    }
+  });
 
+  fabricCanvas.on('mouse:move', function(opt) {
+    if (isDragging) {
+      var e = opt.e;
+      var vpt = fabricCanvas.viewportTransform;
+      vpt[4] += e.clientX - lastPosX;
+      vpt[5] += e.clientY - lastPosY;
+      fabricCanvas.requestRenderAll();
+      lastPosX = e.clientX;
+      lastPosY = e.clientY;
+      fabricCanvas.setCursor('grabbing');
+    }
+  });
 
+  fabricCanvas.on('mouse:up', function(opt) {
+    if (isDragging) {
+      fabricCanvas.setViewportTransform(fabricCanvas.viewportTransform);
+      isDragging = false;
+      fabricCanvas.selection = true;
+      fabricCanvas.setCursor('default');
+    }
+  });
 
-function showRotationDisplay(element, rotation) {
-  // Remove existing display
-  if (rotationDisplay) {
-    rotationDisplay.remove();
+  // Disable context menu on canvas to allow right-click panning
+  fabricCanvas.wrapperEl.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+      switch(e.key.toLowerCase()) {
+        case 'z':
+          if (e.shiftKey) {
+            // Redo (Ctrl+Shift+Z)
+            e.preventDefault();
+            // Fabric.js doesn't have built-in undo/redo, you'd need to implement this
+            console.log('Redo action');
+          } else {
+            // Undo (Ctrl+Z)
+            e.preventDefault();
+            console.log('Undo action');
+          }
+          break;
+        case 'c':
+          // Copy (Ctrl+C)
+          e.preventDefault();
+          copySelectedObject();
+          break;
+        case 'v':
+          // Paste (Ctrl+V)
+          e.preventDefault();
+          pasteObject();
+          break;
+        case 'a':
+          // Select all (Ctrl+A)
+          e.preventDefault();
+          selectAllObjects();
+          break;
+        case '=':
+        case '+':
+          // Zoom in
+          e.preventDefault();
+          zoomIn();
+          break;
+        case '-':
+          // Zoom out
+          e.preventDefault();
+          zoomOut();
+          break;
+        case '0':
+          // Reset zoom
+          e.preventDefault();
+          resetZoom();
+          break;
+      }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      // Delete selected objects
+      deleteSelectedObjects();
+    } else if (e.key === 'Escape') {
+      // Deselect all
+      fabricCanvas.discardActiveObject();
+      fabricCanvas.requestRenderAll();
+      if (isFileMenuOpen) {
+        closeSlidingFileMenu();
+      }
+    }
+  });
+
+  return fabricCanvas;
+}
+
+// Fabric.js utility functions
+let copiedObject = null;
+
+function copySelectedObject() {
+  const activeObject = fabricCanvas.getActiveObject();
+  if (activeObject) {
+    activeObject.clone(function(cloned) {
+      copiedObject = cloned;
+    });
   }
-  
-  // Create rotation display
-  rotationDisplay = document.createElement('div');
-  rotationDisplay.style.position = 'absolute';
-  rotationDisplay.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-  rotationDisplay.style.color = 'white';
-  rotationDisplay.style.padding = '8px 16px';
-  rotationDisplay.style.borderRadius = '20px';
-  rotationDisplay.style.fontSize = '14px';
-  rotationDisplay.style.fontWeight = '600';
-  rotationDisplay.style.zIndex = '10000';
-  rotationDisplay.style.pointerEvents = 'none';
-  rotationDisplay.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
-  rotationDisplay.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-  rotationDisplay.style.backdropFilter = 'blur(10px)';
-  rotationDisplay.textContent = `${Math.round(rotation)}°`;
-  
-  // Position above the element
-  const rect = element.getBoundingClientRect();
-  rotationDisplay.style.left = (rect.left + rect.width / 2 - 30) + 'px';
-  rotationDisplay.style.top = (rect.top - 50) + 'px';
-  
-  document.body.appendChild(rotationDisplay);
 }
 
-function hideRotationDisplay() {
-  if (rotationDisplay) {
-    rotationDisplay.remove();
-    rotationDisplay = null;
+function pasteObject() {
+  if (copiedObject) {
+    copiedObject.clone(function(clonedObj) {
+      fabricCanvas.discardActiveObject();
+      clonedObj.set({
+        left: clonedObj.left + 10,
+        top: clonedObj.top + 10,
+        evented: true,
+      });
+      if (clonedObj.type === 'activeSelection') {
+        clonedObj.canvas = fabricCanvas;
+        clonedObj.forEachObject(function(obj) {
+          fabricCanvas.add(obj);
+        });
+        clonedObj.setCoords();
+      } else {
+        fabricCanvas.add(clonedObj);
+      }
+      fabricCanvas.setActiveObject(clonedObj);
+      fabricCanvas.requestRenderAll();
+    });
   }
 }
 
-function snapToInterval(angle, interval = 15) {
-  return Math.round(angle / interval) * interval;
+function selectAllObjects() {
+  const allObjects = fabricCanvas.getObjects();
+  if (allObjects.length > 0) {
+    const selection = new fabric.ActiveSelection(allObjects, {
+      canvas: fabricCanvas,
+    });
+    fabricCanvas.setActiveObject(selection);
+    fabricCanvas.requestRenderAll();
+  }
 }
 
+function deleteSelectedObjects() {
+  const activeObjects = fabricCanvas.getActiveObjects();
+  if (activeObjects.length > 0) {
+    fabricCanvas.discardActiveObject();
+    activeObjects.forEach(obj => {
+      fabricCanvas.remove(obj);
+    });
+    fabricCanvas.requestRenderAll();
+  }
+}
 
+function zoomIn() {
+  const zoom = fabricCanvas.getZoom();
+  fabricCanvas.setZoom(Math.min(zoom * 1.1, 20));
+}
+
+function zoomOut() {
+  const zoom = fabricCanvas.getZoom();
+  fabricCanvas.setZoom(Math.max(zoom * 0.9, 0.01));
+}
+
+function resetZoom() {
+  fabricCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+  fabricCanvas.setZoom(1);
+}
+
+function resizeCanvas() {
+  const container = document.getElementById('fabric-canvas-container');
+  fabricCanvas.setDimensions({
+    width: container.clientWidth,
+    height: container.clientHeight
+  });
+}
+
+// File menu functions
 function toggleSlidingFileMenu() {
   const menu = document.getElementById('file-sliding-menu');
   const overlay = document.getElementById('file-menu-overlay');
@@ -1251,959 +749,423 @@ function closeSlidingFileMenu() {
   isFileMenuOpen = false;
 }
 
+// Page management functions
+function renderPageButtons() {
+  const container = document.getElementById('page-buttons');
+  container.innerHTML = '';
+  
+  for (let i = 1; i <= totalPages; i++) {
+    const button = document.createElement('div');
+    button.className = 'page-button';
+    button.textContent = i;
+    button.onclick = () => switchToPage(i);
+    
+    if (i === currentPage) {
+      button.classList.add('selected');
+    }
+    
+    container.appendChild(button);
+  }
+}
+
+function switchToPage(pageNum) {
+  if (pageNum >= 1 && pageNum <= totalPages) {
+    // Save current page state
+    if (fabricCanvas) {
+      pages[currentPage].objects = fabricCanvas.toJSON();
+    }
+    
+    currentPage = pageNum;
+    updatePageLabel();
+    renderPageButtons();
+    
+    // Load new page state
+    if (fabricCanvas && pages[currentPage]) {
+      fabricCanvas.loadFromJSON(pages[currentPage].objects || { objects: [] }, function() {
+        fabricCanvas.requestRenderAll();
+      });
+    }
+  }
+}
+
+function addNewPage() {
+  totalPages++;
+  pages[totalPages] = { objects: [] };
+  switchToPage(totalPages);
+}
+
+function deletePage(pageNum) {
+  if (totalPages <= 1) return; // Can't delete the last page
+  
+  delete pages[pageNum];
+  
+  // Renumber pages
+  const newPages = {};
+  let newPageNum = 1;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i !== pageNum && pages[i]) {
+      newPages[newPageNum] = pages[i];
+      newPageNum++;
+    }
+  }
+  
+  pages = newPages;
+  totalPages--;
+  
+  if (currentPage >= pageNum && currentPage > 1) {
+    currentPage--;
+  }
+  
+  renderPageButtons();
+  updatePageLabel();
+  
+  // Load current page
+  if (fabricCanvas && pages[currentPage]) {
+    fabricCanvas.loadFromJSON(pages[currentPage].objects || { objects: [] }, function() {
+      fabricCanvas.requestRenderAll();
+    });
+  }
+}
+
+function updatePageLabel() {
+  document.getElementById('page-label').textContent = `PAGE ${currentPage}`;
+}
+
+// Fabric.js implementation functions
+function addBackground() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        fabric.Image.fromURL(event.target.result, function(img) {
+          // Scale image to fit canvas as background
+          const canvasWidth = fabricCanvas.getWidth();
+          const canvasHeight = fabricCanvas.getHeight();
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+          
+          const scaleX = canvasWidth / imgWidth;
+          const scaleY = canvasHeight / imgHeight;
+          const scale = Math.max(scaleX, scaleY);
+          
+          img.set({
+            scaleX: scale,
+            scaleY: scale,
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false
+          });
+          
+          fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+
+function addImage() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        fabric.Image.fromURL(event.target.result, function(img) {
+          img.set({
+            left: 100,
+            top: 100,
+            scaleX: 0.5,
+            scaleY: 0.5
+          });
+          fabricCanvas.add(img);
+          fabricCanvas.setActiveObject(img);
+          fabricCanvas.requestRenderAll();
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+
+function showTextboxPopup() {
+  const text = prompt('Enter text:');
+  if (text) {
+    const textObj = new fabric.Text(text, {
+      left: 100,
+      top: 100,
+      fontFamily: 'Arial',
+      fontSize: 20,
+      fill: '#000000'
+    });
+    fabricCanvas.add(textObj);
+    fabricCanvas.setActiveObject(textObj);
+    fabricCanvas.requestRenderAll();
+  }
+}
+
+function showButtonPopup() {
+  // Add a rectangle that looks like a button
+  const button = new fabric.Rect({
+    left: 100,
+    top: 100,
+    width: 120,
+    height: 40,
+    fill: '#667eea',
+    stroke: '#4a5568',
+    strokeWidth: 2,
+    rx: 8,
+    ry: 8
+  });
+  
+  const buttonText = new fabric.Text('Button', {
+    left: 160,
+    top: 120,
+    fontFamily: 'Arial',
+    fontSize: 14,
+    fill: '#ffffff',
+    originX: 'center',
+    originY: 'center'
+  });
+  
+  const group = new fabric.Group([button, buttonText], {
+    left: 100,
+    top: 100
+  });
+  
+  fabricCanvas.add(group);
+  fabricCanvas.setActiveObject(group);
+  fabricCanvas.requestRenderAll();
+}
+
+function addMusic() {
+  alert('Audio functionality would require additional implementation');
+}
+
+function openInteractionConfig() {
+  alert('Effects Editor would require additional implementation');
+}
+
+function CursorSettings() {
+  alert('Cursor Editor would require additional implementation');
+}
+
+// File operations
 function saveAs() {
-  alert('Save As clicked');
+  const json = JSON.stringify({
+    pages: pages,
+    currentPage: currentPage,
+    totalPages: totalPages,
+    currentCanvas: fabricCanvas.toJSON()
+  });
+  
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fabric-project.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  
   closeSlidingFileMenu();
 }
 
 function saveFile() {
-  alert('Save clicked');
+  // Save current canvas state to current page
+  if (fabricCanvas) {
+    pages[currentPage].objects = fabricCanvas.toJSON();
+  }
+  console.log('Project saved to memory');
   closeSlidingFileMenu();
 }
 
 function uploadFile() {
-  alert('Upload clicked');
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const data = JSON.parse(event.target.result);
+          pages = data.pages || { 1: { objects: [] } };
+          currentPage = data.currentPage || 1;
+          totalPages = data.totalPages || 1;
+          
+          if (data.currentCanvas && fabricCanvas) {
+            fabricCanvas.loadFromJSON(data.currentCanvas, function() {
+              fabricCanvas.requestRenderAll();
+            });
+          }
+          
+          renderPageButtons();
+          updatePageLabel();
+        } catch (error) {
+          alert('Error loading file: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
   closeSlidingFileMenu();
 }
 
 function openFile() {
-  alert('Open clicked');
-  closeSlidingFileMenu();
+  uploadFile(); // Same as upload for now
 }
 
 function shareFile() {
-  alert('Share clicked');
+  if (navigator.share && fabricCanvas) {
+    const dataURL = fabricCanvas.toDataURL('image/png');
+    fetch(dataURL)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'canvas-export.png', { type: 'image/png' });
+        navigator.share({
+          files: [file],
+          title: 'My Fabric Canvas'
+        });
+      });
+  } else {
+    alert('Sharing not supported on this browser');
+  }
   closeSlidingFileMenu();
 }
 
-
-function saveState() {
-  const state = {
-    canvas: document.getElementById("actual-canvas").innerHTML,
-    pages: JSON.parse(JSON.stringify(pages)),
-    currentPage: currentPage,
-    totalPages: totalPages
-  };
-  
-  actionHistory.push(state);
-  
-  // Clear redo history when a new action is performed
-  redoHistory = [];
-  
-  // Limit history size
-  if (actionHistory.length > maxHistorySize) {
-    actionHistory.shift();
-  }
-}
-
-// Updated undo function
-function undoLastAction() {
-  if (actionHistory.length === 0) return;
-
-  // Save current state to redo history before undoing
-  const currentState = {
-    canvas: document.getElementById("actual-canvas").innerHTML,
-    pages: JSON.parse(JSON.stringify(pages)),
-    currentPage: currentPage,
-    totalPages: totalPages
-  };
-  redoHistory.push(currentState);
-
-  const canvas = document.getElementById("actual-canvas");
-  const previousState = actionHistory.pop();
-  
-  // Restore canvas content
-  canvas.innerHTML = previousState.canvas;
-  
-  // Restore page data
-  pages = previousState.pages;
-  currentPage = previousState.currentPage;
-  totalPages = previousState.totalPages;
-  
-  // Clear selection
-  selectedElement = null;
-  removeResizeBars();
-  
-  // CRITICAL: Rebind events for all elements
-  rebindElementEvents();
-  renderPageButtons();
-  updatePageLabel();
-}
-
-// Updated redo function
-function redoLastAction() {
-  if (redoHistory.length === 0) return;
-
-  // Save current state to action history before redoing
-  const currentState = {
-    canvas: document.getElementById("actual-canvas").innerHTML,
-    pages: JSON.parse(JSON.stringify(pages)),
-    currentPage: currentPage,
-    totalPages: totalPages
-  };
-  actionHistory.push(currentState);
-
-  const canvas = document.getElementById("actual-canvas");
-  const nextState = redoHistory.pop();
-  
-  // Restore canvas content
-  canvas.innerHTML = nextState.canvas;
-  
-  // Restore page data
-  pages = nextState.pages;
-  currentPage = nextState.currentPage;
-  totalPages = nextState.totalPages;
-  
-  // Clear selection
-  selectedElement = null;
-  removeResizeBars();
-  
-  // CRITICAL: Rebind events for all elements
-  rebindElementEvents();
-  renderPageButtons();
-  updatePageLabel();
-}
-
-function clearGuides() {
-  document.querySelectorAll('.guide-line').forEach(g => g.remove());
-}
-
-function showGuideLine(x, y) {
-  const canvas = document.getElementById("actual-canvas");
-  const canvasRect = canvas.getBoundingClientRect();
-
-  if (y !== null) {
-    const h = document.createElement("div");
-    h.className = "guide-line h";
-    h.style.top = ((y - canvasRect.top) / canvasRect.height) * 100 + "%";
-    canvas.appendChild(h);
-  }
-  if (x !== null) {
-    const v = document.createElement("div");
-    v.className = "guide-line v";
-    v.style.left = ((x - canvasRect.left) / canvasRect.width) * 100 + "%";
-    canvas.appendChild(v);
-  }
-}
-
-function getScale(el) {
-  const match = el.style.transform.match(/scale\(([^)]+)\)/);
-  return match ? parseFloat(match[1]) : 1;
-}
-
-function getRotation(el) {
-  const match = el.style.transform.match(/rotate\(([^)]+)deg\)/);
-  return match ? parseFloat(match[1]) : 0;
-}
-
-function isClickOnOpaquePixel(img, event, callback) {
-  if (!img.complete || img.naturalWidth === 0) {
-    img.onload = () => isClickOnOpaquePixel(img, event, callback);
-    return;
-  }
-
-  const rect = img.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-
-  const scaleX = img.naturalWidth / rect.width;
-  const scaleY = img.naturalHeight / rect.height;
-  const pixelX = Math.floor(x * scaleX);
-  const pixelY = Math.floor(y * scaleY);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-
-  try {
-    const alpha = ctx.getImageData(pixelX, pixelY, 1, 1).data[3];
-    if (alpha > 0) callback();
-  } catch (err) {
-    console.warn('Pixel check failed:', err);
-    callback();
-  }
-}
-
-function addResizeBars(el) {
-  removeResizeBars();
-
-  const sides = ['top', 'right', 'bottom', 'left'];
-  sides.forEach(side => {
-    const bar = document.createElement('div');
-    bar.className = `resize-bar resize-${side}`;
-    bar.dataset.side = side;
-    el.appendChild(bar);
-  });
-}
-
-function removeResizeBars() {
-  document.querySelectorAll('.resize-bar').forEach(bar => bar.remove());
-}
-
-// Helper function to check if element should participate in snapping
-function isSnappableElement(el) {
-  // Exclude images from snapping
-  if (el.tagName === 'IMG' || el.classList.contains('image-preview')) {
-    return false;
-  }
-  return el.classList.contains('selectable') || 
-         el.classList.contains('selectable-button') ||
-         el.classList.contains('selectable-textbox');
-}
-
-// Enhanced snapping logic with canvas center support
-function applySnapGuides(selectedElement) {
-  clearGuides();
-  
-  const canvas = document.getElementById('actual-canvas');
-  const canvasRect = canvas.getBoundingClientRect();
-  
-  const get = (el, prop) => parseFloat(el.style[prop] || 0);
-  
-  const b1 = {
-    top: get(selectedElement, 'top'),
-    left: get(selectedElement, 'left'),
-    width: get(selectedElement, 'width'),
-    height: get(selectedElement, 'height'),
-  };
-  
-  const cX1 = b1.left + b1.width / 2;
-  const cY1 = b1.top + b1.height / 2;
-  
-  const threshold = 0.5;
-  let snapped = false;
-  
-  // Canvas center snapping (50% marks)
-  const canvasCenterX = 50;
-  const canvasCenterY = 50;
-  
-  // Snap to canvas center X
-  if (Math.abs(cX1 - canvasCenterX) < threshold) {
-    selectedElement.style.left = (canvasCenterX - b1.width / 2) + "%";
-    showGuideLine(canvasRect.left + canvasRect.width / 2, null);
-    snapped = true;
-  }
-  
-  // Snap to canvas center Y
-  if (Math.abs(cY1 - canvasCenterY) < threshold) {
-    selectedElement.style.top = (canvasCenterY - b1.height / 2) + "%";
-    showGuideLine(null, canvasRect.top + canvasRect.height / 2);
-    snapped = true;
-  }
-  
-  // Element-to-element snapping
-  document.querySelectorAll('#actual-canvas *').forEach(otherEl => {
-    if (otherEl === selectedElement || !isSnappableElement(otherEl)) return;
-    
-    const b2 = {
-      top: get(otherEl, 'top'),
-      left: get(otherEl, 'left'),
-      width: get(otherEl, 'width'),
-      height: get(otherEl, 'height'),
-    };
-    
-    const cX2 = b2.left + b2.width / 2;
-    const cY2 = b2.top + b2.height / 2;
-    
-    const rect2 = otherEl.getBoundingClientRect();
-    const rCenterX = rect2.left + rect2.width / 2;
-    const rCenterY = rect2.top + rect2.height / 2;
-    
-    // Vertical snapping (X-axis)
-    if (Math.abs(b1.left - b2.left) < threshold) {
-      selectedElement.style.left = b2.left + "%";
-      showGuideLine(rect2.left, null);
-      snapped = true;
-    }
-    if (Math.abs(b1.left + b1.width - (b2.left + b2.width)) < threshold) {
-      selectedElement.style.left = (b2.left + b2.width - b1.width) + "%";
-      showGuideLine(rect2.right, null);
-      snapped = true;
-    }
-    if (Math.abs(cX1 - cX2) < threshold) {
-      selectedElement.style.left = (cX2 - b1.width / 2) + "%";
-      showGuideLine(rCenterX, null);
-      snapped = true;
-    }
-    
-    // Horizontal snapping (Y-axis)
-    if (Math.abs(b1.top - b2.top) < threshold) {
-      selectedElement.style.top = b2.top + "%";
-      showGuideLine(null, rect2.top);
-      snapped = true;
-    }
-    if (Math.abs(b1.top + b1.height - (b2.top + b2.height)) < threshold) {
-      selectedElement.style.top = (b2.top + b2.height - b1.height) + "%";
-      showGuideLine(null, rect2.bottom);
-      snapped = true;
-    }
-    if (Math.abs(cY1 - cY2) < threshold) {
-      selectedElement.style.top = (cY2 - b1.height / 2) + "%";
-      showGuideLine(null, rCenterY);
-      snapped = true;
-    }
-    
-    // Edge-to-edge snapping
-    if (Math.abs(b1.left + b1.width - b2.left) < threshold) {
-      selectedElement.style.left = (b2.left - b1.width) + "%";
-      showGuideLine(rect2.left, null);
-      snapped = true;
-    }
-    if (Math.abs(b1.left - (b2.left + b2.width)) < threshold) {
-      selectedElement.style.left = (b2.left + b2.width) + "%";
-      showGuideLine(rect2.right, null);
-      snapped = true;
-    }
-    if (Math.abs(b1.top + b1.height - b2.top) < threshold) {
-      selectedElement.style.top = (b2.top - b1.height) + "%";
-      showGuideLine(null, rect2.top);
-      snapped = true;
-    }
-    if (Math.abs(b1.top - (b2.top + b2.height)) < threshold) {
-      selectedElement.style.top = (b2.top + b2.height) + "%";
-      showGuideLine(null, rect2.bottom);
-      snapped = true;
-    }
-  });
-}
-
-
-// Add this missing function to rebind all event listeners after undo/redo
-function rebindElementEvents() {
-  // Rebind image click events
-  document.querySelectorAll('#actual-canvas img.selectable').forEach(img => {
-    // Remove any existing listeners to prevent duplicates
-    img.replaceWith(img.cloneNode(true));
-    const newImg = document.querySelector(`#actual-canvas img[src="${img.src}"]`);
-    
-    // Rebind the double-click event for naming
-    newImg.addEventListener("dblclick", function(e) {
-      if (this.classList.contains("selectable")) {
-        openNamePopupForImage(this);
-      }
+function ExportFile() {
+  if (fabricCanvas) {
+    const dataURL = fabricCanvas.toDataURL({
+      format: 'png',
+      quality: 1.0,
+      multiplier: 2
     });
     
-    // Rebind click event for selection
-    newImg.addEventListener("click", function(e) {
-      if (!inPreviewMode && !justInteracted) {
-      // Add double-click to open visuals popup
-newImg.addEventListener("contextmenu", function(e) {
-  e.preventDefault();
-  if (!inPreviewMode) {
-    openImageVisualsPopup(this);
+    const link = document.createElement('a');
+    link.download = 'canvas-export.png';
+    link.href = dataURL;
+    link.click();
   }
-});
-        // Handle image transparency check if needed
-        if (this.style.clipPath || this.dataset.hasTransparency === 'true') {
-          isClickOnOpaquePixel(this, e, () => {
-            document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
-            removeResizeBars();
-            selectedElement = this;
-            this.classList.add("selected");
-            addResizeBars(this);
-            e.stopPropagation();
-          });
-        } else {
-          document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
-          removeResizeBars();
-          selectedElement = this;
-          this.classList.add("selected");
-          addResizeBars(this);
-          e.stopPropagation();
-        }
-      }
-    });
-  });
-  
-  // Rebind textbox double-click events
-  document.querySelectorAll('#actual-canvas .selectable[data-box-type="textbox"]').forEach(textbox => {
-    textbox.addEventListener("dblclick", function(e) {
-      if (this.classList.contains("selectable") && this.dataset.boxType === 'textbox') {
-        openTextboxEditorGUI(this);
-      }
-    });
-  });
-  
-  // Rebind button events if you have any
-  document.querySelectorAll('#actual-canvas .selectable-button').forEach(button => {
-    // Add any specific button event handlers here
-  });
+  closeSlidingFileMenu();
 }
 
-function clampZoom(zoom) {
-  return Math.max(ZOOM_CONFIG.min, Math.min(ZOOM_CONFIG.max, zoom));
+function ImportFile() {
+  uploadFile(); // Same as upload for now
 }
 
-function showZoomIndicator() {
-  const indicator = document.getElementById('zoom-indicator');
-  indicator.textContent = Math.round(canvasZoom * 100) + '%';
-  indicator.style.opacity = '1';
-  
-  clearTimeout(zoomIndicatorTimeout);
-  zoomIndicatorTimeout = setTimeout(() => {
-    indicator.style.opacity = '0';
-  }, 1500);
-}
-
-function updateCanvasTransform(smooth = true) {
-  const canvasWrapper = document.getElementById('canvas-wrapper');
-  if (canvasWrapper) {
-    canvasWrapper.style.transformOrigin = '0 0';
-    canvasWrapper.style.transition = smooth ? `transform ${ZOOM_CONFIG.smoothness}s cubic-bezier(0.4, 0, 0.2, 1)` : 'none';
-    canvasWrapper.style.transform = `translate(${canvasPanX}px, ${canvasPanY}px) scale(${canvasZoom})`;
+function viewCode() {
+  if (fabricCanvas) {
+    const json = JSON.stringify(fabricCanvas.toJSON(), null, 2);
+    const popup = window.open('', '_blank', 'width=600,height=400');
+    popup.document.write(`
+      <html>
+        <head><title>Canvas JSON</title></head>
+        <body>
+          <h3>Fabric.js Canvas JSON:</h3>
+          <pre style="white-space: pre-wrap; font-family: monospace;">${json}</pre>
+        </body>
+      </html>
+    `);
   }
-  showZoomIndicator();
+  closeSlidingFileMenu();
 }
 
-function resetCanvasView() {
-  canvasZoom = 1;
-  canvasPanX = 0;
-  canvasPanY = 0;
-  updateCanvasTransform();
+function ToolsFile() {
+  // Add some basic shapes
+  const shapes = [
+    () => {
+      const rect = new fabric.Rect({
+        left: 100, top: 100, width: 100, height: 100,
+        fill: '#667eea', stroke: '#4a5568', strokeWidth: 2
+      });
+      fabricCanvas.add(rect);
+    },
+    () => {
+      const circle = new fabric.Circle({
+        left: 100, top: 100, radius: 50,
+        fill: '#764ba2', stroke: '#4a5568', strokeWidth: 2
+      });
+      fabricCanvas.add(circle);
+    },
+    () => {
+      const triangle = new fabric.Triangle({
+        left: 100, top: 100, width: 100, height: 100,
+        fill: '#e74c3c', stroke: '#4a5568', strokeWidth: 2
+      });
+      fabricCanvas.add(triangle);
+    }
+  ];
+  
+  const shapeIndex = Math.floor(Math.random() * shapes.length);
+  shapes[shapeIndex]();
+  fabricCanvas.requestRenderAll();
+  
+  closeSlidingFileMenu();
 }
 
-function zoomToPoint(mouseX, mouseY, newZoom, smooth = true) {
-  // Calculate the point in canvas coordinates before zoom
-  const canvasPointX = (mouseX - canvasPanX) / canvasZoom;
-  const canvasPointY = (mouseY - canvasPanY) / canvasZoom;
+function openHelpPopup() {
+  alert(`Fabric.js Canvas Controls:
   
-  // Apply new zoom
-  canvasZoom = clampZoom(newZoom);
-  
-  // Adjust pan to keep the same point under the mouse
-  canvasPanX = mouseX - (canvasPointX * canvasZoom);
-  canvasPanY = mouseY - (canvasPointY * canvasZoom);
-  
-  updateCanvasTransform(smooth);
+• Mouse wheel: Zoom in/out
+• Middle click + drag: Pan canvas
+• Right click + drag: Pan canvas (on empty space)
+• Ctrl+Z: Undo (not implemented)
+• Ctrl+Shift+Z: Redo (not implemented)
+• Ctrl+C: Copy selected object
+• Ctrl+V: Paste object
+• Ctrl+A: Select all objects
+• Delete/Backspace: Delete selected objects
+• Ctrl + Plus: Zoom in
+• Ctrl + Minus: Zoom out
+• Ctrl + 0: Reset zoom
+• Escape: Deselect all objects`);
+  closeSlidingFileMenu();
 }
 
-function zoomToFit() {
-  const windowWidth = window.innerWidth - 170; // Account for left sidebar
-  const windowHeight = window.innerHeight - 100; // Account for bottom bar
-  const canvasWidth = 1365;
-  const canvasHeight = window.innerHeight - 100;
-  
-  const scaleX = windowWidth / canvasWidth;
-  const scaleY = windowHeight / canvasHeight;
-  const optimalZoom = Math.min(scaleX, scaleY) * 0.9; // 90% of optimal for padding
-  
-  canvasZoom = clampZoom(optimalZoom);
-  canvasPanX = 0;
-  canvasPanY = 0;
-  updateCanvasTransform();
-}
-
-//
-//
-//
-//
-// Listeners
-//
-//
-//
-//
-
-
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "z") {
-    e.preventDefault();
-    redoLastAction();
-  } else if (e.ctrlKey && e.key.toLowerCase() === "z") {
-    e.preventDefault();
-    undoLastAction();
-  }
-});
-
-document.getElementById("actual-canvas").addEventListener("dblclick", function (e) {
-  if (e.target.tagName === "IMG" && e.target.classList.contains("selectable")) {
-    openNamePopupForImage(e.target);
-  }
-});
-
-document.getElementById("actual-canvas").addEventListener("dblclick", function (e) {
-  if (e.target.classList.contains("selectable") && e.target.dataset.boxType === 'textbox') {
-    openTextboxEditorGUI(e.target);
-  }
-});
-
-document.addEventListener("click", (e) => {
+function previewGame() {
+  inPreviewMode = !inPreviewMode;
   if (inPreviewMode) {
-    if (selectedElement) {
-      selectedElement.classList.remove("selected");
-      selectedElement = null;
-    }
-    return;
-  }
-
-  if (justInteracted) return;
-
-  // Always clear any existing selections
-  document.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
-  removeResizeBars();
-  selectedElement = null;
-
-  // Select new element if applicable
-  if (isSnappableElement(e.target)) {
-    selectedElement = e.target;
-    selectedElement.classList.add("selected");
-    addResizeBars(selectedElement);
-    e.stopPropagation();
-  }
-});
-
-document.addEventListener("keydown", (e) => {
-  const key = e.key.toLowerCase();
-
-  if (key === "escape") {
-    exitPreview();
-    return;
-  }
-
-  if (inPreviewMode) return;
-
-  if (selectedElement) {
-    if (key === "m") interactionMode = "move";
-    if (key === "r") interactionMode = "rotate";
-    if (key === "s") interactionMode = "scale";
-  }
-
-  if ((key === "delete" || key === "backspace") && selectedPageForDelete !== null) {
-    saveState();
-    deleteCurrentPage();
-    return;
-  }
-
-  if (key === "delete" && selectedElement) {
-    const popupVisible = document.getElementById("button-popup");
-    if (!popupVisible || getComputedStyle(popupVisible).display === "none") {
-      if (confirm("Do you want to delete this element?")) {
-        saveState();
-        const index = pages[currentPage].indexOf(selectedElement);
-        if (index !== -1) pages[currentPage].splice(index, 1);
-        selectedElement.remove();
-        selectedElement = null;
-        removeResizeBars();
-      }
-    }
-  }
-
-  if (e.ctrlKey && e.shiftKey && key === "z") {
-    e.preventDefault();
-    redoLastAction();
-  } else if (e.ctrlKey && key === "z") {
-    e.preventDefault();
-    undoLastAction();
-  }
-});
-
-document.getElementById("canvas-wrapper").addEventListener("click", function (e) {
-  if (!justInteracted && (e.target.id === "canvas-wrapper" || e.target.id === "actual-canvas")) {
-    document.querySelectorAll(".selectable").forEach((el) => el.classList.remove("selected"));
-    selectedElement = null;
-    removeResizeBars();
-  }
-});
-
-document.addEventListener("mousedown", function (e) {
-  if (inPreviewMode) return;
-
-  if (interactionMode === null && selectedElement && e.target === selectedElement) {
-    interactionMode = "move";
-  }
-
-  if (!selectedElement || !["move", "scale", "rotate"].includes(interactionMode)) return;
-
-  saveState();
-  isMouseDown = true;
-  justInteracted = true;
-  
-  // Store initial mouse position
-  initialMouseX = e.clientX;
-  initialMouseY = e.clientY;
-  
-  // Store initial element state for scaling and rotation
-  if (interactionMode === "scale" || interactionMode === "rotate") {
-    initialScale = getScale(selectedElement);
-    initialRotation = getRotation(selectedElement);
-    
-    // Calculate initial distance and angle from element center
-    const box = selectedElement.getBoundingClientRect();
-    const centerX = box.left + box.width / 2;
-    const centerY = box.top + box.height / 2;
-    
-    initialDistance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-    initialAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-  }
-});
-
-document.addEventListener("mouseup", function () {
-  if (["move", "scale", "rotate"].includes(interactionMode)) {
-    isMouseDown = false;
-    interactionMode = null;
-    clearGuides();
-    hideRotationDisplay(); // Hide rotation display when done
-    setTimeout(() => { justInteracted = false; }, 50);
-  }
-});
-
-document.addEventListener("mousemove", function (e) {
-  if (inPreviewMode) return;
-  if (!selectedElement || !isMouseDown || !["move", "scale", "rotate"].includes(interactionMode)) return;
-  
-  const canvas = document.getElementById("actual-canvas");
-  const rect = canvas.getBoundingClientRect();
-  
-  if (interactionMode === "move") {
-    const el = selectedElement;
-    const canvasWidth = rect.width;
-    const canvasHeight = rect.height;
-
-    const offsetX = (e.movementX / canvasWidth) * 100;
-    const offsetY = (e.movementY / canvasHeight) * 100;
-    
-    let currentLeft = parseFloat(el.style.left);
-    let currentTop = parseFloat(el.style.top);
-
-    if (isNaN(currentLeft) || isNaN(currentTop)) {
-      const elRect = el.getBoundingClientRect();
-      const canvasRect = canvas.getBoundingClientRect();
-      currentLeft = ((elRect.left - canvasRect.left) / canvasRect.width) * 100;
-      currentTop = ((elRect.top - canvasRect.top) / canvasRect.height) * 100;
-    }
-
-    let newLeft = currentLeft + offsetX;
-    let newTop = currentTop + offsetY;
-
-// Get the current scale factor
-const currentScale = getScale(el);
-
-// Calculate the actual visual dimensions accounting for scale
-const baseWidth = (el.offsetWidth / canvasWidth) * 100;
-const baseHeight = (el.offsetHeight / canvasHeight) * 100;
-const visualWidth = baseWidth * currentScale;
-const visualHeight = baseHeight * currentScale;
-
-// Calculate the offset caused by scaling from center (transform-origin: 50% 50%)
-const scaleOffsetX = (baseWidth - visualWidth) / 2;
-const scaleOffsetY = (baseHeight - visualHeight) / 2;
-
-// Adjust the visual bounds accounting for scale offset
-const visualLeft = newLeft + scaleOffsetX;
-const visualTop = newTop + scaleOffsetY;
-const visualRight = visualLeft + visualWidth;
-const visualBottom = visualTop + visualHeight;
-
-const snapThreshold = 1;
-
-// Canvas edge snapping using visual bounds
-if (Math.abs(visualLeft) < snapThreshold) {
-  newLeft = -scaleOffsetX;
-} else if (Math.abs(visualRight - 100) < snapThreshold) {
-  newLeft = 100 - visualWidth - scaleOffsetX;
-}
-
-if (Math.abs(visualTop) < snapThreshold) {
-  newTop = -scaleOffsetY;
-} else if (Math.abs(visualBottom - 100) < snapThreshold) {
-  newTop = 100 - visualHeight - scaleOffsetY;
-}
-
-    el.style.left = `${newLeft}%`;
-    el.style.top = `${newTop}%`;
-    
-    // Apply enhanced snapping (only if not an image)
-    if (selectedElement.tagName !== 'IMG' && !selectedElement.classList.contains('image-preview')) {
-      applySnapGuides(selectedElement);
-    }
-  }
-  
-  if (interactionMode === "scale") {
-    const box = selectedElement.getBoundingClientRect();
-    const centerX = box.left + box.width / 2;
-    const centerY = box.top + box.height / 2;
-    
-    // Calculate current distance from center
-    const currentDistance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-    
-    // Calculate scale change based on distance change from initial
-    const distanceChange = currentDistance - initialDistance;
-    const scaleChange = distanceChange / 150; // Adjust sensitivity here
-    const newScale = Math.max(0.05, initialScale + scaleChange);
-    
-    selectedElement.style.transform = `scale(${newScale}) rotate(${getRotation(selectedElement)}deg)`;
-  }
-  
-if (interactionMode === "rotate") {
-  const box = selectedElement.getBoundingClientRect();
-  const centerX = box.left + box.width / 2;
-  const centerY = box.top + box.height / 2;
-  
-  // Calculate current angle from center
-  const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-  
-  // Calculate rotation change from initial angle
-  const angleChange = currentAngle - initialAngle;
-  let newRotation = initialRotation + angleChange;
-  
-  // Apply snapping if Ctrl is held down
-  if (isCtrlPressed) {
-    newRotation = snapToInterval(newRotation, 15);
-  }
-  
-  // Show rotation display
-  showRotationDisplay(selectedElement, newRotation);
-  
-  selectedElement.style.transform = `rotate(${newRotation}deg) scale(${getScale(selectedElement)})`;
-}
-});
-
-document.addEventListener("mousedown", (e) => {
-  if (e.target.classList.contains("resize-bar")) {
-    resizing = true;
-    resizeSide = e.target.dataset.side;
-    selectedElement = e.target.parentElement;
-    e.preventDefault();
-
-    saveState(); // Save state before resizing
-
-    const rect = selectedElement.getBoundingClientRect();
-    const canvasRect = document.getElementById("actual-canvas").getBoundingClientRect();
-    startX = e.clientX;
-    startY = e.clientY;
-    startWidth = rect.width;
-    startHeight = rect.height;
-    startLeft = rect.left - canvasRect.left;
-    startTop = rect.top - canvasRect.top;
-    
-    justInteracted = true;
-  }
-});
-
-document.addEventListener("mouseup", () => {
-  if (resizing) {
-    resizing = false;
-    clearGuides();
-    setTimeout(() => { justInteracted = false; }, 50);
-  }
-  hideRotationDisplay(); // Also hide when resizing ends
-  resizeSide = null;
-});
-
-document.addEventListener("mousemove", (e) => {
-  if (!resizing || !selectedElement) return;
-
-  const canvas = document.getElementById("actual-canvas");
-  const canvasRect = canvas.getBoundingClientRect();
-  const percent = (val, total) => (val / total) * 100;
-
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-
-  const applyScalingSnapGuides = () => {
-    clearGuides();
-    const get = (el, prop) => parseFloat(el.style[prop] || 0);
-    const b1 = {
-      top: get(selectedElement, 'top'),
-      left: get(selectedElement, 'left'),
-      width: get(selectedElement, 'width'),
-      height: get(selectedElement, 'height'),
-    };
-
-    document.querySelectorAll('#actual-canvas *').forEach(otherEl => {
-      if (otherEl === selectedElement || !isSnappableElement(otherEl)) return;
-
-      const b2 = {
-        top: get(otherEl, 'top'),
-        left: get(otherEl, 'left'),
-        width: get(otherEl, 'width'),
-        height: get(otherEl, 'height'),
-      };
-
-      const cX1 = b1.left + b1.width / 2;
-      const cX2 = b2.left + b2.width / 2;
-      const cY1 = b1.top + b1.height / 2;
-      const cY2 = b2.top + b2.height / 2;
-
-      const rect2 = otherEl.getBoundingClientRect();
-      const rCenterX = rect2.left + rect2.width / 2;
-      const rCenterY = rect2.top + rect2.height / 2;
-      const threshold = 0.5;
-
-      // All the existing scaling snap logic...
-      if (Math.abs(b1.left - b2.left) < threshold && resizeSide === "left") {
-        const diff = b1.left - b2.left;
-        selectedElement.style.left = b2.left + "%";
-        selectedElement.style.width = (b1.width + diff) + "%";
-        showGuideLine(rect2.left, null);
-      }
-
-      if (Math.abs(b1.left + b1.width - (b2.left + b2.width)) < threshold && resizeSide === "right") {
-        selectedElement.style.width = (b2.left + b2.width - b1.left) + "%";
-        showGuideLine(rect2.right, null);
-      }
-
-      if (Math.abs(cX1 - cX2) < threshold) {
-        const diff = cX1 - cX2;
-        if (resizeSide === "left") {
-          selectedElement.style.left = (b1.left - diff) + "%";
-          selectedElement.style.width = (b1.width + diff) + "%";
-        } else if (resizeSide === "right") {
-          selectedElement.style.width = (b1.width - diff) + "%";
-        }
-        showGuideLine(rCenterX, null);
-      }
-
-      if (Math.abs(b1.top - b2.top) < threshold && resizeSide === "top") {
-        const diff = b1.top - b2.top;
-        selectedElement.style.top = b2.top + "%";
-        selectedElement.style.height = (b1.height + diff) + "%";
-        showGuideLine(null, rect2.top);
-      }
-
-      if (Math.abs(b1.top + b1.height - (b2.top + b2.height)) < threshold && resizeSide === "bottom") {
-        selectedElement.style.height = (b2.top + b2.height - b1.top) + "%";
-        showGuideLine(null, rect2.bottom);
-      }
-
-      if (Math.abs(cY1 - cY2) < threshold) {
-        const diff = cY1 - cY2;
-        if (resizeSide === "top") {
-          selectedElement.style.top = (b1.top - diff) + "%";
-          selectedElement.style.height = (b1.height + diff) + "%";
-        } else if (resizeSide === "bottom") {
-          selectedElement.style.height = (b1.height - diff) + "%";
-        }
-        showGuideLine(null, rCenterY);
-      }
-
-      if (resizeSide === "left" && Math.abs(b1.left + b1.width - b2.left) < threshold) {
-        selectedElement.style.width = (b2.left - b1.left) + "%";
-        showGuideLine(rect2.left, null);
-      }
-
-      if (resizeSide === "top" && Math.abs(b1.top + b1.height - b2.top) < threshold) {
-        selectedElement.style.height = (b2.top - b1.top) + "%";
-        showGuideLine(null, rect2.top);
-      }
-
-      if (resizeSide === "left" && Math.abs(b1.left - (b2.left + b2.width)) < threshold) {
-        const diff = b1.left - (b2.left + b2.width);
-        selectedElement.style.left = (b2.left + b2.width) + "%";
-        selectedElement.style.width = (b1.width + diff) + "%";
-        showGuideLine(rect2.right, null);
-      }
-
-      if (resizeSide === "top" && Math.abs(b1.top - (b2.top + b2.height)) < threshold) {
-        const diff = b1.top - (b2.top + b2.height);
-        selectedElement.style.top = (b2.top + b2.height) + "%";
-        selectedElement.style.height = (b1.height + diff) + "%";
-        showGuideLine(null, rect2.bottom);
-      }
+    document.body.classList.add('preview-fullscreen');
+    fabricCanvas.selection = false;
+    fabricCanvas.forEachObject(obj => {
+      obj.selectable = false;
+      obj.evented = false;
     });
-  };
-
-  if (resizeSide === "left") {
-    let newLeft = startLeft + dx;
-    let newWidth = startWidth - dx;
-
-    if (Math.abs(percent(newLeft, canvasRect.width)) < 1) {
-      newLeft = 0;
-      newWidth = startWidth + startLeft;
-    }
-
-    if (newWidth >= 20) {
-      selectedElement.style.left = percent(newLeft, canvasRect.width) + "%";
-      selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
-      clearGuides();
-      applyScalingSnapGuides();
-    }
+  } else {
+    document.body.classList.remove('preview-fullscreen');
+    fabricCanvas.selection = true;
+    fabricCanvas.forEachObject(obj => {
+      obj.selectable = true;
+      obj.evented = true;
+    });
   }
+  fabricCanvas.requestRenderAll();
+  closeSlidingFileMenu();
+}
 
-  if (resizeSide === "right") {
-    let newWidth = startWidth + dx;
+function openGlobalProcedures() {
+  alert('Global procedures would require additional implementation');
+}
 
-    let rightEdge = startLeft + newWidth;
-    if (Math.abs(percent(rightEdge, canvasRect.width) - 100) < 1) {
-      newWidth = canvasRect.width - startLeft;
-    }
-
-    if (newWidth >= 20) {
-      selectedElement.style.width = percent(newWidth, canvasRect.width) + "%";
-      applyScalingSnapGuides();
-    }
-  }
-
-  if (resizeSide === "top") {
-    let newHeight = startHeight - dy;
-    let newTop = startTop + dy;
-
-    if (Math.abs(percent(newTop, canvasRect.height)) < 1) {
-      newTop = 0;
-      newHeight = startTop + startHeight;
-    }
-
-    if (newHeight >= 20) {
-      selectedElement.style.top = percent(newTop, canvasRect.height) + "%";
-      selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
-      clearGuides();
-      applyScalingSnapGuides();
-    }
-  }
-
-  if (resizeSide === "bottom") {
-    let newHeight = startHeight + dy;
-    let snapped = false;
-
-    const currentTop = parseFloat(selectedElement.style.top || "0");
-    const newBottom = currentTop + percent(newHeight, canvasRect.height);
-
-    if (Math.abs(newBottom - 100) < 1) {
-      newHeight = (100 - currentTop) * canvasRect.height / 100;
-      snapped = true;
-    }
-
-    if (newHeight >= 20) {
-      selectedElement.style.height = percent(newHeight, canvasRect.height) + "%";
-      applyScalingSnapGuides();
-      if (snapped) showGuideLine(null, canvasRect.bottom);
-    }
+// Handle window resize
+window.addEventListener('resize', function() {
+  if (fabricCanvas) {
+    setTimeout(resizeCanvas, 100); // Small delay to ensure container has resized
   }
 });
-
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.key.toLowerCase() === 'c') {
-    if (selectedElement) {
-      copiedElement = selectedElement.cloneNode(true);
-      copiedElement.classList.remove('selected');
-    }
-  }
-
-  if (e.ctrlKey && e.key.toLowerCase() === 'v') {
-    if (copiedElement && document.getElementById('actual-canvas')) {
-      saveState();
-
-      const newElement = copiedElement.cloneNode(true);
-      newElement.style.left = (parseFloat(copiedElement.style.left || "0") + 2) + "%";
-      newElement.style.top = (parseFloat(copiedElement.style.top || "0") + 2) + "%";
-      document.getElementById('actual-canvas').appendChild(newElement);
-      pages[currentPage].push(newElement);
-    }
-  }
-});
-
-document.getElementById('page-buttons').addEventListener('wheel', function (e) {
-  if (e.deltaY !== 0) {
-    e.preventDefault();
-    this.scrollLeft += e.deltaY;
-  }
-});
-renderPageButtons();
-loadScene(currentPage);
-updatePageLabel();
-setupTrashCan();
-
 
 // Close menu when pressing Escape key
 document.addEventListener('keydown', function(e) {
@@ -2212,145 +1174,108 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Control") {
-    isCtrlPressed = true;
+// Page scrolling
+document.getElementById('page-buttons').addEventListener('wheel', function (e) {
+  if (e.deltaY !== 0) {
+    e.preventDefault();
+    this.scrollLeft += e.deltaY;
   }
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Control") {
-    isCtrlPressed = false;
-  }
-});
-
-
-// Zoom and Pan Event Listeners
-const canvasWrapper = document.getElementById('canvas-wrapper');
-
-// Professional wheel zoom handling
-canvasWrapper.addEventListener('wheel', function(e) {
-  e.preventDefault();
-  e.stopPropagation();
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeFabricCanvas();
+  renderPageButtons();
+  updatePageLabel();
   
-  // Get mouse position relative to the canvas
-  const rect = canvasWrapper.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  
-  // Calculate zoom delta with improved sensitivity
-  const delta = -e.deltaY * ZOOM_CONFIG.sensitivity;
-  const zoomFactor = Math.exp(delta);
-  const newZoom = canvasZoom * zoomFactor;
-  
-  zoomToPoint(mouseX, mouseY, newZoom, false);
+  // Add a welcome message
+  const welcomeText = new fabric.Text('Welcome to Fabric.js Canvas!', {
+    left: fabricCanvas.getWidth() / 2,
+    top: fabricCanvas.getHeight() / 2,
+    fontFamily: 'Arial',
+    fontSize: 24,
+    fill: '#667eea',
+    originX: 'center',
+    originY: 'center'
+  });
+  fabricCanvas.add(welcomeText);
+  fabricCanvas.requestRenderAll();
 });
 
-// Mouse panning setup
-canvasWrapper.addEventListener('mousedown', function(e) {
-  if (e.button === 1) { // Middle mouse button
-    e.preventDefault();
-    e.stopPropagation();
-    isPanningWithMiddle = true;
-    lastPanX = e.clientX;
-    lastPanY = e.clientY;
-    document.body.style.cursor = 'grabbing';
-  }
-});
+// Initialize the interface immediately
+renderPageButtons();
+updatePageLabel();
+</script>FileMenu();
+}
 
-document.getElementById('actual-canvas').addEventListener('mousedown', function(e) {
-  if (e.button === 2) { // Right mouse button
-    e.preventDefault();
-    e.stopPropagation();
-    isPanningWithRight = true;
-    isPanning = true;
-    lastPanX = e.clientX;
-    lastPanY = e.clientY;
-    document.body.style.cursor = 'grabbing';
-  }
-});
+function uploadFile() {
+  console.log('Upload clicked');
+  closeSlidingFileMenu();
+}
 
-document.getElementById('actual-canvas').addEventListener('contextmenu', function(e) {
-  if (isPanningWithRight || isPanning) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+function openFile() {
+  console.log('Open clicked');
+  closeSlidingFileMenu();
+}
 
-document.addEventListener('mouseup', function(e) {
-  if ((e.button === 2 && isPanningWithRight) || (e.button === 1 && isPanningWithMiddle)) {
-    isPanningWithRight = false;
-    isPanningWithMiddle = false;
-    isPanning = false;
-    document.body.style.cursor = '';
-  }
-});
+function shareFile() {
+  console.log('Share clicked');
+  closeSlidingFileMenu();
+}
 
-document.addEventListener('mousemove', function(e) {
-  if (isPanningWithMiddle || isPanningWithRight) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const deltaX = e.clientX - lastPanX;
-    const deltaY = e.clientY - lastPanY;
-    
-    canvasPanX += deltaX;
-    canvasPanY += deltaY;
-    
-    lastPanX = e.clientX;
-    lastPanY = e.clientY;
-    
-    updateCanvasTransform(false);
-    
-    isPanning = true;
-  }
-});
+function ExportFile() {
+  console.log('Export clicked');
+  closeSlidingFileMenu();
+}
 
-// Enhanced keyboard zoom controls
-document.addEventListener('keydown', function(e) {
-  if (e.ctrlKey || e.metaKey) {
-    if (e.key === '=' || e.key === '+') {
-      e.preventDefault();
-      const rect = canvasWrapper.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      const newZoom = canvasZoom + ZOOM_CONFIG.keyboardStep;
-      zoomToPoint(centerX, centerY, newZoom);
-      
-    } else if (e.key === '-') {
-      e.preventDefault();
-      const rect = canvasWrapper.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      const newZoom = canvasZoom - ZOOM_CONFIG.keyboardStep;
-      zoomToPoint(centerX, centerY, newZoom);
-      
-    } else if (e.key === '0') {
-      e.preventDefault();
-      resetCanvasView();
-    } else if (e.key === '9') {
-      e.preventDefault();
-      zoomToFit();
-    }
-  }
-});
+function ImportFile() {
+  console.log('Import clicked');
+  closeSlidingFileMenu();
+}
 
-// Double-click to reset view
-canvasWrapper.addEventListener('dblclick', function(e) {
-  if (e.target === canvasWrapper || e.target === document.getElementById('actual-canvas')) {
-    resetCanvasView();
-  }
+function viewCode() {
+  console.log('View Code clicked');
+  closeSlidingFileMenu();
+}
+
+function ToolsFile() {
+  console.log('Tools clicked');
+  closeSlidingFileMenu();
+}
+
+function openHelpPopup() {
+  console.log('Help clicked');
+  closeSlidingFileMenu();
+}
+
+function previewGame() {
+  console.log('Preview Game clicked');
+  closeSlidingFileMenu();
+}
+
+function openGlobalProcedures() {
+  console.log('Global procedures clicked');
+}
+
+// Initialize the interface
+renderPageButtons();
+updatePageLabel();
+
+// Initialize fabric.js canvas (you'll need to add fabric.js CDN)
+// Example initialization:
+/*
+const canvas = new fabric.Canvas('fabric-canvas', {
+  width: document.getElementById('fabric-canvas-container').clientWidth,
+  height: document.getElementById('fabric-canvas-container').clientHeight
 });
 
 // Handle window resize
 window.addEventListener('resize', function() {
-  updateCanvasTransform(false);
+  const container = document.getElementById('fabric-canvas-container');
+  canvas.setDimensions({
+    width: container.clientWidth,
+    height: container.clientHeight
+  });
 });
-
-// Initialize canvas transform
-document.addEventListener('DOMContentLoaded', function() {
-  updateCanvasTransform();
-});
+*/
 </script>

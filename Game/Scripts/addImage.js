@@ -250,3 +250,5 @@ function openNamePopupForImage(img) {
 
   document.body.appendChild(popup);
 }
+
+

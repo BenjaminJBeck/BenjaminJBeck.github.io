@@ -406,6 +406,7 @@ box-sizing: border-box;
 .cropped-item {
 margin-bottom: 10px;
 text-align: center;
+position: relative;
 }
 .cropped-item img {
 max-width: 100%;
@@ -417,6 +418,26 @@ border: 1px solid #ddd;
 font-size: 12px;
 margin-top: 5px;
 color: #666;
+}
+.delete-btn {
+position: absolute;
+top: 2px;
+right: 2px;
+background: #ff4444;
+color: white;
+border: none;
+border-radius: 50%;
+width: 20px;
+height: 20px;
+font-size: 12px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 10;
+}
+.delete-btn:hover {
+background: #cc0000;
 }
 #left-panel .side-button {
 background: #666;
@@ -948,9 +969,50 @@ function addCropToPanel(dataURL, name) {
   nameDiv.className = 'crop-name';
   nameDiv.textContent = name;
   
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.innerHTML = '×';
+  deleteBtn.onclick = () => deleteCrop(croppedImages.length - 1);
+  
   cropItem.appendChild(img);
   cropItem.appendChild(nameDiv);
+  cropItem.appendChild(deleteBtn);
   croppedContainer.appendChild(cropItem);
+}
+
+function deleteCrop(index) {
+  if (index < 0 || index >= croppedImages.length) return;
+  
+  // Remove from arrays
+  croppedImages.splice(index, 1);
+  cropNames.splice(index, 1);
+  
+  // Rebuild the entire panel to fix indices
+  const croppedContainer = document.getElementById('cropped-images');
+  croppedContainer.innerHTML = '';
+  
+  // Re-add all remaining crops with correct indices
+  for (let i = 0; i < croppedImages.length; i++) {
+    const cropItem = document.createElement('div');
+    cropItem.className = 'cropped-item';
+    
+    const img = document.createElement('img');
+    img.src = croppedImages[i];
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'crop-name';
+    nameDiv.textContent = cropNames[i];
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.innerHTML = '×';
+    deleteBtn.onclick = () => deleteCrop(i);
+    
+    cropItem.appendChild(img);
+    cropItem.appendChild(nameDiv);
+    cropItem.appendChild(deleteBtn);
+    croppedContainer.appendChild(cropItem);
+  }
 }
 
 function openNamingModal() {

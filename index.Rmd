@@ -705,7 +705,7 @@ padding: 12px;
 <div class="nav-item">
 <a href="#" class="nav-link">Tools</a>
 <div class="dropdown">
-<a href="PictureSplitter/PictureSplitter.html" class="dropdown-item">Picture Splitter</a>
+<a href="PictureSplitter/PictureSplitterv2.html" class="dropdown-item">Picture Splitter</a>
 <a href="Pixelator/Pixelator.html" class="dropdown-item">Pixelator</a>
 <a href="RandomItemGen/RandomItemGen.html" class="dropdown-item">Random Item Generator</a>
 <a href="CodeHelper/CodeHelper.html" class="dropdown-item">Text Encryption</a>
