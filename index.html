@@ -7,11 +7,11 @@
 <meta charset="utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-<link rel="icon" href="Pictures/Icon.png" type="image/png">
 
 
 
-<title>Benjamin J. Beck About Me</title>
+
+<title>index.knit</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -970,15 +970,41 @@ box-shadow: 0 18px 40px rgba(0,0,0,.45);
 @media (max-width: 900px) {
 .oldly-collage {
 height: auto;
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 12px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0;
+padding-top: 8px;
+padding-inline: 16px; 
+overflow: visible;
 }
 .oldly-collage .shot {
-position: static;
+
+position: relative;
+left: auto; top: auto;
+
 width: 100%;
-transform: none !important; 
-box-shadow: 0 8px 22px rgba(0,0,0,.28);
+max-width: 480px;
+
+margin-top: -64px;
+
+--rot: 0deg;
+transform: rotate(var(--rot));
+transform-origin: center;
+box-shadow: 0 10px 26px rgba(0,0,0,.30);
+transition: transform .2s ease, box-shadow .2s ease;
+z-index: 1;
+}
+.oldly-collage .shot:first-child { margin-top: 0; }
+
+.oldly-collage .s1 { --rot: -6deg; z-index: 4; }
+.oldly-collage .s2 { --rot: 4deg; z-index: 3; }
+.oldly-collage .s3 { --rot: -3deg; z-index: 2; }
+.oldly-collage .s4 { --rot: 5deg; z-index: 1; }
+
+.oldly-collage .shot:hover {
+transform: translateY(-2px) rotate(var(--rot));
+box-shadow: 0 14px 32px rgba(0,0,0,.36);
 }
 }
 </style>
