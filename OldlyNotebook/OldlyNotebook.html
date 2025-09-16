@@ -410,6 +410,38 @@
                 min-height: 300px;
             }
         }
+        .download-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.stat-box {
+  background: rgba(255,255,255,0.85);
+  border: 2px solid rgba(0,0,0,0.05);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  min-width: 180px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 0.25rem;
+  letter-spacing: .3px;
+}
+
+.stat-value {
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #2c3e50;
+}
+
     </style>
 </head>
 <body>
@@ -516,9 +548,17 @@
                 </div>
             </div>
             
-            <a href="https://github.com/BenjaminJBeck/BenjaminJBeck.github.io/releases/download/OldlyNotebook/Oldly.Notebook-1.0.0.Setup.exe" class="download-btn">
-  📥 Download Installer
-</a>
+            <div class="download-actions">
+                <a id="downloadBtn"
+                    href="https://github.com/BenjaminJBeck/BenjaminJBeck.github.io/releases/download/OldlyNotebook/Oldly.Notebook-1.0.0.Setup.exe"
+                    class="download-btn" rel="noopener">
+                    📥 Download Installer
+                </a>
+            
+                <div class="stat-box" aria-live="polite" title="Total downloads of the Windows installer">
+                    <div class="stat-label">Total Downloads</div>
+                    <div class="stat-value"><span id="dlCount">—</span></div>
+                </div>        </div>
             
             <p style="margin-top: 2rem; opacity: 0.9;">System Requirements: Windows 10 or later</p>
             <p style="opacity: 0.8; font-size: 0.95rem;">macOS and Linux versions coming soon!</p>
@@ -597,6 +637,37 @@
                 closeModal();
             }
         });
+
+        // --- Download counter: fetch from GitHub Releases and optimistic bump on click ---
+            const GH_OWNER = "BenjaminJBeck";
+            const GH_REPO = "BenjaminJBeck.github.io";
+            const GH_TAG = "OldlyNotebook"; // the release tag in your download URL
+            const ASSET_NAME = "Oldly.Notebook-1.0.0.Setup.exe"; // exact asset name
+
+            async function loadDownloadCount() {
+                const countEl = document.getElementById('dlCount');
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/tags/${GH_TAG}`);
+                    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+                    const data = await res.json();
+                    const asset = (data.assets || []).find(a => a.name === ASSET_NAME);
+                    countEl.textContent = asset ? asset.download_count.toLocaleString() : '—';
+                } catch (e) {
+                    countEl.textContent = '—'; // fall back gracefully if rate-limited or offline
+                }
+            }
+
+            document.getElementById('downloadBtn')?.addEventListener('click', () => {
+                const el = document.getElementById('dlCount');
+                const n = parseInt(String(el.textContent).replace(/,/g, ''), 10);
+                if (!Number.isNaN(n)) {
+                    el.textContent = (n + 1).toLocaleString(); // optimistic UI bump
+                }
+                // (Optional) you could refetch after a delay to sync with GitHub's server count.
+            });
+
+            // Load on page show
+            loadDownloadCount();
 
         function closeModal() {
             modal.style.display = 'none';
