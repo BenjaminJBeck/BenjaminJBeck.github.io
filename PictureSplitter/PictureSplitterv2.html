@@ -530,9 +530,10 @@
                 <input type="file" id="file-input" accept="image/*" multiple>
             </div>
             <div class="right-controls">
-                <button id="name-all-btn" class="gui-button">🏷️ Name All</button>
-                <button id="download-btn" class="gui-button">💾 Download</button>
-            </div>
+              <button id="upload-split-btn" class="gui-button">📁 Upload Split</button>
+              <button id="name-all-btn" class="gui-button">🏷️ Name All</button>
+              <button id="download-btn" class="gui-button">💾 Download</button>
+              <input type="file" id="split-file-input" accept="image/*" multiple style="display: none;">    </div>
         </div>
 
         <!-- Name Image Popup -->
@@ -1585,6 +1586,58 @@ document.getElementById('name-all-input').addEventListener('keydown', (e) => {
   }
 });
 
+  // Add this NEW code after the existing handleFiles function:
+
+  // Handle upload for split images section
+  const uploadSplitBtn = document.getElementById('upload-split-btn');
+  const splitFileInput = document.getElementById('split-file-input');
+
+  uploadSplitBtn.addEventListener('click', () => {
+    splitFileInput.click();
+  });
+
+  splitFileInput.addEventListener('change', (event) => {
+    const files = event.target.files;
+    handleSplitFiles(files);
+    splitFileInput.value = ''; // Allow re-uploading the same image
+  });
+
+  function handleSplitFiles(files) {
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const src = e.target.result;
+        displaySplitImage(src);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function displaySplitImage(src) {
+    const newImg = document.createElement('img');
+    newImg.src = src;
+    newImg.style.width = 'auto';
+    newImg.style.height = 'auto';
+    newImg.style.maxWidth = 'calc(20% - 10px)';
+    newImg.style.maxHeight = '120px';
+    newImg.style.objectFit = 'contain';
+    newImg.style.borderRadius = '8px';
+    newImg.style.cursor = 'pointer';
+    newImg.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+    outputBox.appendChild(newImg);
+
+    // Single click for selection
+    newImg.addEventListener('click', () => {
+      newImg.classList.toggle('selected');
+    });
+
+    // Double click for modal
+    newImg.addEventListener('dblclick', () => {
+      openModal(src);
+    });
+  }
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
