@@ -1082,31 +1082,39 @@ if (!allImages.length) {
   const zip = new JSZip();
   const folder = zip.folder("converted_images");
 
-// Keep track of used names to handle duplicates
-const usedNames = new Map(); // name -> count
+  // Keep track of used names to handle duplicates
+  const usedNames = new Map(); // name -> count
 
-for (const img of allImages) {
-  const response = await fetch(img.src);
-  const blob = await response.blob();
-  
-  // Get the base name - use global base name if set, otherwise individual names, otherwise default
-  let baseName = imageNames.get(img) || globalBaseName || "Converted Image";
-  
-  // Handle duplicate names by adding numbers
-  let finalName;
-  if (usedNames.has(baseName)) {
-    // Increment counter for this base name
-    const count = usedNames.get(baseName) + 1;
-    usedNames.set(baseName, count);
-    finalName = `${baseName} (${count})`;
-  } else {
-    // First time using this name
-    usedNames.set(baseName, 1);
-    finalName = `${baseName} (1)`;
+  for (const img of allImages) {
+    const response = await fetch(img.src);
+    const blob = await response.blob();
+
+    // Get the base name - use global base name if set, otherwise individual names, otherwise default
+    let baseName = imageNames.get(img) || globalBaseName || "Converted Image";
+
+    // Handle duplicate names by adding numbers before the first period
+    let finalName;
+    if (usedNames.has(baseName)) {
+      // This name has been used before, add a number before the first period
+      const count = usedNames.get(baseName) + 1;
+      usedNames.set(baseName, count);
+
+      const firstDotIndex = baseName.indexOf('.');
+      if (firstDotIndex !== -1) {
+        // Insert number before first period
+        finalName = baseName.substring(0, firstDotIndex) + ` (${count})` + baseName.substring(firstDotIndex);
+      } else {
+        // No period found, add at end
+        finalName = `${baseName} (${count})`;
+      }
+    } else {
+      // First time using this name - no number needed
+      usedNames.set(baseName, 1);
+      finalName = baseName;
+    }
+
+    folder.file(`${finalName}.png`, blob);
   }
-  
-  folder.file(`${finalName}.png`, blob);
-}
 
   zip.generateAsync({ type: "blob" }).then(content => {
     saveAs(content, "converted_images.zip");
