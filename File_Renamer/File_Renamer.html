@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Renaming Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         .file-list {
             max-height: 128px;
@@ -121,7 +122,7 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 </li>
                 <li class="flex gap-2">
                     <span class="font-semibold">4.</span>
-                    <span>Click "Download Renamed Files" to download all files with their new names</span>
+                    <span>Click "Download Renamed Files" to download all files (as a zip if multiple files)</span>
                 </li>
             </ol>
         </div>
@@ -200,7 +201,7 @@ Crocodile.Animals.png -> Alligator.Animals.png"
             return { rules, parseErrors };
         }
 
-        downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', async () => {
             hideMessages();
 
             if (uploadedFiles.length === 0) {
@@ -238,8 +239,9 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 return;
             }
 
-            // Create downloads for each renamed file
-            renamedFiles.forEach(({ file, newName }) => {
+            // If only one file, download directly
+            if (renamedFiles.length === 1) {
+                const { file, newName } = renamedFiles[0];
                 const url = URL.createObjectURL(file);
                 const a = document.createElement('a');
                 a.href = url;
@@ -248,9 +250,30 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-            });
+                showSuccess('Successfully downloaded 1 renamed file');
+            } else {
+                // If multiple files, create a zip
+                const zip = new JSZip();
 
-            showSuccess(`Successfully downloaded ${renamedFiles.length} renamed file(s)`);
+                for (const { file, newName } of renamedFiles) {
+                    zip.file(newName, file);
+                }
+
+                try {
+                    const content = await zip.generateAsync({ type: 'blob' });
+                    const url = URL.createObjectURL(content);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'renamed_files.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showSuccess(`Successfully downloaded ${renamedFiles.length} renamed files in a zip folder`);
+                } catch (error) {
+                    showErrors(['Error creating zip file: ' + error.message]);
+                }
+            }
         });
     </script>
 </body>
