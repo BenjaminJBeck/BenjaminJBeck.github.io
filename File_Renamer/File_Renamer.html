@@ -221,7 +221,7 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 return;
             }
 
-            const renamedFiles = [];
+            const renameMap = new Map();
             const notFoundFiles = [];
 
             rules.forEach(({ oldName, newName }) => {
@@ -230,7 +230,7 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 if (!file) {
                     notFoundFiles.push(oldName);
                 } else {
-                    renamedFiles.push({ file, newName });
+                    renameMap.set(file.name, newName);
                 }
             });
 
@@ -239,24 +239,26 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                 return;
             }
 
-            // If only one file, download directly
-            if (renamedFiles.length === 1) {
-                const { file, newName } = renamedFiles[0];
+            // If only one file total, download directly
+            if (uploadedFiles.length === 1) {
+                const file = uploadedFiles[0];
+                const finalName = renameMap.get(file.name) || file.name;
                 const url = URL.createObjectURL(file);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = newName;
+                a.download = finalName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showSuccess('Successfully downloaded 1 renamed file');
+                showSuccess('Successfully downloaded 1 file');
             } else {
-                // If multiple files, create a zip
+                // If multiple files, create a zip with ALL files
                 const zip = new JSZip();
 
-                for (const { file, newName } of renamedFiles) {
-                    zip.file(newName, file);
+                for (const file of uploadedFiles) {
+                    const finalName = renameMap.get(file.name) || file.name;
+                    zip.file(finalName, file);
                 }
 
                 try {
@@ -269,7 +271,7 @@ Crocodile.Animals.png -> Alligator.Animals.png"
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    showSuccess(`Successfully downloaded ${renamedFiles.length} renamed files in a zip folder`);
+                    showSuccess(`Successfully downloaded ${uploadedFiles.length} files (${renameMap.size} renamed) in a zip folder`);
                 } catch (error) {
                     showErrors(['Error creating zip file: ' + error.message]);
                 }
