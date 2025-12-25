@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Renaming Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .file-list {
+            max-height: 128px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                File Renaming Tool
+            </h1>
+            <p class="text-gray-600 mb-6">Upload files, specify rename rules, and download with new names</p>
+
+            <!-- File Upload Section -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Upload Files
+                </label>
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
+                    <input type="file" multiple id="file-upload" class="hidden">
+                    <label for="file-upload" class="cursor-pointer block">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                        <p class="text-sm text-gray-600">
+                            Click to upload files or drag and drop
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Any file type supported
+                        </p>
+                    </label>
+                </div>
+                <div id="file-list-container" class="hidden mt-3 p-3 bg-gray-50 rounded-md">
+                    <p class="text-sm font-medium text-gray-700 mb-2">
+                        Uploaded files (<span id="file-count">0</span>):
+                    </p>
+                    <div id="file-list" class="file-list"></div>
+                </div>
+            </div>
+
+            <!-- Rename Rules Section -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Rename Rules (one per line)
+                </label>
+                <p class="text-xs text-gray-500 mb-2">
+                    Format: <code class="bg-gray-100 px-1 rounded">oldname.ext -> newname.ext</code>
+                </p>
+                <textarea id="rename-rules" placeholder="Painting.Art.png -> Painting (1).Art.png
+Crocodile.Animals.png -> Alligator.Animals.png"
+                    class="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"></textarea>
+            </div>
+
+            <!-- Error Messages -->
+            <div id="error-container" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-start gap-2">
+                    <svg class="text-red-600 h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-800">Errors:</p>
+                        <div id="error-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-container" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p id="success-message" class="text-sm text-green-800"></p>
+            </div>
+
+            <!-- Download Button -->
+            <button id="download-btn"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download Renamed Files
+            </button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">How to Use</h2>
+            <ol class="space-y-2 text-sm text-gray-700">
+                <li class="flex gap-2">
+                    <span class="font-semibold">1.</span>
+                    <span>Upload your files using the upload area above</span>
+                </li>
+                <li class="flex gap-2">
+                    <span class="font-semibold">2.</span>
+                    <span>Enter rename rules in the text area, one per line</span>
+                </li>
+                <li class="flex gap-2">
+                    <span class="font-semibold">3.</span>
+                    <span>Use the format: <code
+                            class="bg-gray-100 px-1 rounded">oldname.ext -> newname.ext</code></span>
+                </li>
+                <li class="flex gap-2">
+                    <span class="font-semibold">4.</span>
+                    <span>Click "Download Renamed Files" to download all files with their new names</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+
+        const fileUpload = document.getElementById('file-upload');
+        const fileListContainer = document.getElementById('file-list-container');
+        const fileList = document.getElementById('file-list');
+        const fileCount = document.getElementById('file-count');
+        const renameRules = document.getElementById('rename-rules');
+        const downloadBtn = document.getElementById('download-btn');
+        const errorContainer = document.getElementById('error-container');
+        const errorList = document.getElementById('error-list');
+        const successContainer = document.getElementById('success-container');
+        const successMessage = document.getElementById('success-message');
+
+        fileUpload.addEventListener('change', (e) => {
+            uploadedFiles = Array.from(e.target.files);
+            displayFiles();
+            hideMessages();
+        });
+
+        function displayFiles() {
+            if (uploadedFiles.length > 0) {
+                fileListContainer.classList.remove('hidden');
+                fileCount.textContent = uploadedFiles.length;
+                fileList.innerHTML = uploadedFiles.map(file =>
+                    `<div class="text-xs text-gray-600 py-1">• ${file.name}</div>`
+                ).join('');
+            } else {
+                fileListContainer.classList.add('hidden');
+            }
+        }
+
+        function hideMessages() {
+            errorContainer.classList.add('hidden');
+            successContainer.classList.add('hidden');
+        }
+
+        function showErrors(errors) {
+            errorContainer.classList.remove('hidden');
+            errorList.innerHTML = errors.map(error =>
+                `<p class="text-sm text-red-700 mt-1">• ${error}</p>`
+            ).join('');
+        }
+
+        function showSuccess(message) {
+            successContainer.classList.remove('hidden');
+            successMessage.textContent = message;
+        }
+
+        function parseRenameRules(rulesText) {
+            const lines = rulesText.split('\n').filter(line => line.trim());
+            const rules = [];
+            const parseErrors = [];
+
+            lines.forEach((line, index) => {
+                if (!line.includes('->')) {
+                    parseErrors.push(`Line ${index + 1}: Missing '->' separator`);
+                    return;
+                }
+
+                const [oldName, newName] = line.split('->').map(s => s.trim());
+
+                if (!oldName || !newName) {
+                    parseErrors.push(`Line ${index + 1}: Invalid format`);
+                    return;
+                }
+
+                rules.push({ oldName, newName });
+            });
+
+            return { rules, parseErrors };
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            hideMessages();
+
+            if (uploadedFiles.length === 0) {
+                showErrors(['Please upload files first']);
+                return;
+            }
+
+            if (!renameRules.value.trim()) {
+                showErrors(['Please enter rename rules']);
+                return;
+            }
+
+            const { rules, parseErrors } = parseRenameRules(renameRules.value);
+
+            if (parseErrors.length > 0) {
+                showErrors(parseErrors);
+                return;
+            }
+
+            const renamedFiles = [];
+            const notFoundFiles = [];
+
+            rules.forEach(({ oldName, newName }) => {
+                const file = uploadedFiles.find(f => f.name === oldName);
+
+                if (!file) {
+                    notFoundFiles.push(oldName);
+                } else {
+                    renamedFiles.push({ file, newName });
+                }
+            });
+
+            if (notFoundFiles.length > 0) {
+                showErrors([`Files not found: ${notFoundFiles.join(', ')}`]);
+                return;
+            }
+
+            // Create downloads for each renamed file
+            renamedFiles.forEach(({ file, newName }) => {
+                const url = URL.createObjectURL(file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = newName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            showSuccess(`Successfully downloaded ${renamedFiles.length} renamed file(s)`);
+        });
+    </script>
+</body>
+
+</html>
