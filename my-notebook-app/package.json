@@ -1,0 +1,50 @@
+{
+  "name": "oldly-notebook",
+  "productName": "Oldly Notebook",
+  "version": "1.0.0",
+  "description": "Oldly Notebook - A digital notebook application",
+  "main": "main.js",
+  "author": "Benjamin Beck",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "@electron-forge/cli": "^7.3.0",
+    "@electron-forge/maker-squirrel": "^7.3.0",
+    "@electron-forge/maker-zip": "^7.3.0",
+    "@electron-forge/maker-deb": "^7.3.0",
+    "@electron-forge/maker-rpm": "^7.3.0"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "Book5Cropped.ico"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "OldlyNotebook",
+            "authors": "Benjamin Beck",
+            "setupIcon": "Book5Cropped.ico",
+            "iconUrl": "https://YOUR_HOST/Book5Cropped.ico",
+            "noMsi": true,
+            "createDesktopShortcut": true,
+            "shortcutName": "Oldly Notebook"
+          }
+        },
+        { "name": "@electron-forge/maker-zip" },
+        { "name": "@electron-forge/maker-deb" },
+        { "name": "@electron-forge/maker-rpm" }
+      ]
+    }
+  }
+}

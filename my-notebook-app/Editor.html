@@ -1,0 +1,4037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notebook Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('Images/Desk.png') center/cover no-repeat;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;          /* <- disables page scrolling */
+            overscroll-behavior: none; /* <- stops rubber-band/bounce */
+        }
+        
+
+        .sidebar {
+    width: 250px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* was: space-evenly */
+    gap: 1rem;                   /* nicer spacing */
+    overflow: hidden;
+}
+
+
+
+        .title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Biro Script Plus';
+        }
+
+        .toolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;  /* spreads top-to-bottom */
+    flex: 1;                          /* make toolbar take all sidebar height */
+}
+
+        .btn {
+            background: transparent;
+            border: 1px transparent;
+            color: black;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.0rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            font-family: 'Biro Script Plus';
+        }
+
+        .btn:hover {
+            transform: translateX(5px);
+        }
+
+        .font-selector {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            width: 100%;
+        }
+
+        .font-selector option {
+            background: #333;
+            color: white;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: stretch;
+            padding: 2rem;
+            gap: .5rem;
+        }
+
+        .book-container {
+            background: transparent;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            position: relative;
+        }
+
+        .tools-panel {
+          background: url('Images/ToolsPaper.png') center/cover no-repeat;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transform: rotate(3deg) scale(1) translate(0px, 0px);
+        }
+
+        .tools-header {
+            background: transparent;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #495057;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Biro Script Plus', cursive;
+        }
+
+        .tools-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .tool-section {
+            margin-bottom: 2rem;
+        }
+
+        .tool-section h3 {
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid black;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Biro Script Plus';
+    width: 90%;
+}
+
+        .tool-section .tool-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-section label {
+            display: block;
+            color: black;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            font-family: 'Biro Script Plus';
+        }
+
+        .tools-font-selector {
+            background: transparent;
+            color: black;
+            padding: 0.5rem;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+            font-family: 'Biro Script Plus';
+        }
+        #brushSizeValue {
+  font-family: 'Biro Script Plus';
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+        .tools-font-selector:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .tools-font-selector option {
+            background: white;
+            color: #495057;
+        }
+
+        .tool-placeholder {
+            color: #999;
+            font-style: italic;
+            font-size: 0.9rem;
+            padding: 1rem;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px dashed #ddd;
+            font-family: 'Biro Script Plus';
+        }
+
+        .page-header {
+    background: transparent;
+    padding: 0.25rem 0.5rem; /* thinner bar */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 36px;        /* thinner bar */
+}
+
+        .page-nav {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    /* Use padding-left instead if you prefer: */
+    padding-left: 1rem;  /* Adjust this value as needed */
+}
+
+        .page-nav button {
+    background: transparent;
+    color: black;
+    border: none;
+    padding: 0.25rem 0.5rem; /* smaller */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;       /* smaller text */
+    font-family: 'Biro Script Plus';
+    line-height: 1;
+    white-space: nowrap;
+}
+
+        .page-nav button:hover:not(:disabled) {
+    background: transparent;
+    transform: translateY(-1px);
+}
+
+        .page-nav button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.3;
+    color: rgba(255, 255, 255, 0.6);  /* Also fade the text color */
+}
+
+        .toc-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    font-family: 'Biro Script Plus';
+    line-height: 1;
+    white-space: nowrap;
+}
+
+        .toc-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+        .page-counter {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .editor {
+  height: 100%;
+  padding: 2rem;
+  overflow-y: auto;
+  overflow-x: hidden;        /* hides horizontal scrollbars */
+  font-size: 16px;
+  line-height: 1.6;
+  position: relative;
+
+  word-wrap: break-word;     /* break long words at edges */
+  overflow-wrap: anywhere;   /* modern: break anywhere if needed */
+}
+
+        .editor:focus {
+            outline: none;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 1rem;
+            right: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Biro Script Plus';
+        }
+
+        .toc-page {
+            padding: 2rem;
+        }
+
+        .toc-title {
+            font-size: 2rem;
+            font-family: 'Biro Script Plus';
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+            border-bottom: 3px solid black;
+            padding-bottom: 1rem;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toc-item:hover {
+            background: transparent;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .toc-chapter {
+            font-weight: 600;
+            color: black;
+        }
+
+        .toc-page-num {
+            background: transparent;
+            color: black;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-family: 'Biro Script Plus';
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            border: none;
+            background: transparent;
+        }
+
+        .canvas-overlay.drawing-active {
+    pointer-events: all;
+    cursor: crosshair !important;   /* force crosshair */
+    caret-color: transparent !important; /* hide text caret */
+}
+
+        .drawing-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .drawing-controls button,
+.drawing-controls-inline button {
+    background: transparent;
+    color: black;
+    border: 1px solid black;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-family: 'Biro Script Plus';
+}
+.drawing-controls button:hover,
+.drawing-controls-inline button:hover {
+    background: lightgrey;
+}
+
+.drawing-controls button.active,
+.drawing-controls-inline button.active {
+    background: lightgrey;
+}
+
+        .drawing-controls button:hover {
+            background: #0056b3;
+        }
+
+        .drawing-controls button.active {
+            background: #28a745;
+        }
+
+        .drawing-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* spacing between buttons */
+  margin-bottom: 1rem;
+}
+
+        .drawing-color-picker {
+  width: 32px;   /* small square */
+  height: 32px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+        .drawing-size-control {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .drawing-size-control input {
+            width: 100%;
+        }
+
+        .chapter-marker {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 1rem 0;
+            display: block;
+        }
+
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+            user-select: none;
+        }
+
+        .image-wrapper.selected {
+            outline: 3px solid #007bff;
+            outline-offset: 2px;
+        }
+
+        .image-wrapper img,
+.image-wrapper video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: move;
+}
+
+        .image-controls {
+            position: absolute;
+            top: -40px;
+            right: -10px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 5px;
+            display: none;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .image-wrapper.selected .image-controls {
+            display: flex;
+        }
+
+        .image-controls button {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-family: 'Biro Script Plus';
+            transition: background 0.2s;
+        }
+
+        .image-controls button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #007bff;
+            border-radius: 50%;
+            cursor: se-resize;
+            display: none;
+        }
+
+        .image-wrapper.selected .resize-handle {
+            display: block;
+        }
+
+        .rotation-handle {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            border-radius: 50%;
+            cursor: grab;
+            display: none;
+        }
+
+        .image-wrapper.selected .rotation-handle {
+            display: block;
+        }
+
+        .image-wrapper,
+.image-wrapper *,
+.polaroid,
+.polaroid *,
+.video-polaroid,
+.video-polaroid *,
+.image-controls,
+.image-controls *,
+.resize-handle,
+.rotation-handle {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    pointer-events: auto;
+}
+
+.image-wrapper .frame,
+.image-wrapper .photo,
+.image-wrapper img,
+.image-wrapper video {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Cursor styles for image elements */
+.image-wrapper {
+    cursor: pointer;
+}
+
+.image-wrapper:hover {
+    cursor: move;
+}
+
+.image-wrapper.selected {
+    cursor: move;
+}
+
+.image-wrapper .polaroid,
+.image-wrapper .video-polaroid,
+.image-wrapper img,
+.image-wrapper video,
+.image-wrapper .frame,
+.image-wrapper .photo {
+    cursor: move !important;
+}
+
+.image-wrapper .resize-handle {
+    cursor: se-resize !important;
+}
+
+.image-wrapper .rotation-handle {
+    cursor: grab !important;
+}
+
+.image-wrapper .rotation-handle:active {
+    cursor: grabbing !important;
+}
+
+.image-wrapper .image-controls {
+    cursor: default !important;
+}
+
+.image-wrapper .image-controls button {
+    cursor: pointer !important;
+}
+
+/* Override any text cursor that might be inherited */
+.image-wrapper *:not(.image-controls button) {
+    cursor: inherit !important;
+}
+
+        .rotation-handle:active {
+            cursor: grabbing;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .book-container {
+                height: 500px;
+            }
+
+            .toolbar {
+                justify-content: center;
+            }
+        }
+
+        .entry-title-line,
+.entry-date-line {
+  border-bottom: 2px solid black;  /* underline */
+  padding-bottom: 0.25rem;
+  margin: 0.5rem 0 0.75rem 0;
+  min-height: 1.75em;                /* easy to click/type */
+}
+
+.entry-title-line {
+  font-size: 1.4rem;
+  font-weight: 600;
+  max-width: 70%;
+}
+
+.entry-date-line {
+  font-size: 0.95rem;
+  color: black;
+  max-width: 16rem;                   /* shorter line for date */
+}
+
+/* optional: give body some space from the header lines */
+.page-body {
+  margin-top: 1rem;
+  min-height: 300px;   /* makes the area clickable */
+  cursor: text;
+}
+        
+/* Chapter tabs */
+.chapter-tabs {
+  position: absolute;
+  top: -25px;          /* tweak to taste */
+  left: 40px;        /* tweak to taste */
+  display: flex;
+  gap: 6px;
+  z-index: 5;        /* above page header */
+  pointer-events: auto;
+}
+
+.chapter-tab {
+  background: #fff9c4;
+  border: 1px solid #d4c35a;
+  border-bottom: 2px solid #b9a846;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: 'Biro Script Plus';
+  line-height: 1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+  white-space: nowrap;
+
+  /* new: make room & position for the close icon */
+  position: relative;
+  padding-right: 22px;
+}
+
+.chapter-tab:hover {
+  transform: translateY(-2px);
+  background: #fff59d;
+}
+
+/* small close (x), only visible on hover */
+.chapter-tab .close {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity .15s ease;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+
+.chapter-tab:hover .close {
+  opacity: 1;
+}
+
+/* Outer frame that holds BOTH panels */
+.notebook-frame {
+  position: relative;
+  width: min(1200px, 95vw);
+  height: clamp(800px, 95vh, 1300px);
+  margin: 0 auto;
+  border-radius: 18px;
+  background: url('Images/BookPages.png') center/100% 100% no-repeat; /* starter tint; swap to image later */
+  backdrop-filter: blur(6px);
+  padding: 16px;     /* inner gutter around the spread */
+  overflow: visible; /* lets tabs/accents poke out if needed */
+}
+
+/* Row containing the book and tools panel */
+.spread {
+  display: flex;
+  gap: .5rem;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+}
+
+/* Let both panels fill the frame vertically */
+.book-container,
+.tools-panel {
+  height: 100%;
+  max-width: none;
+  flex: 1 1 0;
+}
+.font-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* ensures it doesn't break if too narrow */
+}
+
+.font-size-selector {
+  max-width: 65px;
+}
+
+.format-btn {
+  background: transparent;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Biro Script Plus';
+  transition: background 0.2s ease;
+}
+
+.format-btn:hover {
+  background: #e0e0e0;
+}
+.format-btn.list-btn {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Biro Script Plus';
+}
+
+.highlight-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;   /* let it size evenly like other buttons */
+}
+
+.highlight-dropdown {
+  background: transparent;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: 'Biro Script Plus';
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.2);
+  margin-right: 6px;
+  vertical-align: -2px;
+  background: #fff59d; /* default */
+}
+
+.hidden-color {
+  /* visually hidden but still clickable via .click() */
+  position: absolute;
+  left: -9999px;
+  width: 0; height: 0; border: 0; padding: 0; margin: 0;
+}
+.drawing-cursor {
+  position: fixed;
+  width: 8px;   /* circle size */
+  height: 8px;
+  background: black;
+  border-radius: 50%;
+  pointer-events: none; /* so it never blocks clicks */
+  z-index: 2000;        /* above everything */
+  display: none;        /* hidden by default */
+}
+
+/* Polaroid frame (image overlay + inner photo area) */
+.polaroid {
+  position: relative;
+  display: inline-block;
+  width: 260px;                 /* JS resizes this; height comes from aspect-ratio */
+  border-radius: 6px;
+  user-select: none;
+  /* default paddings for the inner photo area */
+  --pad-side: 5%;
+  --pad-top: 17%;
+  --pad-bottom: 15%;            /* leave a little extra for the polaroid “lip” */
+}
+
+/* The actual picture, placed inside the frame window */
+/* The actual picture, placed inside the frame window */
+.polaroid .photo {
+  position: absolute;
+  left: max(10%, var(--pad-side));   /* ≥10% sides */
+  right: max(10%, var(--pad-side));
+  top: var(--pad-top);               /* ~17% if that's your variable */
+  bottom: var(--pad-bottom);         /* keep bottom padding */
+  border-radius: 4px;
+  background-size: contain;          /* show entire image, no crop */
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* PNG frame overlay that sits on top */
+.polaroid .frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;          /* match container aspect ratio */
+  pointer-events: none;         /* don’t block clicks/drags */
+  user-select: none;
+}
+
+/* Optional caption (if you want to keep it) */
+.polaroid .caption {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 6px;
+  text-align: center;
+  font-family: "Comic Sans MS", "Segoe Script", cursive;
+  font-size: 0.9rem;
+  color: #333;
+  opacity: 0.85;
+  pointer-events: none;
+  font-family: 'Biro Script Plus';
+}
+
+.polaroid .frame { z-index: 1; }
+.polaroid .photo { z-index: 2; }
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.popup-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+}
+
+.popup-input {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 1rem 0;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Biro Script Plus';
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.popup-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: 'Biro Script Plus';
+}
+
+.popup-btn.cancel {
+    background: transparent;
+    color: white;
+}
+
+.popup-btn.ok {
+    background: transparent;
+    color: white;
+}
+
+/* Remove gray border from Polaroid pieces */
+.image-wrapper .frame { border: 0 !important; border-radius: 0; box-shadow: none; }
+.image-wrapper .polaroid .photo { border: 0 !important; box-shadow: none; }
+
+/* If the blue selection outline bugs you too, kill it: */
+.image-wrapper.selected { outline: none; }
+
+
+.lightbox-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000; padding: 2rem;
+}
+.lightbox-content { position: relative; max-width: 95vw; max-height: 95vh; }
+.lightbox-img, .lightbox-video {
+  max-width: 95vw; max-height: 95vh; display: block;
+  border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+.lightbox-close {
+  position: absolute; top: -12px; right: -12px;
+  background: #000; color: #fff; border: none; border-radius: 999px;
+  width: 36px; height: 36px; font-size: 20px; line-height: 36px; text-align: center;
+  font-family: 'Biro Script Plus';
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.lightbox-close:hover { background: #333; }
+
+@font-face {
+  font-family: 'Biro Script Plus';
+  src: url('biro_script/Biro_Script_reduced.woff2') format('woff2'),
+       url('biro_script/Biro_Script_reduced.woff') format('woff'),
+       url('biro_script/Biro_Script_reduced.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lazy Dog';
+  src: url('lazy-dog/lazy_dog.ttf') format('truetype'),
+}
+
+.compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.compact-row label {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  font-family: 'Biro Script Plus';
+}
+.compact-row input[type="range"] {
+  flex: 1;
+  min-width: 70px;
+  max-width: 80px;
+}
+
+/* Compact rows keep items side by side */
+.compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.compact-row label {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  font-family: 'Biro Script Plus';
+}
+
+.compact-row input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+}
+
+/* Override .btn width inside compact-row */
+.compact-row .btn {
+  border: 1px solid black;
+  width: auto;
+  padding: 0.25rem 0.75rem; /* smaller button */
+  font-size: 0.8rem;
+  font-family: 'Biro Script Plus';
+}
+.top-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Video with a frame behind it (acts like Polaroid) */
+.video-polaroid {
+  position: relative;
+  display: inline-block;
+  width: 300px;              /* JS can resize; height via aspect-ratio */
+  border-radius: 6px;
+  user-select: none;
+  --pad-side: 5%;
+  --pad-top: 12%;
+  --pad-bottom: 12%;
+}
+
+/* Frame image sits BEHIND the video */
+.video-polaroid .frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;                /* behind */
+}
+
+/* Center the video and give it padding on all sides */
+.video-polaroid {
+  /* tweak these defaults to change padding */
+  --vpad-x: 12%;   /* left/right padding */
+  --vpad-y: 14%;   /* top/bottom padding */
+}
+
+.video-polaroid video{
+  position:absolute;
+
+  /* perfect centering */
+  left:50%;
+  top:50%;
+  transform: translate(-50%, -45%) scale(0.7);
+
+  /* respect the padding variables on all sides */
+  width: calc(100% - 2 * var(--vpad-x));
+  height: calc(100% - 2 * var(--vpad-y));
+
+  object-fit: contain;        /* keep full video visible */
+  object-position: center center;
+  background:#000;
+  border-radius:4px;
+  z-index:2;
+}
+
+.font-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+    margin-bottom: 0.5rem;
+}
+
+.font-row .tools-font-selector {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.font-row .format-btn {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    min-width: auto;
+}
+
+.font-row label {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+}
+
+.toolbar-image-btn {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.toolbar-image-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.toolbar-image-btn.drawing-active {
+    filter: hue-rotate(120deg) saturate(150%);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.image-button-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 10px auto;
+    user-select: none;
+}
+
+.image-button-wrapper.selected {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.toolbar-controls {
+    position: absolute;
+    top: -35px;
+    right: -10px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    padding: 3px;
+    display: none;
+    gap: 3px;
+    align-items: center;
+}
+
+.image-button-wrapper.selected .toolbar-controls {
+    display: flex;
+}
+
+.toolbar-controls button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.toolbar-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.top-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    background-image: url('Images/SinglePageGUI2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: rotate(5deg) translate(-40px, -35px);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(2px); /* optional: adds subtle blur effect */
+}
+/* Add Image Button hover */
+.image-button-wrapper[data-id="addImageBtn"] .toolbar-image-btn:hover {
+    transform: rotate(15deg) scale(2.8) translate(-30px, -25px) !important;
+    /* Original: rotate(15deg) scale(2.7) translate(-30px, -25px) */
+    /* 2.7 * 1.5 = 4.05 */
+}
+
+/* Add Video Button hover */
+.image-button-wrapper[data-id="addVideoBtn"] .toolbar-image-btn:hover {
+    transform: rotate(-10deg) scale(3.8) translate(-5px, -20px) !important;
+    /* Original: rotate(-10deg) scale(3.4) translate(-5px, -20px) */
+    /* 3.4 * 1.5 = 5.1 */
+}
+
+/* Drawing Button hover */
+.image-button-wrapper[data-id="drawingBtn"] .toolbar-image-btn:hover {
+    transform: rotate(7deg) scale(3.9) translate(-5px, 0px) !important;
+    /* Original: rotate(7deg) scale(3.7) translate(-5px, 0px) */
+    /* 3.7 * 1.5 = 5.55 */
+}
+
+
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="top-buttons">
+    <button class="btn" id="saveBtn" title="Ctrl+S">Save</button>
+    <button class="btn" onclick="openImportExport()">Import / Export</button>
+    <button class="btn" id="saveExitBtn" title="Ctrl+S then exit">Back</button>
+</div>
+
+<div class="toolbar">
+    <div class="image-button-wrapper" data-id="addImageBtn">
+        <img src="Images/AddImageButton.png" class="toolbar-image-btn" style="transform: rotate(15deg) scale(2.7) translate(-30px, -25px);" onclick="addImage()" alt="Add Image" draggable="false">
+        <div class="image-controls toolbar-controls">
+            <button onclick="resetImageButton(this)" title="Reset">↻</button>
+        </div>
+        <div class="resize-handle"></div>
+        <div class="rotation-handle"></div>
+    </div>
+    
+    <div class="image-button-wrapper" data-id="addVideoBtn">
+        <img src="Images/AddVideoButton.png" class="toolbar-image-btn" style="transform: rotate(-10deg) scale(3.4) translate(-5px, -20px);" onclick="addVideo()" alt="Add Video" draggable="false">
+        <div class="image-controls toolbar-controls">
+            <button onclick="resetImageButton(this)" title="Reset">↻</button>
+        </div>
+        <div class="resize-handle"></div>
+        <div class="rotation-handle"></div>
+    </div>
+
+    
+    <div class="image-button-wrapper" data-id="drawingBtn">
+        <img src="Images/DrawingButton.png" class="toolbar-image-btn" id="drawingToggle" style="transform: rotate(7deg) scale(3.7) translate(-5px, 0px);" onclick="toggleDrawing()" alt="Drawing Tool" draggable="false">
+        <div class="image-controls toolbar-controls">
+            <button onclick="resetImageButton(this)" title="Reset">↻</button>
+        </div>
+        <div class="resize-handle"></div>
+        <div class="rotation-handle"></div>
+    </div>
+</div>
+</div>
+
+<div class="main-container">
+  <div class="notebook-frame">
+    <div class="spread">
+      <div class="book-container">
+        <div class="page-header">
+            <div class="page-nav">
+                <button onclick="previousPage()" id="prevBtn">←</button>
+                <button onclick="nextPage()" id="nextBtn">→</button>
+                <button onclick="addPage()">Add Page</button>
+                <button onclick="addChapter()">Add Chapter</button>
+                <button onclick="deletePage()">Delete Page</button>
+            </div>
+        </div>
+
+        <div style="position: relative; flex: 1; overflow: hidden;">
+            <div class="editor" contenteditable="true" id="editor" oninput="saveCurrentPage()">
+                <!-- Content will be loaded here -->
+            </div>
+            <canvas class="canvas-overlay" id="drawingCanvas"></canvas>
+        </div>
+
+        <div class="page-number" id="pageNumber">Page 0</div>
+      </div>
+
+      <div class="tools-panel">
+        <div class="tools-header">
+          Tools Panel
+        </div>
+        <div class="tools-content">
+            <div class="tool-section">
+    <h3>Text Tools</h3>
+    
+    <!-- Row 1: Font controls and basic formatting -->
+    <div class="tool-item font-row">
+        <select class="tools-font-selector" onchange="changeFont(this.value)" style="max-width: 110px;">
+            <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Default</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="'Comic Sans MS', cursive">Comic Sans</option>
+            <option value="'Biro Script Plus', cursive">Khand</option>
+            <option value="'Lazy Dog', cursive">Lazy Dog</option>
+        </select>
+
+        <select class="tools-font-selector font-size-selector" onchange="changeFontSize(this.value)" style="max-width: 70px;">
+            <option value="12px">12</option>
+            <option value="14px">14</option>
+            <option value="16px" selected>16</option>
+            <option value="18px">18</option>
+            <option value="20px">20</option>
+            <option value="24px">24</option>
+            <option value="28px">28</option>
+            <option value="32px">32</option>
+        </select>
+
+        <select class="tools-font-selector line-spacing-selector" onchange="changeLineSpacing(this.value)" style="max-width: 60px;">
+            <option value="1">1.0</option>
+            <option value="1.15" selected>1.15</option>
+            <option value="1.5">1.5</option>
+            <option value="2">2.0</option>
+            <option value="2.5">2.5</option>
+            <option value="3">3.0</option>
+        </select>
+
+        <button type="button" class="format-btn" onclick="formatText('bold')" style="padding: 0.25rem 0.4rem;"><b>B</b></button>
+        <button type="button" class="format-btn" onclick="formatText('italic')" style="padding: 0.25rem 0.4rem;"><i>I</i></button>
+        <button type="button" class="format-btn" onclick="formatText('underline')" style="padding: 0.25rem 0.4rem;"><u>U</u></button>
+    </div>
+
+    <!-- Row 2: List, highlight, and options -->
+    <div class="tool-item font-row">
+        <button type="button" class="format-btn" onclick="formatText('insertUnorderedList')" style="padding: 0.25rem 0.5rem;">• List</button>
+        
+        <button type="button" class="format-btn" onclick="applyHighlight()" style="padding: 0.25rem 0.4rem;">
+            <span class="swatch" id="hlSwatch"></span>
+        </button>
+
+        <select class="highlight-dropdown" onchange="setHighlightColor(this.value)" style="max-width: 80px;">
+            <option value="#fff59d" selected>Yellow</option>
+            <option value="#a5d6a7">Green</option>
+            <option value="#90caf9">Blue</option>
+            <option value="#ffccbc">Peach</option>
+            <option value="#ffd54f">Gold</option>
+            <option value="__custom__">Custom…</option>
+        </select>
+
+        <input type="color" id="hlCustom" class="hidden-color" value="#fff59d" onchange="setHighlightColor(this.value)" />
+        
+        <label style="font-size: 0.8rem; white-space: nowrap;"><input type="checkbox" id="disable-scroll" checked> No Scroll</label>
+    </div>
+</div>
+            <div class="tool-section">
+  <h3>Drawing Tools</h3>
+  
+  <!-- Single row with color, size, brush, and eraser -->
+  <div class="drawing-controls-inline">
+    <input type="color" class="drawing-color-picker" id="drawingColorPicker" value="#000000">
+    <input type="range" id="brushSize" min="1" max="20" value="3" class="brush-slider">
+    <span id="brushSizeValue">3px</span>
+    <button id="brushMode" onclick="setBrushMode()" class="active">Pen</button>
+    <button id="eraserMode" onclick="setEraserMode()">Eraser</button>
+  </div>
+  
+  <!-- Second row with action buttons -->
+  <div class="drawing-controls-inline">
+    <button onclick="clearAllDrawings()">Clear</button>
+    <button onclick="undoLastStroke()">↶ Undo</button>
+    <button onclick="redoLastStroke()">↷ Redo</button>
+  </div>
+</div>
+
+            <div class="tool-section">
+  <h3>Image Tools</h3>
+
+  <!-- Row 1: Sliders -->
+<div class="tool-item compact-row">
+  <label>Opacity</label>
+  <input id="imgOpacity" type="range" min="0" max="100" value="100" oninput="imgControlsApplyFromUI()">
+
+  <label>Saturation</label>
+  <input id="imgSaturation" type="range" min="0" max="300" value="100" oninput="imgControlsApplyFromUI()">
+
+  <label>Warmth</label>
+  <input id="imgWarmth" type="range" min="-100" max="100" value="0" oninput="imgControlsApplyFromUI()">
+</div>
+
+<!-- Row 2: Toggles -->
+<div class="tool-item compact-row">
+  <label><input id="imgBW" type="checkbox" onchange="imgControlsApplyFromUI()"> B&amp;W</label>
+  <label><input id="imgVintage" type="checkbox" onchange="imgControlsApplyFromUI()"> Vintage</label>
+  <button type="button" class="btn" style="color:black;" onclick="openFramePicker()">Frame</button>
+  <button type="button" class="btn" style="color:black;" onclick="imgControlsReset()">Reset</button>
+</div>
+</div>
+
+            <div class="tool-section">
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="drawingCursor" class="drawing-cursor"></div>
+
+    <script>
+
+      // This is Version 5
+
+
+        let currentPageIndex = 0;
+        let globalFormatting = {
+  fontFamily: "'Biro Script Plus', cursive",
+  fontSize: "16px",
+  lineHeight: "1.6"
+};
+        let pages = [];
+        let chapters = [];
+        let isDrawingMode = false;
+        let isEraserMode = false;
+        let drawingStrokes = [];
+        let currentStroke = [];
+        let redoStrokes = [];
+        let dragPhoto = false;
+let resizePhoto = false;
+let startOffsetX = 0, startOffsetY = 0, startScale = 100;
+
+
+        // --- Polaroid photo-inside editing mode ---
+let photoEditMode = false;
+let photoEditWrapper = null;
+
+
+function setBrushMode() {
+    isEraserMode = false;
+    document.getElementById('brushMode').classList.add('active');
+    document.getElementById('eraserMode').classList.remove('active');
+    
+    // Show color picker when in brush mode
+    document.getElementById('drawingColorPicker').style.display = 'block';
+}
+
+function setEraserMode() {
+    isEraserMode = true;
+    document.getElementById('eraserMode').classList.add('active');
+    document.getElementById('brushMode').classList.remove('active');
+    
+    // Hide color picker when in eraser mode
+    document.getElementById('drawingColorPicker').style.display = 'none';
+}
+
+function resolveMediaPathsForPage(bookFolder) {
+  if (!bookFolder) return;
+
+  // Build correct file:// prefix (Windows needs the extra slash)
+  const isWindowsPath = /^[A-Za-z]:/.test(bookFolder);
+  const prefix = `file://${isWindowsPath ? '/' : ''}${bookFolder.replace(/\\/g, '/')}/`;
+
+  const editor = document.getElementById('editor');
+  if (!editor) return;
+
+  // <img> and <video>
+  editor.querySelectorAll('img, video').forEach(el => {
+    const src = el.getAttribute('src') || '';
+    if (src.startsWith('media/')) {
+      el.setAttribute('src', encodeURI(prefix + src));
+    }
+  });
+
+  // .polaroid .photo (background-image + optional data-src)
+  editor.querySelectorAll('.polaroid .photo').forEach(div => {
+    const bg = div.style.backgroundImage || '';
+    // NOTE: single backslashes in the regex literal are correct
+    const m = bg.match(/url\(["']?(media\/[^"')]+)["']?\)/);
+    if (m) {
+      div.style.backgroundImage = `url("${encodeURI(prefix + m[1])}")`;
+    }
+
+    const ds = div.getAttribute('data-src') || '';
+    if (ds.startsWith('media/')) {
+      div.setAttribute('data-src', encodeURI(prefix + ds));
+    }
+  });
+}
+
+
+function getPhotoEl(wrapper) {
+  return wrapper?.querySelector('.polaroid .photo') || null;
+}
+
+function getPhotoState(wrapper) {
+  const d = wrapper.dataset || {};
+  return {
+    scale:   d.photoScale   ? parseFloat(d.photoScale)   : 100,  // %
+    offsetX: d.photoOffsetX ? parseFloat(d.photoOffsetX) : 0,    // px
+    offsetY: d.photoOffsetY ? parseFloat(d.photoOffsetY) : 0     // px
+  };
+}
+
+function applyPhotoState(wrapper, state) {
+  const photo = getPhotoEl(wrapper);
+  if (!photo) return;
+  // Persist
+  wrapper.dataset.photoScale   = String(state.scale);
+  wrapper.dataset.photoOffsetX = String(state.offsetX);
+  wrapper.dataset.photoOffsetY = String(state.offsetY);
+  // Render
+  photo.style.backgroundSize      = `${Math.max(10, state.scale)}% auto`;
+  photo.style.backgroundPosition  = `${state.offsetX}px ${state.offsetY}px`;
+  // Ensure it can move within frame cleanly
+  photo.style.backgroundRepeat    = 'no-repeat';
+  // Save
+  saveCurrentPage();
+}
+
+function enterPhotoEditMode(wrapper) {
+  const photo = getPhotoEl(wrapper);
+  if (!photo) return;
+  photoEditMode = true;
+  photoEditWrapper = wrapper;
+  wrapper.classList.add('photo-editing');
+  // Visual hint (tiny badge)
+  if (!wrapper.querySelector('.photo-edit-badge')) {
+    const b = document.createElement('div');
+    b.className = 'photo-edit-badge';
+    b.textContent = 'Photo Edit';
+    b.style.cssText = 'position:absolute;top:-26px;left:-2px;background:#17a2b8;color:#fff;font-size:12px;padding:2px 6px;border-radius:6px;';
+    wrapper.appendChild(b);
+  }
+  // Ensure state applied at entry
+  applyPhotoState(wrapper, getPhotoState(wrapper));
+}
+
+function exitPhotoEditMode() {
+  if (!photoEditMode) return;
+  if (photoEditWrapper) {
+    photoEditWrapper.classList.remove('photo-editing');
+    const b = photoEditWrapper.querySelector('.photo-edit-badge');
+    if (b) b.remove();
+  }
+  photoEditMode = false;
+  photoEditWrapper = null;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'p' || e.key === 'P') {
+    const w = getSelectedImageWrapper();
+    const photo = w && getPhotoEl(w);
+    if (!w || !photo) return;
+    e.preventDefault();
+    if (photoEditMode && photoEditWrapper === w) exitPhotoEditMode();
+    else enterPhotoEditMode(w);
+  }
+});
+
+
+
+        // Apply inline formatting while preserving the user's selection
+let __lastRange = null;
+
+function formatText(cmd) {
+  const editor = document.getElementById('editor');
+
+  // Restore last selection if the toolbar click shifted focus
+  const sel = window.getSelection();
+  if (__lastRange) {
+    sel.removeAllRanges();
+    sel.addRange(__lastRange);
+  }
+
+  editor.focus();
+  document.execCommand(cmd, false, null); // 'bold' | 'italic' | 'underline' | 'insertUnorderedList'
+  saveCurrentPage();
+
+  // Save the new selection range for subsequent clicks
+  if (sel && sel.rangeCount > 0) {
+    __lastRange = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+
+        function ensurePageScaffold() {
+  const editor = document.getElementById('editor');
+  if (!editor) return;
+
+  // 🚫 Do nothing on TOC
+  if (pages?.[currentPageIndex]?.isTOC || editor.querySelector('.toc-page')) {
+    return;
+  }
+
+  let title = editor.querySelector('.entry-title-line');
+  let date  = editor.querySelector('.entry-date-line');
+  let body  = editor.querySelector('.page-body');
+
+  if (!title) {
+    title = document.createElement('div');
+    title.className = 'entry-title-line';
+    title.innerHTML = '';
+    editor.insertAdjacentElement('afterbegin', title);
+  }
+
+  if (!date) {
+    date = document.createElement('div');
+    date.className = 'entry-date-line';
+    date.innerHTML = ''; // keep space for date (blank line)
+    title.insertAdjacentElement('afterend', date);
+  }
+
+  if (!body) {
+    body = document.createElement('div');
+    body.className = 'page-body';
+    body.innerHTML = `<p style="line-height: ${globalFormatting.lineHeight}"><br></p>`;
+    editor.appendChild(body);
+  }
+
+  // Enforce order: title → date → body
+  if (title.nextElementSibling !== date) editor.insertBefore(date, body);
+  if (date.nextElementSibling !== body)  editor.insertBefore(body, date.nextElementSibling);
+}
+
+        // No-scroll (fixed page) mode: stop inserting when caret would go past bottom
+(function(){
+  const checkbox = document.getElementById("disable-scroll");
+  const editor   = document.getElementById("editor");
+
+
+  function setNoScrollMode(on) {
+    editor.style.overflowY = on ? "hidden" : "auto";
+    editor.dataset.noScroll = on ? "1" : "0";
+  }
+    // Force startup state based on the checkbox
+  setNoScrollMode(checkbox.checked);
+
+  function isInsertInputType(type) {
+    return [
+      "insertText","insertParagraph","insertLineBreak",
+      "insertFromPaste","insertFromDrop","insertReplacementText","insertFromYank"
+    ].includes(type);
+  }
+
+  function caretWouldOverflow() {
+    // Measure caret line against editor bottom using a temporary zero-width marker
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return false;
+
+    const range = sel.getRangeAt(0).cloneRange();
+    const marker = document.createElement("span");
+    marker.textContent = "\u200B";           // zero-width space
+    marker.style.display = "inline-block";
+    range.insertNode(marker);
+
+    const markerRect = marker.getBoundingClientRect();
+    marker.parentNode.removeChild(marker);
+
+    const edRect = editor.getBoundingClientRect();
+    const buffer = 30;                         // a few px tolerance
+    return markerRect.bottom > (edRect.bottom - buffer);
+  }
+
+  function flashBottomEdge() {
+    editor.style.boxShadow = "inset 0 -6px 0 0 #dc3545";
+    setTimeout(() => (editor.style.boxShadow = ""), 180);
+  }
+
+  checkbox.addEventListener("change", function () {
+    setNoScrollMode(this.checked);
+  });
+
+  editor.addEventListener("beforeinput", (e) => {
+    if (editor.dataset.noScroll !== "1") return;
+    if (!isInsertInputType(e.inputType)) return; // allow deletions etc.
+
+    // Block only if the caret is already at/beyond the visible bottom
+    if (caretWouldOverflow()) {
+      e.preventDefault();
+      flashBottomEdge();
+    }
+  });
+})();
+
+
+
+        function getSelectedImageWrapper() {
+  return document.querySelector('.image-wrapper.selected');
+}
+function getImageTarget(wrapper) {
+  return wrapper?.querySelector('.polaroid .photo')
+      || wrapper?.querySelector('img:not(.frame), video')
+      || null;
+}
+
+// Defaults if no settings saved
+function getImageSettings(wrapper) {
+  const d = wrapper?.dataset || {};
+  return {
+    opacity:   d.opacity   ? parseFloat(d.opacity)   : 1,
+    saturation:d.saturation? parseInt(d.saturation)  : 100,
+    warmth:    d.warmth    ? parseInt(d.warmth)      : 0,
+    bw:        d.bw === '1',
+    vintage:   d.vintage === '1'
+  };
+}
+function setImageSettings(wrapper, s) {
+  const d = wrapper.dataset;
+  d.opacity    = String(s.opacity);
+  d.saturation = String(s.saturation);
+  d.warmth     = String(s.warmth);
+  d.bw         = s.bw ? '1' : '0';
+  d.vintage    = s.vintage ? '1' : '0';
+}
+
+// Build CSS filter chain from settings
+function buildFilterFromSettings(s) {
+  const filters = [];
+  // base
+  filters.push(`saturate(${Math.max(0, s.saturation)}%)`);
+
+  // warmth: small sepia + hue shift + brightness
+  if (s.warmth !== 0) {
+    const w = Math.max(-100, Math.min(100, s.warmth));
+    const sep = Math.abs(w) * 0.4;            // 0–40%
+    const hue = w > 0 ? -10 : 10;             // warm tilt vs cool tilt
+    const brt = 100 + w * 0.15;               // ±15%
+    filters.push(`sepia(${sep}%) hue-rotate(${hue}deg) brightness(${brt}%)`);
+  }
+
+  if (s.bw) filters.push('grayscale(100%)');
+
+  // vintage preset (stackable)
+  if (s.vintage) filters.push('sepia(35%) contrast(90%) brightness(105%) saturate(120%)');
+
+  return filters.join(' ');
+}
+
+function applyImageSettings(wrapper, s) {
+  const target = getImageTarget(wrapper);
+  if (!target) return;
+
+  // Opacity applies to the visual node only (not the controls)
+  target.style.opacity = String(s.opacity);
+
+  // Filters apply to the same target (works on div.photo with background)
+  target.style.filter = buildFilterFromSettings(s);
+
+  setImageSettings(wrapper, s);
+  saveCurrentPage();
+}
+
+// UI ↔ settings sync
+function imgControlsSyncToUI(wrapper) {
+  const s = getImageSettings(wrapper);
+  const $ = (id) => document.getElementById(id);
+
+  if ($('imgOpacity'))   $('imgOpacity').value   = Math.round(s.opacity * 100);
+  if ($('imgSaturation'))$('imgSaturation').value= s.saturation;
+  if ($('imgWarmth'))    $('imgWarmth').value    = s.warmth;
+  if ($('imgBW'))        $('imgBW').checked      = s.bw;
+  if ($('imgVintage'))   $('imgVintage').checked = s.vintage;
+}
+
+function imgControlsApplyFromUI() {
+  const w = getSelectedImageWrapper();
+  if (!w) return;
+  const $ = (id) => document.getElementById(id);
+
+  const s = {
+    opacity:    Math.max(0, Math.min(1, (parseInt($('imgOpacity').value)||100)/100)),
+    saturation: parseInt($('imgSaturation').value)||100,
+    warmth:     parseInt($('imgWarmth').value)||0,
+    bw:         !!$('imgBW').checked,
+    vintage:    !!$('imgVintage').checked
+  };
+  applyImageSettings(w, s);
+}
+
+function imgControlsReset() {
+  const w = getSelectedImageWrapper();
+  if (!w) return;
+  const s = { opacity:1, saturation:100, warmth:0, bw:false, vintage:false };
+  applyImageSettings(w, s);
+  imgControlsSyncToUI(w);
+}
+
+
+
+
+
+        function viewImage(button) {
+  const wrapper = button.closest('.image-wrapper');
+  let src = null, kind = 'img';
+
+  // Prefer polaroid photo background
+  const photo = wrapper.querySelector('.polaroid .photo');
+  if (photo) {
+    src = photo.dataset.src || (photo.style.backgroundImage || '')
+           .replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+    kind = 'img';
+  } else {
+    const img = wrapper.querySelector('img:not(.frame)');
+    if (img) { src = img.src; kind = 'img'; }
+    else {
+      const vid = wrapper.querySelector('video');
+      if (vid) { src = vid.src; kind = 'video'; }
+    }
+  }
+  if (!src) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'lightbox-overlay';
+
+  const content = document.createElement('div');
+  content.className = 'lightbox-content';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'lightbox-close';
+  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.textContent = '×';
+
+  const close = () => {
+    try { document.body.removeChild(overlay); } catch {}
+    document.removeEventListener('keydown', escHandler);
+  };
+  const escHandler = (e) => { if (e.key === 'Escape') close(); };
+
+  closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', escHandler);
+
+  if (kind === 'img') {
+    const imgEl = document.createElement('img');
+    imgEl.className = 'lightbox-img';
+    imgEl.src = src;
+    content.appendChild(imgEl);
+  } else {
+    const vidEl = document.createElement('video');
+    vidEl.className = 'lightbox-video';
+    vidEl.src = src;
+    vidEl.controls = true;
+    vidEl.autoplay = true;
+    content.appendChild(vidEl);
+  }
+
+  content.appendChild(closeBtn);
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+}
+
+
+
+        let __canvasInited = false;
+function ensureCanvasSetup() {
+  if (__canvasInited) return;
+  setupCanvas();
+  __canvasInited = true;
+}
+
+
+
+
+        (async () => {
+  const ident = window.electronAPI?.getEditorIdentity?.() || {};
+  const { bookId, bookName } = ident;
+
+  if (!bookName) {
+    console.error('Missing bookName in URL query. Did main load editor.html with { query: { bookName } }?');
+    return;
+  }
+
+  // LOAD the book’s JSON from the app data folder
+  let bookInfo = null;
+  let bookFolder = null;
+
+  try {
+    const loadRes = await window.electronAPI.loadBookInfo(bookName);
+bookInfo = loadRes.data;
+const bookFolder = loadRes.folder || null;
+window.__bookFolder__ = bookFolder;  // <- stash it
+
+console.log(`[EDITOR] Opened book "${bookName}" (id: ${bookId || '—'})`);
+if (bookFolder) {
+  console.log(`[EDITOR] Folder: ${bookFolder}`);
+} else {
+  console.warn(`[EDITOR] No folder yet for "${bookName}" — will be created on save`);
+}
+  } catch (err) {
+    console.error('[EDITOR] loadBookInfo threw:', err);
+    return;
+  }
+
+  const editorEl = document.querySelector('#editor');
+window.__bookInfo__ = bookInfo;
+window.__bookName__ = bookName;
+
+if (bookInfo.pages && Array.isArray(bookInfo.pages)) {
+  applyImportedNotebook({
+    pages: bookInfo.pages,
+    chapters: bookInfo.chapters || [],
+    currentPage: Number.isFinite(bookInfo.currentPage) ? bookInfo.currentPage : 0,
+    globalFormatting: bookInfo.globalFormatting || globalFormatting
+  });
+} else if (bookInfo.editorState && bookInfo.editorState.htmlContent) {
+  applyImportedNotebook({
+    pages: [
+      { content: generateTOCContent(), isTOC: true, drawings: [] },
+      {
+        content: `
+          <div class="entry-title-line"></div>
+          <div class="entry-date-line">${formatDate()}</div>
+          <div class="page-body">${bookInfo.editorState.htmlContent}</div>
+        `,
+        isTOC: false,
+        drawings: []
+      }
+    ],
+    chapters: [],
+    currentPage: 1,
+    globalFormatting
+  });
+} else {
+  if (!pages.length) initializeNotebook();
+}
+
+  async function saveCurrent() {
+  try {
+    saveCurrentPage();
+
+    bookInfo.pages = pages;
+    bookInfo.chapters = chapters;
+    bookInfo.currentPage = currentPageIndex;
+    bookInfo.globalFormatting = globalFormatting;
+
+    const res = await window.electronAPI.saveBookInfo(bookName, bookInfo);
+    if (!res || !res.success) {
+      console.error('[EDITOR] Save failed:', res?.error);
+      return false;
+    }
+    console.log(`[EDITOR] Saved "${bookName}"`);
+    return true;
+  } catch (err) {
+    console.error('[EDITOR] saveBookInfo threw:', err);
+    return false;
+  }
+}
+
+ // Ctrl+S to save
+window.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    saveCurrent();
+
+    // Show "Saved!" popup
+    const overlay = document.createElement('div');
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+    overlay.innerHTML = `
+      <div role="dialog" aria-modal="true"
+           style="position:relative;width:min(90vw,400px);aspect-ratio:3/2;">
+        <img src="Images/Popup.png" alt=""
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+          <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:26px;text-align:center;">
+            Saved!
+          </p>
+          <button class="ok"
+            style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+            OK
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector('.ok').addEventListener('click', close);
+    overlay.addEventListener('click', (evt) => { if (evt.target === overlay) close(); });
+    window.addEventListener('keydown', function esc(evt){ if (evt.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+  }
+});
+
+  const saveBtn = document.getElementById('saveBtn');
+if (saveBtn) {
+  saveBtn.addEventListener('click', () => {
+    // Create and dispatch a synthetic keydown event that matches Ctrl+S
+    const syntheticEvent = new KeyboardEvent('keydown', {
+      key: 's',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+    
+    // Dispatch the event on the window to trigger your existing listener
+    window.dispatchEvent(syntheticEvent);
+  });
+}
+
+const saveExitBtn = document.getElementById('saveExitBtn');
+if (saveExitBtn) {
+  saveExitBtn.addEventListener('click', async () => {
+    try {
+      saveExitBtn.disabled = true;
+      saveExitBtn.textContent = 'Saving…';
+
+      const ok = await saveCurrent();   // writes pages/chapters/etc
+      if (!ok) {
+        alert('Save failed — staying in the editor.');
+        return;
+      }
+
+      // Prefer Electron path; fall back to plain browser testing
+      if (window.electronAPI?.goBackToIndex) {
+        const res = await window.electronAPI.goBackToIndex();
+        if (!res?.success) console.error(res?.error || 'goBackToIndex failed');
+      } else {
+        window.location.href = 'index.html';
+      }
+    } finally {
+      saveExitBtn.disabled = false;
+      saveExitBtn.textContent = '💾 Save & Exit';
+    }
+  });
+}
+
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => window.electronAPI.goBackToIndex());
+  }
+
+  // Expose for manual debugging
+  window.__saveCurrentBook__ = saveCurrent;
+})();
+
+        function deleteChapterById(id) {
+  const idx = chapters.findIndex(ch => String(ch.id) === String(id));
+  if (idx === -1) return;
+
+  chapters.splice(idx, 1);
+
+  // Rebuild TOC and tabs
+  pages[0].content = generateTOCContent();
+  renderChapterTabs();
+
+  // If you're currently on the deleted chapter page, nothing else to do.
+  // (Optional: you could also update the TOC page immediately, etc.)
+}
+
+
+        function applyImportedNotebook(data) {
+  // Basic shape validation
+  if (!data || typeof data !== 'object') {
+    alert('Import failed: file is not a valid object.');
+    return;
+  }
+  if (!Array.isArray(data.pages)) {
+    alert('Import failed: missing "pages" array.');
+    return;
+  }
+  if (!Array.isArray(data.chapters)) {
+    alert('Import failed: missing "chapters" array.');
+    return;
+  }
+
+  // Pull fields with safe defaults
+  const importedPages = data.pages.map(p => ({
+    content: typeof p.content === 'string' ? p.content : '',
+    isTOC: !!p.isTOC,
+    drawings: Array.isArray(p.drawings) ? p.drawings : []
+  }));
+
+  const importedChapters = data.chapters.map(ch => ({
+    title: (ch && typeof ch.title === 'string') ? ch.title : 'Untitled',
+    page: (ch && Number.isFinite(ch.page)) ? ch.page : 1,
+    id: (ch && (typeof ch.id === 'number' || typeof ch.id === 'string')) ? ch.id : Date.now()
+  }));
+
+  let importedCurrentPage = Number.isFinite(data.currentPage)
+  ? data.currentPage
+  : (importedPages.length > 1 ? 1 : 0);
+  const importedFormatting = (data.globalFormatting && typeof data.globalFormatting === 'object')
+  ? {
+      fontFamily: (function(ff){
+        // If the saved file still has the old default, upgrade it to Biro
+        if (!ff || /Segoe UI/.test(ff)) return "'Biro Script Plus', cursive";
+        return ff;
+      })(data.globalFormatting.fontFamily),
+      fontSize: data.globalFormatting.fontSize || "16px",
+      lineHeight: data.globalFormatting.lineHeight || "1.6"
+    }
+  : { fontFamily: "'Biro Script Plus', cursive", fontSize: "16px", lineHeight: "1.6" };
+
+  // Ensure there is at least one page
+  if (importedPages.length === 0) {
+    importedPages.push({ content: '', isTOC: false, drawings: [] });
+  }
+
+  // Ensure page 0 exists and is TOC; regenerate its content from chapters
+  if (!importedPages[0] || importedPages[0].isTOC !== true) {
+    importedPages.unshift({ content: '', isTOC: true, drawings: [] });
+  }
+  // Normalize chapter page numbers into valid range after possible unshift
+  importedChapters.forEach(ch => {
+    if (!Number.isFinite(ch.page)) ch.page = 1;
+    ch.page = Math.max(1, Math.min(ch.page, importedPages.length));
+  });
+
+  // Set globals
+  pages = importedPages;
+  chapters = importedChapters;
+  globalFormatting = importedFormatting;
+  const fontSel = document.querySelector('.tools-font-selector');
+if (fontSel) fontSel.value = globalFormatting.fontFamily;
+try { window.__saveCurrentBook__ && window.__saveCurrentBook__(); } catch {}
+
+  // Rebuild TOC page from current chapters
+  pages[0].content = generateTOCContent();
+
+  // Clamp current page
+  importedCurrentPage = Math.max(0, Math.min(importedCurrentPage, pages.length - 1));
+  currentPageIndex = importedCurrentPage;
+
+  // Exit drawing mode if it was on
+  if (isDrawingMode) {
+    isDrawingMode = false;
+    const toggleBtn = document.getElementById('drawingToggle');
+    const canvas = document.getElementById('drawingCanvas');
+    const editor = document.getElementById('editor');
+    if (canvas) canvas.classList.remove('drawing-active');
+    if (toggleBtn) {
+      toggleBtn.textContent = '✏️ Start Drawing';
+      toggleBtn.classList.remove('active');
+    }
+    if (editor) {
+      editor.contentEditable = 'true';
+      editor.style.userSelect = 'text';
+      editor.style.caretColor = '';
+    }
+    const cursor = document.getElementById('drawingCursor');
+    if (cursor) cursor.style.display = 'none';
+  }
+
+  // Refresh UI
+  applyGlobalFormatting();   // set font/spacing on container + nodes
+  loadPage();                // renders content + drawings for current page
+  updatePageCounter();
+  renderChapterTabs();
+  ensureCanvasSetup();
+
+  // Ensure canvas matches new page size & redraw strokes once more
+  setTimeout(() => {
+    const editor = document.getElementById('editor');
+    const canvas = document.getElementById('drawingCanvas');
+    if (editor && canvas) {
+      const parentRect = editor.parentElement.getBoundingClientRect();
+      canvas.width = parentRect.width;
+      canvas.height = parentRect.height;
+      canvas.style.width = parentRect.width + 'px';
+      canvas.style.height = parentRect.height + 'px';
+      drawingStrokes = pages[currentPageIndex].drawings || [];
+      redrawAllStrokes();
+    }
+  }, 50);
+}
+
+
+        function openImportExport() {
+  // build overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <h3 style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:26px;">
+          Import / Export
+        </h3>
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:20px;text-align:center;">
+          What would you like to do?
+        </p>
+        <div style="display:flex;gap:30px;justify-content:center;margin-top:10px;">
+          <button class="popup-btn cancel"
+            style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;">
+            Cancel
+          </button>
+          <button id="importBtn"
+            style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;">
+            Import (.json)
+          </button>
+          <button id="exportBtn"
+            style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;">
+            Export (.json)
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const cleanup = () => document.body.removeChild(overlay);
+
+  // Close handlers
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(); });
+  overlay.querySelector('.cancel').addEventListener('click', cleanup);
+
+  // Import handler
+  overlay.querySelector('#importBtn').addEventListener('click', () => {
+    const picker = document.createElement('input');
+    picker.type = 'file';
+    picker.accept = 'application/json,.json';
+    picker.onchange = (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          applyImportedNotebook(data);   // <-- your existing function
+          cleanup();
+        } catch (err) {
+          console.error(err);
+          // styled popup for errors instead of alert
+          const errorOverlay = document.createElement('div');
+          errorOverlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:10000;";
+          errorOverlay.innerHTML = `
+            <div role="dialog" aria-modal="true"
+                 style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+              <img src="Images/Popup.png" alt=""
+                   style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+                <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:20px;text-align:center;">
+                  Import failed:<br>invalid JSON file.
+                </p>
+                <button style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;padding:6px 14px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;">
+                  OK
+                </button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(errorOverlay);
+          errorOverlay.querySelector('button').addEventListener('click', () => errorOverlay.remove());
+        }
+      };
+      reader.readAsText(file);
+    };
+    picker.click();
+  });
+
+  // Export handler
+  overlay.querySelector('#exportBtn').addEventListener('click', () => {
+    saveNotebook();   // your existing function
+    cleanup();
+  });
+}
+
+
+function showChapterTitlePopup() {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        
+        overlay.innerHTML = `
+            <div class="popup-box" style="background-image: url('Images/CreateChapterButton.png');transform: scale(2); background-size: contain; background-position: center; background-repeat: no-repeat; padding: 40px; min-width: 400px; min-height: 300px; border: none; box-shadow: none; background-color: transparent;">
+                <input type="text" class="popup-input" placeholder="Enter chapter title..." autofocus style="background: transparent; border: none; border-bottom: 2px solid #333; outline: none; padding: 8px 4px; font-size: 16px; color: #333; width: 60%; margin: 60px auto 40px auto; display: block; text-align: center;">
+                <div class="popup-buttons" style="display: flex; gap: 40px; justify-content: center; margin-top: 20px;">
+    <button class="popup-btn cancel" style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:28px;color:#222;cursor:pointer;">Cancel</button>
+    <button class="popup-btn ok" 
+ style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:28px;color:#222;cursor:pointer;">
+ Confirm
+</button>
+</div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        const input = overlay.querySelector('.popup-input');
+        const cancelBtn = overlay.querySelector('.cancel');
+        const okBtn = overlay.querySelector('.ok');
+        
+        const cleanup = (result) => {
+            document.body.removeChild(overlay);
+            resolve(result);
+        };
+        
+        okBtn.onclick = () => cleanup(input.value.trim() || null);
+        cancelBtn.onclick = () => cleanup(null);
+        overlay.onclick = (e) => { if (e.target === overlay) cleanup(null); };
+        input.onkeypress = (e) => { 
+            if (e.key === 'Enter') cleanup(input.value.trim() || null);
+            if (e.key === 'Escape') cleanup(null);
+        };
+        
+        // Style the input placeholder
+        const style = document.createElement('style');
+        style.textContent = `
+            .popup-input::placeholder {
+                color: transparent;
+                opacity: 0.7;
+            }
+            .popup-input:focus {
+                border-bottom-color: transparent;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        input.focus();
+    });
+}
+
+document.addEventListener('mousemove', function(e) {
+  if (isDrawingMode) {
+    const cursor = document.getElementById('drawingCursor');
+    cursor.style.left = (e.clientX - 4) + 'px'; // offset by radius
+    cursor.style.top = (e.clientY - 4) + 'px';
+  }
+});
+
+        // Highlight logic (uses hiliteColor if available, falls back to backColor)
+let currentHighlightColor = '#fff59d';
+const highlightCommand = document.queryCommandSupported('hiliteColor') ? 'hiliteColor' : 'backColor';
+
+function setHighlightColor(val) {
+  if (val === '__custom__') {
+    document.getElementById('hlCustom').click();
+    return;
+  }
+  currentHighlightColor = val;
+  const swatch = document.getElementById('hlSwatch');
+  if (swatch) swatch.style.background = currentHighlightColor;
+  document.getElementById('editor').focus();
+}
+
+function applyHighlight() {
+  const editor = document.getElementById('editor');
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return; // no selection
+
+  // Only proceed if the selection is inside the editor
+  const anchorNode = sel.anchorNode && (sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode);
+  if (!editor.contains(anchorNode)) return;
+
+  const range = sel.getRangeAt(0);
+  const parentEl = range.commonAncestorContainer.nodeType === 1
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentElement;
+
+  // Toggle: if selection already highlighted with same color -> clear, else apply
+  const alreadyHighlighted =
+    parentEl &&
+    parentEl.tagName === 'SPAN' &&
+    (parentEl.style.backgroundColor &&
+     parentEl.style.backgroundColor !== '' &&
+     parentEl.style.backgroundColor !== 'transparent');
+
+  if (alreadyHighlighted) {
+    document.execCommand(highlightCommand, false, 'transparent');
+  } else {
+    document.execCommand(highlightCommand, false, currentHighlightColor);
+  }
+
+  editor.focus();
+}
+
+function clearHighlight() {
+  const editor = document.getElementById('editor');
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+  const anchorNode = sel.anchorNode && (sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode);
+  if (!editor.contains(anchorNode)) return;
+
+  document.execCommand(highlightCommand, false, 'transparent');
+  editor.focus();
+}
+
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  const editor = document.getElementById('editor');
+  const btn = document.querySelector('.highlight-control > button'); // main Highlight button
+  if (!editor) return;
+
+  const anchorEl = sel && sel.anchorNode
+    ? (sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode)
+    : null;
+
+  const inEditor = !!(sel && sel.rangeCount > 0 && editor.contains(anchorEl));
+
+  // Enable/disable Highlight button based on selection inside editor
+  if (btn) btn.disabled = !(inEditor && !sel.isCollapsed);
+
+  // Cache the selection range so toolbar clicks can restore it
+  if (inEditor && sel.rangeCount > 0) {
+    __lastRange = sel.getRangeAt(0).cloneRange();
+  }
+});
+
+// Keep focus/selection in the editor when clicking formatting buttons
+document.querySelectorAll('.format-btn').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.preventDefault());
+});
+
+document.addEventListener('DOMContentLoaded', ensurePageScaffold);
+
+const __editorEl = document.getElementById('editor');
+__editorEl.addEventListener('input', () => {
+  if (!pages?.[currentPageIndex]?.isTOC) ensurePageScaffold();
+});
+__editorEl.addEventListener('paste', () => {
+  if (!pages?.[currentPageIndex]?.isTOC) setTimeout(ensurePageScaffold);
+});
+__editorEl.addEventListener('drop', () => {
+  if (!pages?.[currentPageIndex]?.isTOC) setTimeout(ensurePageScaffold);
+});
+
+function applyGlobalFormatting() {
+    const editor = document.getElementById('editor');
+    editor.style.fontFamily = globalFormatting.fontFamily;
+    editor.style.fontSize = globalFormatting.fontSize;
+    
+    // Apply line-height to content elements, not just the container
+    const paragraphs = editor.querySelectorAll('p, div:not(.toc-page):not(.entry-title-line):not(.entry-date-line):not(.page-body)');
+    paragraphs.forEach(p => {
+        p.style.lineHeight = globalFormatting.lineHeight;
+    });
+}
+
+function changeLineSpacing(spacing) {
+    globalFormatting.lineHeight = spacing;
+    applyGlobalFormatting();
+    
+    // Apply line-height to all paragraph elements in the current content
+    const editor = document.getElementById('editor');
+    const paragraphs = editor.querySelectorAll('p, div:not(.toc-page):not(.entry-title-line):not(.entry-date-line):not(.page-body)');
+    paragraphs.forEach(p => {
+        p.style.lineHeight = spacing;
+    });
+    
+    saveCurrentPage();
+}
+        function changeFontSize(size) {
+    globalFormatting.fontSize = size;   // ✅ update saved formatting
+    applyGlobalFormatting();            // ✅ reapply to all content
+    saveCurrentPage();                  // ✅ persist change in page data
+}
+        function showDeletePagePopup() {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        
+        overlay.innerHTML = `
+            <div class="popup-box" style="background-image: url('Images/DeleteThisPage.png'); transform: scale(2); background-size: contain; background-position: center; background-repeat: no-repeat; padding: 40px; min-width: 400px; min-height: 300px; border: none; box-shadow: none; background-color: transparent;">
+                <div class="popup-buttons" style="display: flex; gap: 20px; justify-content: center; margin-top: 150px;">
+                    <img src="Images/CancelButton.png" class="popup-btn cancel" style="cursor: pointer; width: 80px; height: auto;" alt="Cancel">
+                    <img src="Images/ConfirmButton.png" class="popup-btn ok" style="cursor: pointer; width: 80px; height: auto;" alt="OK">
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        const cancelBtn = overlay.querySelector('.cancel');
+        const okBtn = overlay.querySelector('.ok');
+        
+        const cleanup = (result) => {
+            document.body.removeChild(overlay);
+            resolve(result);
+        };
+        
+        okBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+        overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+        
+        // Handle Escape key
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                cleanup(false);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    });
+}
+
+async function deletePage() {
+  // ---- Shared styles (inject once) ----
+  function ensurePopupStyles() {
+    if (document.getElementById('toc-popup-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'toc-popup-styles';
+    s.textContent = `
+      .toc-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999}
+      .toc-popup{position:relative;width:min(90vw,520px);aspect-ratio:4/3;}
+      .toc-popup-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+      .toc-popup-body{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;}
+      .toc-popup-body p{margin:0;text-align:center;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;line-height:1.4;max-width:360px;word-wrap:break-word;}
+      .popup-buttons{display:flex;gap:40px;justify-content:center;}
+      .popup-btn{background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer}
+      .popup-btn:focus{outline:2px solid rgba(0,0,0,.3);outline-offset:2px}
+    `;
+    document.head.appendChild(s);
+  }
+
+  // ---- Simple OK popup (replaces alert) ----
+  function showPopup(message) {
+    ensurePopupStyles();
+    const overlay = document.createElement('div');
+    overlay.className = 'toc-popup-overlay';
+    overlay.innerHTML = `
+      <div class="toc-popup" role="dialog" aria-modal="true">
+        <img src="Images/Popup.png" alt="" class="toc-popup-bg">
+        <div class="toc-popup-body">
+          <p>${message.replace(/\n/g, '<br>')}</p>
+          <div class="popup-buttons">
+            <button class="popup-btn toc-ok">OK</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector('.toc-ok').addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+  }
+
+  // ---- Confirm popup (replaces confirm) ----
+  function showDeletePagePopup() {
+    return new Promise((resolve) => {
+      ensurePopupStyles();
+      const overlay = document.createElement('div');
+      overlay.className = 'toc-popup-overlay';
+      overlay.innerHTML = `
+        <div class="toc-popup" role="dialog" aria-modal="true">
+          <img src="Images/Popup.png" alt="" class="toc-popup-bg">
+          <div class="toc-popup-body">
+            <p>Are you sure you want to <br> delete this page?</p>
+            <div class="popup-buttons">
+              <button class="popup-btn cancel" style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;">Cancel</button>
+<button class="popup-btn ok" style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;cursor:pointer;">Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const cleanup = (result) => { overlay.remove(); resolve(result); };
+      overlay.querySelector('.cancel').addEventListener('click', () => cleanup(false));
+      overlay.querySelector('.ok').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+      window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { cleanup(false); window.removeEventListener('keydown', esc);} });
+    });
+  }
+
+  // ---- Guards using text-only popup ----
+  if (pages[currentPageIndex].isTOC) {
+    showPopup("You cannot delete the Table of Contents page.");
+    return;
+  }
+  if (pages.length <= 1) {
+    showPopup("You must have at least one page.");
+    return;
+  }
+
+  // ---- Confirm deletion ----
+  const shouldDelete = await showDeletePagePopup();
+  if (!shouldDelete) return;
+
+  // ---- Proceed with deletion ----
+  const deletedIndex = currentPageIndex; // zero-based
+  pages.splice(currentPageIndex, 1);
+
+  // Fix chapter page numbers and remove chapters that pointed to the deleted page
+  chapters = chapters
+    .filter(ch => ch.page !== deletedIndex + 1) // remove chapters on deleted page
+    .map(ch => ({
+      ...ch,
+      page: ch.page > deletedIndex + 1 ? ch.page - 1 : ch.page // shift pages after deletion
+    }));
+
+  if (currentPageIndex >= pages.length) currentPageIndex = pages.length - 1;
+
+  // Refresh TOC and UI
+  pages[0].content = generateTOCContent();
+  loadPage();
+  updatePageCounter();
+  renderChapterTabs();
+}
+
+        function renderChapterTabs() {
+  const book = document.querySelector('.book-container');
+  if (!book) return;
+
+  // --- local confirm popup (inline-styled, no external CSS) ---
+  function showConfirmDeleteChapter() {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+      overlay.innerHTML = `
+        <div role="dialog" aria-modal="true"
+             style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+          <img src="Images/Popup.png" alt=""
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+            <p style="margin:0;text-align:center;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;">
+              Delete this chapter?
+            </p>
+            <div style="display:flex;gap:40px;justify-content:center;margin-top:4px;">
+              <button class="cancel"
+                style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+                Cancel
+              </button>
+              <button class="ok"
+                style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const cleanup = (result) => { overlay.remove(); resolve(result); };
+      overlay.querySelector('.cancel').addEventListener('click', () => cleanup(false));
+      overlay.querySelector('.ok').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+      window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { cleanup(false); window.removeEventListener('keydown', esc);} });
+    });
+  }
+
+  // ensure container exists
+  let tabs = book.querySelector('.chapter-tabs');
+  if (!tabs) {
+    tabs = document.createElement('div');
+    tabs.className = 'chapter-tabs';
+    book.appendChild(tabs);
+  }
+
+  // rebuild tabs
+  tabs.innerHTML = '';
+
+  // --- TOC tab first ---
+  const tocTab = document.createElement('button');
+  tocTab.className = 'chapter-tab';
+  tocTab.textContent = 'Table of Contents';
+  tocTab.title = 'Go to page 1';
+  tocTab.addEventListener('click', () => {
+    saveCurrentPage();
+    pages[0].content = generateTOCContent();
+    goToPage(1); // TOC is page 1 (index 0)
+  });
+  tabs.appendChild(tocTab);
+
+  // --- Chapter tabs ---
+  chapters.forEach((ch, idx) => {
+    const tab = document.createElement('button');
+    tab.className = 'chapter-tab';
+    tab.title = `Go to page ${ch.page}`;
+    tab.addEventListener('click', () => goToPage(ch.page));
+
+    // label
+    const label = document.createElement('span');
+    label.textContent = ch.title || `Chapter ${idx + 1}`;
+    tab.appendChild(label);
+
+    // close (x) – only for real chapter tabs (not TOC / Last Page)
+    const close = document.createElement('span');
+    close.className = 'close';
+    close.textContent = '×';
+    close.title = 'Delete chapter';
+    close.addEventListener('click', (e) => {
+      e.stopPropagation(); // don't navigate
+      showConfirmDeleteChapter().then((ok) => {
+        if (ok) deleteChapterById(ch.id);
+      });
+    });
+    tab.appendChild(close);
+
+    tabs.appendChild(tab);
+  });
+
+  // --- Last Page tab ---
+  const lastTab = document.createElement('button');
+  lastTab.className = 'chapter-tab';
+  lastTab.textContent = 'Last Page';
+  lastTab.title = 'Jump to last page';
+  lastTab.addEventListener('click', () => {
+    saveCurrentPage();
+    goToLastPage(); // uses your existing function
+  });
+  tabs.appendChild(lastTab);
+
+  tabs.style.display = 'flex'; // always visible (we always have at least TOC + Last)
+}
+
+
+
+        
+
+
+        function goToLastPage() {
+    saveCurrentPage();
+    currentPageIndex = pages.length - 1; // jump to last page
+    loadPage();
+    updatePageCounter();
+}
+
+        function getPageTemplate() {
+  const today = formatDate();
+  return `
+    <div class="entry-title-line"></div>
+    <div class="entry-date-line">${today}</div>
+    <div class="page-body"><p style="line-height: ${globalFormatting.lineHeight}"><br></p></div>
+  `;
+}
+
+        // Initialize the notebook with TOC and first content page
+        function initializeNotebook() {
+            pages = [
+            { content: generateTOCContent(), isTOC: true, drawings: [] },
+            { content: getPageTemplate(), isTOC: false, drawings: [] },
+            { content: getPageTemplate(), isTOC: false, drawings: [] }
+        ];
+            ensureCanvasSetup();
+            loadPage();
+            updatePageCounter();
+            applyGlobalFormatting();
+        }
+
+        function formatDate(d = new Date()) {
+  return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+        function setupCanvas() {
+            console.log('Setting up canvas...');
+            const canvas = document.getElementById('drawingCanvas');
+            const editor = document.getElementById('editor');
+            
+            if (!canvas) {
+                console.error('Canvas element not found! Available elements:', document.querySelectorAll('canvas'));
+                return;
+            }
+            if (!editor) {
+                console.error('Editor element not found!');
+                return;
+            }
+            
+            console.log('Canvas and editor found, setting up...');
+            const ctx = canvas.getContext('2d');
+            
+            function resizeCanvas() {
+                if (!editor || !canvas) return;
+                
+                const editorRect = editor.getBoundingClientRect();
+                const parentRect = editor.parentElement.getBoundingClientRect();
+                
+                // Set canvas size to match the editor's parent container
+                canvas.width = parentRect.width;
+                canvas.height = parentRect.height;
+                canvas.style.width = parentRect.width + 'px';
+                canvas.style.height = parentRect.height + 'px';
+                
+                console.log('Canvas resized to:', canvas.width, 'x', canvas.height);
+                redrawAllStrokes();
+            }
+            
+            // Initial resize
+            setTimeout(resizeCanvas, 200);
+            window.addEventListener('resize', resizeCanvas);
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            canvas.addEventListener('pointerdown', (e) => {
+  if (!isDrawingMode) return;
+
+  // capture pointer so we keep getting move events while dragging
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  lastX = e.clientX - rect.left;
+  lastY = e.clientY - rect.top;
+
+  const color = isEraserMode ? 'ERASER' : document.getElementById('drawingColorPicker').value;
+const size = parseInt(document.getElementById('brushSize').value);
+
+currentStroke = [{
+  x: lastX,
+  y: lastY,
+  color: color,
+  size: size
+}];
+
+  // keep the dot pinned to the cursor at drag start
+  const cursor = document.getElementById('drawingCursor');
+  if (isDrawingMode && cursor) {
+    cursor.style.left = (e.clientX - 4) + 'px';
+    cursor.style.top  = (e.clientY - 4) + 'px';
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  // always move the dot while in drawing mode
+  const cursor = document.getElementById('drawingCursor');
+  if (isDrawingMode && cursor) {
+    cursor.style.left = (e.clientX - 4) + 'px';
+    cursor.style.top  = (e.clientY - 4) + 'px';
+  }
+
+  if (!isDrawing || !isDrawingMode) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const size = parseInt(document.getElementById('brushSize').value);
+
+  if (isEraserMode) {
+    // Eraser mode: use destination-out composite operation
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = 'rgba(0,0,0,1)'; // doesn't matter for destination-out
+    ctx.lineWidth = size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    currentStroke.push({ x, y, color: 'ERASER', size });
+  } else {
+    // Normal brush mode
+    const color = document.getElementById('drawingColorPicker').value;
+    
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    currentStroke.push({ x, y, color, size });
+  }
+
+  lastX = x;
+  lastY = y;
+
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (isDrawing && currentStroke.length > 0) {
+    drawingStrokes.push([...currentStroke]);
+    pages[currentPageIndex].drawings = [...drawingStrokes];
+    saveCurrentPage();
+  }
+  isDrawing = false;
+  currentStroke = [];
+  redoStrokes = [];
+
+  try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+
+  e.preventDefault();
+  e.stopPropagation();
+});
+            // Brush size slider
+            document.getElementById('brushSize').addEventListener('input', function(e) {
+                document.getElementById('brushSizeValue').textContent = e.target.value + 'px';
+            });
+        }
+
+        function redrawAllStrokes() {
+    const canvas = document.getElementById('drawingCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    drawingStrokes.forEach(stroke => {
+        if (stroke.length > 1) {
+            const isEraser = stroke[0].color === 'ERASER';
+            
+            if (isEraser) {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.strokeStyle = 'rgba(0,0,0,1)';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = stroke[0].color;
+            }
+            
+            ctx.lineWidth = stroke[0].size;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(stroke[0].x, stroke[0].y);
+            
+            for (let i = 1; i < stroke.length; i++) {
+                ctx.lineTo(stroke[i].x, stroke[i].y);
+            }
+            ctx.stroke();
+        }
+    });
+    
+    // Reset to normal drawing mode
+    ctx.globalCompositeOperation = 'source-over';
+}
+
+        function toggleDrawing() {
+            const canvas = document.getElementById('drawingCanvas');
+            const toggleBtn = document.getElementById('drawingToggle');
+            const editor = document.getElementById('editor');
+            
+            if (!canvas || !toggleBtn || !editor) {
+                console.error('Required elements not found:', { canvas: !!canvas, toggleBtn: !!toggleBtn, editor: !!editor });
+                return;
+            }
+            
+            if (pages[currentPageIndex].isTOC) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;text-align:center;">
+          Cannot draw on Table of Contents page
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+            
+            isDrawingMode = !isDrawingMode;
+            
+            if (isDrawingMode) {
+    setTimeout(() => {
+        canvas.width = editor.scrollWidth || editor.clientWidth;
+        canvas.height = editor.scrollHeight || editor.clientHeight;
+        canvas.style.width = (editor.scrollWidth || editor.clientWidth) + 'px';
+        canvas.style.height = (editor.scrollHeight || editor.clientHeight) + 'px';
+        redrawAllStrokes();
+    }, 10);
+
+    canvas.classList.add('drawing-active');
+    editor.contentEditable = 'false';
+    editor.style.userSelect = 'none';
+    editor.style.caretColor = 'transparent';
+    toggleBtn.textContent = '🛑 Stop Drawing';
+    toggleBtn.classList.add('active');
+
+    // 👉 show custom cursor
+    document.getElementById('drawingCursor').style.display = 'block';
+
+    console.log('Drawing mode ON - Canvas active');
+} else {
+    canvas.classList.remove('drawing-active');
+    editor.contentEditable = 'true';
+    editor.style.userSelect = 'text';
+    editor.style.caretColor = '';
+    toggleBtn.textContent = '✏️ Start Drawing';
+    toggleBtn.classList.remove('active');
+
+    // 👉 hide custom cursor
+    document.getElementById('drawingCursor').style.display = 'none';
+
+    console.log('Drawing mode OFF - Text editing enabled');
+}
+
+        }
+
+        function clearAllDrawings() {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawingStrokes = [];
+            pages[currentPageIndex].drawings = [];
+            saveCurrentPage();
+        }
+
+        function undoLastStroke() {
+  if (drawingStrokes.length > 0) {
+    const last = drawingStrokes.pop();
+    redoStrokes.push(last); // save for redo
+    pages[currentPageIndex].drawings = [...drawingStrokes];
+    redrawAllStrokes();
+    saveCurrentPage();
+  }
+}
+
+function redoLastStroke() {
+  if (redoStrokes.length > 0) {
+    const stroke = redoStrokes.pop();
+    drawingStrokes.push(stroke);
+    pages[currentPageIndex].drawings = [...drawingStrokes];
+    redrawAllStrokes();
+    saveCurrentPage();
+  }
+}
+
+        function generateTOCContent() {
+            let tocHTML = `
+                <div class="toc-page">
+                    <div class="toc-title">Table of Contents</div>
+            `;
+
+            // Only add chapters
+            chapters.forEach(chapter => {
+                tocHTML += `
+                    <div class="toc-item" onclick="goToPage(${chapter.page})">
+                        <span class="toc-chapter">${chapter.title}</span>
+                        <span class="toc-page-num">${chapter.page}</span>
+                    </div>
+                `;
+            });
+
+            if (chapters.length === 0) {
+                tocHTML += `
+                    <div style="text-align: center; color: #666; padding: 2rem; font-style: italic;">
+                        No chapters yet. Add chapters using the "Add Chapter" button above.
+                    </div>
+                `;
+            }
+
+            tocHTML += '</div>';
+            return tocHTML;
+        }
+
+        function getPageTitle(content) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            const h1 = tempDiv.querySelector('h1');
+            const h2 = tempDiv.querySelector('h2');
+            const h3 = tempDiv.querySelector('h3');
+            
+            if (h1) return h1.textContent;
+            if (h2) return h2.textContent;
+            if (h3) return h3.textContent;
+            
+            const firstP = tempDiv.querySelector('p');
+            if (firstP) {
+                const text = firstP.textContent.trim();
+                return text.length > 50 ? text.substring(0, 50) + '...' : text;
+            }
+            
+            return null;
+        }
+        
+        function saveCurrentPage() {
+            if (pages[currentPageIndex] && !pages[currentPageIndex].isTOC) {
+                pages[currentPageIndex].content = document.getElementById('editor').innerHTML;
+                pages[currentPageIndex].drawings = [...drawingStrokes];
+            }
+        }
+
+        function addPage() {
+            saveCurrentPage();
+            const newPageContent = getPageTemplate();
+            pages.push({ content: newPageContent, isTOC: false, drawings: [] });
+            
+            // Update TOC
+            pages[0].content = generateTOCContent();
+            
+            // Go to the new page
+            currentPageIndex = pages.length - 1;
+            loadPage();
+            renderChapterTabs();    // 👈 added here
+            updatePageCounter();
+            
+            console.log('Added new page, total pages:', pages.length);
+        }
+
+        function nextPage() {
+            if (currentPageIndex < pages.length - 1) {
+                saveCurrentPage();
+                currentPageIndex++;
+                loadPage();
+                renderChapterTabs();   // 👈 added here
+                updatePageCounter();
+            }
+        }
+
+        function previousPage() {
+            if (currentPageIndex > 0) {
+                saveCurrentPage();
+                currentPageIndex--;
+                loadPage();
+                renderChapterTabs();   // 👈 added here
+                updatePageCounter();
+            }
+        }
+
+        function goToPage(pageNum) {
+            if (pageNum >= 1 && pageNum <= pages.length) {
+                saveCurrentPage();
+                currentPageIndex = pageNum - 1;
+                loadPage();
+                updatePageCounter();
+            }
+        }
+
+        function showTOC() {
+            saveCurrentPage();
+            // Update TOC content first
+            pages[0].content = generateTOCContent();
+            currentPageIndex = 0;
+            loadPage();
+            updatePageCounter();
+            renderChapterTabs();     // 👈 added here
+        }
+
+        function loadPage() {
+            console.log('Loading page...');
+            const editor = document.getElementById('editor');
+            const canvas = document.getElementById('drawingCanvas');
+            
+            if (!editor) {
+                console.error('Editor not found!');
+                return;
+            }
+            if (!canvas) {
+                console.error('Canvas not found!');
+                return;
+            }
+            
+            console.log('Editor and canvas found, loading content...');
+            editor.innerHTML = pages[currentPageIndex].content;
+            resolveMediaPathsForPage(window.__bookFolder__);
+            applyGlobalFormatting();
+            
+
+            if (!pages[currentPageIndex].isTOC) ensurePageScaffold();
+            
+            // Load drawings for this page
+            drawingStrokes = pages[currentPageIndex].drawings || [];
+            
+            // Setup canvas after content is loaded and DOM is updated
+            setTimeout(() => {
+                const parentRect = editor.parentElement.getBoundingClientRect();
+                canvas.width = parentRect.width;
+                canvas.height = parentRect.height;
+                canvas.style.width = parentRect.width + 'px';
+                canvas.style.height = parentRect.height + 'px';
+                redrawAllStrokes();
+                console.log('Canvas updated for page load');
+            }, 100);
+            
+            // Make TOC page non-editable
+            if (pages[currentPageIndex].isTOC) {
+                editor.contentEditable = 'false';
+                editor.style.cursor = 'default';
+                
+                // Disable drawing mode if on TOC
+                if (isDrawingMode) {
+                    toggleDrawing();
+                }
+            } else {
+                editor.contentEditable = isDrawingMode ? 'false' : 'true';
+                editor.style.cursor = isDrawingMode ? 'default' : 'text';
+                
+                // Re-attach event listeners to existing images
+editor.querySelectorAll('.image-wrapper').forEach(wrapper => {
+    wrapper.contentEditable = 'false';
+    wrapper.querySelectorAll('*').forEach(el => {
+        el.contentEditable = 'false';
+        el.draggable = false;
+    });
+    addImageEventListeners(wrapper);
+});
+            }
+            
+            // Ensure drawing mode state is correct
+            const toggleBtn = document.getElementById('drawingToggle');
+            if (toggleBtn) {
+                if (isDrawingMode) {
+                    canvas.classList.add('drawing-active');
+                    toggleBtn.textContent = '🛑 Stop Drawing';
+                    toggleBtn.classList.add('active');
+                } else {
+                    canvas.classList.remove('drawing-active');
+                    toggleBtn.textContent = '✏️ Start Drawing';
+                    toggleBtn.classList.remove('active');
+                }
+            }
+            renderChapterTabs();   // 👈 added here
+        }
+
+        function updatePageCounter() {
+            document.getElementById('pageNumber').textContent = `Page ${currentPageIndex + 1}`;
+            
+            document.getElementById('prevBtn').disabled = currentPageIndex === 0;
+            document.getElementById('nextBtn').disabled = currentPageIndex === pages.length - 1;
+        }
+
+        async function addChapter() {
+  // No chapter on TOC
+  if (pages[currentPageIndex].isTOC) {
+  const overlay = document.createElement('div');
+  overlay.className = 'toc-popup-overlay';
+  overlay.innerHTML = `
+    <div class="toc-popup" role="dialog" aria-modal="true">
+      <img src="Images/Popup.png" alt="" class="toc-popup-bg">
+      <div class="toc-popup-body">
+        <p>
+  Cannot add chapter to Table of <br>
+  Contents page. Please go to a <br>
+  content page first.
+</p>
+        <button class="toc-ok" 
+ style="
+   background:transparent;
+   border:none;
+   font-family:'Biro Script Plus',cursive;
+   font-size:28px;
+   color:#222;
+   cursor:pointer;
+   letter-spacing:2px;
+   text-transform:uppercase;
+   padding:6px 14px;
+   text-shadow:0 1px 0 #00000022;
+   transition:transform .12s ease, opacity .12s ease, text-shadow .12s ease;
+">
+  OK
+</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Inject styles once
+  if (!document.getElementById('toc-popup-styles')) {
+    const s = document.createElement('style');
+    s.id = 'toc-popup-styles';
+    s.textContent = `
+      .toc-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999}
+      .toc-popup{position:relative;width:min(90vw,520px);aspect-ratio:4/3;}
+      .toc-popup-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+      .toc-popup-body{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;}
+      .toc-popup-body p{margin:0;text-align:center;color:#222;font-family:'Biro Script Plus', cursive;font-size:25px;line-height:1.3;}
+      .toc-ok{background:transparent;border:none;padding:8px 16px;font-family:'Biro Script Plus', cursive;font-size:20px;color:#222;cursor:pointer}
+      .toc-ok:focus{outline:2px solid rgba(0,0,0,.3);outline-offset:2px}
+    `;
+    document.head.appendChild(s);
+  }
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.toc-ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+  // 🚫 Prevent multiple chapters on the same page
+  const pageNum = currentPageIndex + 1; // 1-based for chapters
+  const alreadyHasChapter = chapters.some(ch => ch.page === pageNum);
+  if (alreadyHasChapter) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;text-align:center;font-family:'Biro Script Plus',cursive;font-size:22px;color:#222;max-width:360px;">
+          This page already has a chapter.<br>
+          Each page can only have one chapter.
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+  // Ask for title
+  const title = await showChapterTitlePopup();
+  if (!title) return;
+
+  // Add chapter
+  const chapter = { title, page: pageNum, id: Date.now() };
+  chapters.push(chapter);
+
+  // Update TOC and UI
+  pages[0].content = generateTOCContent();
+  saveCurrentPage();
+  setTimeout(() => { renderChapterTabs(); }, 10);
+  console.log('Chapter added:', chapter);
+}
+
+
+        function addImage() {
+            if (pages[currentPageIndex].isTOC) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;text-align:center;">
+          Cannot add image to Table of Contents page
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const wrapper = document.createElement('div');
+wrapper.className = 'image-wrapper';
+wrapper.setAttribute('data-id', Date.now());
+
+// Polaroid container (resized as a unit)
+const polaroid = document.createElement('div');
+polaroid.className = 'polaroid';
+polaroid.style.width = '260px';
+polaroid.draggable = false;
+
+/* inner photo as background (5% sides, 10% top padding handled in CSS) */
+const dataURL = e.target.result;
+const photo = document.createElement('div');
+photo.className = 'photo';
+photo.style.backgroundImage = `url('${dataURL}')`;
+photo.dataset.src = dataURL;   // <-- add this line
+
+/* random frame overlay: Images/Poloroid1.png .. Images/Poloroid5.png */
+const idx = 1 + Math.floor(Math.random() * 7);
+const frame = document.createElement('img');
+frame.className = 'frame';
+frame.src = `Images/Poloroid${idx}.png`;
+frame.alt = '';
+
+/* lock container aspect ratio to the PNG frame once it loads */
+frame.onload = () => {
+  if (frame.naturalWidth && frame.naturalHeight) {
+    polaroid.style.aspectRatio = `${frame.naturalWidth} / ${frame.naturalHeight}`;
+  }
+};
+
+/* optional caption (leave empty or set later) */
+const caption = document.createElement('div');
+caption.className = 'caption';
+caption.textContent = '';
+
+/* controls/handles (unchanged) */
+const controls = document.createElement('div');
+controls.className = 'image-controls';
+controls.innerHTML = `
+  <button onclick="deleteImage(this)" title="Delete">🗑️</button>
+  <button onclick="duplicateImage(this)" title="Duplicate">📋</button>
+  <button onclick="viewImage(this)" title="View">🔍</button>
+`;
+
+const resizeHandle = document.createElement('div');
+resizeHandle.className = 'resize-handle';
+
+const rotationHandle = document.createElement('div');
+rotationHandle.className = 'rotation-handle';
+
+/* assemble: photo below, frame on top, caption above frame */
+polaroid.appendChild(frame);
+polaroid.appendChild(photo);
+polaroid.appendChild(caption);
+wrapper.appendChild(polaroid);
+wrapper.appendChild(controls);
+wrapper.appendChild(resizeHandle);
+wrapper.appendChild(rotationHandle);
+
+/* drop into editor */
+(document.querySelector('#editor .page-body') || document.getElementById('editor'))
+  .appendChild(wrapper);
+
+/* enable drag/resize/rotate as before */
+wrapper.contentEditable = 'false';
+wrapper.querySelectorAll('*').forEach(el => {
+    el.contentEditable = 'false';
+    el.draggable = false;
+});
+addImageEventListeners(wrapper);
+// initialize style data for this new image
+wrapper.dataset.opacity = '1';
+wrapper.dataset.saturation = '100';
+wrapper.dataset.warmth = '0';
+wrapper.dataset.bw = '0';
+wrapper.dataset.vintage = '0';
+
+saveCurrentPage();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function addImageEventListeners(wrapper) {
+    // Prevent any part of the image wrapper from being editable
+    wrapper.contentEditable = 'false';
+    wrapper.querySelectorAll('*').forEach(el => {
+        el.contentEditable = 'false';
+        el.draggable = false;
+    });
+
+    // Prefer polaroid container so frame + photo act as one
+const media = wrapper.querySelector('.polaroid, .video-polaroid') || wrapper.querySelector('img, video');
+    const resizeHandle = wrapper.querySelector('.resize-handle');
+    const rotationHandle = wrapper.querySelector('.rotation-handle');
+    let isDragging = false;
+    let isResizing = false;
+    let isRotating = false;
+    let startX, startY, startWidth, startHeight, startAngle = 0;
+    let currentRotation = 0;
+
+    // Selection
+    wrapper.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectImage(wrapper);
+    });
+
+    media.addEventListener('mousedown', function(e) {
+  if (isResizing || isRotating) return;
+
+  // If we're editing the photo inside, drag moves the background position instead
+  if (photoEditMode && photoEditWrapper === wrapper && getPhotoEl(wrapper)) {
+    dragPhoto = true;
+    const st = getPhotoState(wrapper);
+    startOffsetX = st.offsetX;
+    startOffsetY = st.offsetY;
+    startX = e.clientX;
+    startY = e.clientY;
+  } else {
+    isDragging = true;
+    isDragging = true;
+const rect = wrapper.getBoundingClientRect();
+const editorRect = document.getElementById('editor').getBoundingClientRect();
+startX = e.clientX - editorRect.left - wrapper.offsetLeft;
+startY = e.clientY - editorRect.top - wrapper.offsetTop;
+    wrapper.style.position = 'absolute';
+    wrapper.style.zIndex = '1000';
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+    // Resizing
+    if (resizeHandle) {
+        resizeHandle.addEventListener('mousedown', function(e) {
+  if (photoEditMode && photoEditWrapper === wrapper && getPhotoEl(wrapper)) {
+    resizePhoto = true;
+    const st = getPhotoState(wrapper);
+    startScale = st.scale;
+    startX = e.clientX;
+    startY = e.clientY;
+  } else {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = parseInt(getComputedStyle(media).width);
+  }
+  e.stopPropagation();
+  e.preventDefault();
+});
+    }
+
+    // Rotation
+    if (rotationHandle) {
+        rotationHandle.addEventListener('mousedown', function(e) {
+    isRotating = true;
+    const rect = wrapper.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI) - currentRotation;
+    e.stopPropagation();
+    e.preventDefault();
+});
+    }
+
+    // Global mouse move handler
+    const mouseMoveHandler = function(e) {
+        if (dragPhoto && photoEditMode && photoEditWrapper === wrapper) {
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const st = getPhotoState(wrapper);
+  st.offsetX = startOffsetX + dx;
+  st.offsetY = startOffsetY + dy;
+  applyPhotoState(wrapper, st);
+} else if (isDragging) {
+  // (normal: move whole wrapper)
+  const editorEl   = document.getElementById('editor');
+  const editorRect = editorEl.getBoundingClientRect();
+
+  let left = e.clientX - editorRect.left - startX;
+  let top  = e.clientY - editorRect.top  - startY;
+
+  const w = wrapper.offsetWidth;
+  const h = wrapper.offsetHeight;
+  const minLeft = -w / 2;
+  const maxLeft = editorRect.width  - w / 2;
+  const minTop  = -h / 2;
+  const maxTop  = editorRect.height - h / 2;
+
+  left = Math.min(Math.max(left, minLeft), maxLeft);
+  top  = Math.min(Math.max(top,  minTop),  maxTop);
+
+  wrapper.style.left = left + 'px';
+  wrapper.style.top  = top  + 'px';
+} else if (resizePhoto && photoEditMode && photoEditWrapper === wrapper) {
+  // scale photo inside frame (drag right to increase)
+  const dx = e.clientX - startX;
+  const st = getPhotoState(wrapper);
+  st.scale = Math.max(10, startScale + dx * 0.5); // tweak sensitivity as you like
+  applyPhotoState(wrapper, st);
+} else if (isResizing) {
+  const deltaX = e.clientX - startX;
+  const newWidth = Math.max(50, startWidth + deltaX);
+  media.style.width = newWidth + 'px';
+} else if (isRotating) {
+    const rect = wrapper.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    const newRotation = currentAngle - startAngle;
+    currentRotation = newRotation;
+    wrapper.style.transform = `rotate(${currentRotation}deg)`;
+}
+    };
+
+    // Global mouse up handler
+    const mouseUpHandler = function() {
+  if (dragPhoto || resizePhoto || isDragging || isResizing || isRotating) {
+    dragPhoto = false;
+    resizePhoto = false;
+    isDragging = false;
+    isResizing = false;
+    isRotating = false;
+    wrapper.style.zIndex = 'auto';
+    saveCurrentPage();
+  }
+};
+
+    // Store handlers for cleanup
+    wrapper._mouseMoveHandler = mouseMoveHandler;
+    wrapper._mouseUpHandler = mouseUpHandler;
+
+    // Add global listeners
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+
+    // Double click to reset
+    wrapper.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+        wrapper.style.transform = 'rotate(0deg)';
+        wrapper.style.position = 'relative';
+        wrapper.style.left = 'auto';
+        wrapper.style.top = 'auto';
+        media.style.width = '300px';
+        currentRotation = 0;
+        saveCurrentPage();
+    });
+}
+
+        function selectImage(wrapper) {
+    // Deselect all images
+    document.querySelectorAll('.image-wrapper').forEach(w => {
+        w.classList.remove('selected');
+    });
+    
+    // Select this image
+    wrapper.classList.add('selected');
+
+    // Sync tools panel with this image's current settings
+    imgControlsSyncToUI(wrapper);
+}
+
+        function deleteImage(button) {
+            const wrapper = button.closest('.image-wrapper');
+            // Clean up event listeners
+            if (wrapper._mouseMoveHandler) {
+                document.removeEventListener('mousemove', wrapper._mouseMoveHandler);
+            }
+            if (wrapper._mouseUpHandler) {
+                document.removeEventListener('mouseup', wrapper._mouseUpHandler);
+            }
+            wrapper.remove();
+            saveCurrentPage();
+        }
+
+        function duplicateImage(button) {
+            const wrapper = button.closest('.image-wrapper');
+            const clone = wrapper.cloneNode(true);
+            clone.setAttribute('data-id', Date.now());
+            
+            // Reset position for clone
+            clone.style.position = 'relative';
+            clone.style.left = 'auto';
+            clone.style.top = 'auto';
+            clone.classList.remove('selected');
+            
+            document.getElementById('editor').appendChild(clone);
+            addImageEventListeners(clone);
+            saveCurrentPage();
+        }
+
+        function getSelectedImageWrapper() {
+  return document.querySelector('.image-wrapper.selected');
+}
+function getImageTarget(wrapper) {
+  return wrapper?.querySelector('.polaroid .photo')
+      || wrapper?.querySelector('img:not(.frame), video')
+      || null;
+}
+
+function getImageSettings(wrapper) {
+  const d = wrapper?.dataset || {};
+  return {
+    opacity:   d.opacity   ? parseFloat(d.opacity)   : 1,
+    saturation:d.saturation? parseInt(d.saturation)  : 100,
+    warmth:    d.warmth    ? parseInt(d.warmth)      : 0,
+    bw:        d.bw === '1',
+    vintage:   d.vintage === '1'
+  };
+}
+function setImageSettings(wrapper, s) {
+  const d = wrapper.dataset;
+  d.opacity    = String(s.opacity);
+  d.saturation = String(s.saturation);
+  d.warmth     = String(s.warmth);
+  d.bw         = s.bw ? '1' : '0';
+  d.vintage    = s.vintage ? '1' : '0';
+}
+
+function buildFilterFromSettings(s) {
+  const filters = [];
+  filters.push(`saturate(${Math.max(0, s.saturation)}%)`);
+  if (s.warmth !== 0) {
+    const w = Math.max(-100, Math.min(100, s.warmth));
+    const sep = Math.abs(w) * 0.4;
+    const hue = w > 0 ? -10 : 10;
+    const brt = 100 + w * 0.15;
+    filters.push(`sepia(${sep}%) hue-rotate(${hue}deg) brightness(${brt}%)`);
+  }
+  if (s.bw) filters.push('grayscale(100%)');
+  if (s.vintage) filters.push('sepia(35%) contrast(90%) brightness(105%) saturate(120%)');
+  return filters.join(' ');
+}
+
+function applyImageSettings(wrapper, s) {
+  const target = getImageTarget(wrapper);
+  if (!target) return;
+  target.style.opacity = String(s.opacity);
+  target.style.filter  = buildFilterFromSettings(s);
+  setImageSettings(wrapper, s);
+  saveCurrentPage();
+}
+
+function imgControlsSyncToUI(wrapper) {
+  const s = getImageSettings(wrapper);
+  const $ = (id) => document.getElementById(id);
+  if ($('imgOpacity'))   $('imgOpacity').value    = Math.round(s.opacity * 100);
+  if ($('imgSaturation'))$('imgSaturation').value = s.saturation;
+  if ($('imgWarmth'))    $('imgWarmth').value     = s.warmth;
+  if ($('imgBW'))        $('imgBW').checked       = s.bw;
+  if ($('imgVintage'))   $('imgVintage').checked  = s.vintage;
+}
+
+function imgControlsApplyFromUI() {
+  const w = getSelectedImageWrapper();
+  if (!w) return;
+  const $ = (id) => document.getElementById(id);
+  const s = {
+    opacity:    Math.max(0, Math.min(1, (parseInt($('imgOpacity').value)||100)/100)),
+    saturation: parseInt($('imgSaturation').value)||100,
+    warmth:     parseInt($('imgWarmth').value)||0,
+    bw:         !!$('imgBW').checked,
+    vintage:    !!$('imgVintage').checked
+  };
+  applyImageSettings(w, s);
+}
+
+// ---- Frame Picker for Polaroids ----
+const FRAME_PATHS = [
+  'Images/Poloroid1.png',
+  'Images/Poloroid2.png',
+  'Images/Poloroid3.png',
+  'Images/Poloroid4.png',
+  'Images/Poloroid5.png',
+  'Images/Poloroid6.png',
+  'Images/Poloroid7.png'
+];
+
+function setPolaroidFrame(wrapper, frameSrc) {
+  const polaroid = wrapper.querySelector('.polaroid');
+  const frameEl  = polaroid && polaroid.querySelector('.frame');
+  if (!polaroid || !frameEl) return;
+
+  // swap the frame image
+  frameEl.onload = () => {
+    // lock container aspect ratio to the new frame dimensions
+    if (frameEl.naturalWidth && frameEl.naturalHeight) {
+      polaroid.style.aspectRatio = `${frameEl.naturalWidth} / ${frameEl.naturalHeight}`;
+    }
+    saveCurrentPage();
+  };
+  frameEl.src = frameSrc;
+
+  // store which frame we chose (optional)
+  wrapper.dataset.frameSrc = frameSrc;
+}
+
+function openFramePicker() {
+  const wrapper = getSelectedImageWrapper();
+  if (!wrapper) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;text-align:center;">
+          Select an image first.
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+const polaroid = wrapper.querySelector('.polaroid');
+if (!polaroid) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;text-align:center;">
+          The selected item is not a Polaroid image.
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'popup-overlay';
+  overlay.innerHTML = `
+  <div class="popup-box" role="dialog" aria-modal="true" style="
+    background: url('Images/LeftBarPaper.png') center/cover no-repeat;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
+    min-width: 400px;
+    min-height: 300px;
+  ">
+    <div style="padding: 2rem;">
+      <h3 style="margin:0 0 1rem 0; color:#333; font-family:'Biro Script Plus';">Choose a Frame</h3>
+      <div class="frame-grid" style="
+        display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+        gap:10px; max-height:50vh; overflow:auto; padding:2px;">
+      </div>
+      <div class="popup-buttons" style="margin-top:1rem;">
+        <button class="popup-btn cancel" style = "color: black; font-size: 1.2rem;">Close</button>
+      </div>
+    </div>
+  </div>
+`;
+  document.body.appendChild(overlay);
+
+  const grid = overlay.querySelector('.frame-grid');
+
+  // Render thumbnails
+  FRAME_PATHS.forEach((src) => {
+    const cell = document.createElement('button');
+    cell.type = 'button';
+    cell.style.cssText = `
+      background:#f8f9fa; border:1px solid #e1e5ea; border-radius:8px; padding:6px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:transform .15s ease, box-shadow .15s ease;
+    `;
+    cell.title = src.split('/').pop();
+    cell.innerHTML = `
+      <img src="${src}" alt="" style="max-width:100%; max-height:90px; display:block;">
+    `;
+    cell.addEventListener('click', () => {
+      setPolaroidFrame(wrapper, src);
+      try { document.body.removeChild(overlay); } catch {}
+    });
+    cell.addEventListener('mouseenter', () => { cell.style.transform = 'translateY(-2px)'; cell.style.boxShadow = '0 4px 14px rgba(0,0,0,.08)'; });
+    cell.addEventListener('mouseleave', () => { cell.style.transform = ''; cell.style.boxShadow = ''; });
+    grid.appendChild(cell);
+  });
+
+  // Close handlers
+  const cleanup = () => { try { document.body.removeChild(overlay); } catch {} };
+  overlay.querySelector('.cancel').addEventListener('click', cleanup);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(); });
+}
+
+function imgControlsReset() {
+  const w = getSelectedImageWrapper();
+  if (!w) return;
+  const s = { opacity:1, saturation:100, warmth:0, bw:false, vintage:false };
+  applyImageSettings(w, s);
+  imgControlsSyncToUI(w);
+}
+
+        document.addEventListener('dblclick', function(e) {
+  if (!e.target.closest('.image-wrapper')) {
+    document.querySelectorAll('.image-wrapper').forEach(wrapper => {
+      wrapper.classList.remove('selected');
+    });
+    // leave photo-edit mode if active
+    exitPhotoEditMode();
+  }
+});
+
+document.addEventListener('dblclick', function(e) {
+  if (e.target.closest('.image-wrapper')) {
+    // Double-click inside image wrapper: keep it selected and don’t trigger the outside handler.
+    e.stopPropagation();
+  }
+}, true); // use capture to intercept early
+
+        function addVideo() {
+  if (pages[currentPageIndex].isTOC) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true"
+         style="position:relative;width:min(90vw,520px);aspect-ratio:4/3;">
+      <img src="Images/Popup.png" alt=""
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px;">
+        <p style="margin:0;color:#222;font-family:'Biro Script Plus',cursive;font-size:22px;text-align:center;">
+          Cannot add video to Table of Contents page
+        </p>
+        <button class="ok"
+          style="background:transparent;border:none;font-family:'Biro Script Plus',cursive;font-size:24px;color:#222;cursor:pointer;padding:6px 14px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 0 #00000022;transition:transform .12s ease,opacity .12s ease;">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.ok').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  window.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { close(); window.removeEventListener('keydown', esc);} });
+
+  return;
+}
+
+  // Build a wrapped video that uses a frame behind it
+  function makeWrappedVideo(src) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-wrapper';
+    wrapper.setAttribute('data-id', Date.now());
+
+    // Container that mimics polaroid behavior
+    const vpol = document.createElement('div');
+    vpol.className = 'video-polaroid';
+    vpol.style.width = '300px';     // initial; user can resize via handle
+    vpol.draggable = false;
+
+    // Frame BEHIND the video
+    const frame = document.createElement('img');
+    frame.className = 'frame';
+    frame.src = 'Images/VideoFrame.png';
+    frame.alt = '';
+
+    // When frame loads, lock container aspect ratio to frame image
+    frame.onload = () => {
+      if (frame.naturalWidth && frame.naturalHeight) {
+        vpol.style.aspectRatio = `${frame.naturalWidth} / ${frame.naturalHeight}`;
+      }
+    };
+
+    // Actual video inside the frame window
+    const video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.draggable = false;
+
+    // Controls/handles (same UI as images)
+    const controls = document.createElement('div');
+    controls.className = 'image-controls';
+    controls.innerHTML = `
+      <button onclick="deleteImage(this)" title="Delete">🗑️</button>
+      <button onclick="duplicateImage(this)" title="Duplicate">📋</button>
+      <button onclick="viewImage(this)" title="View">🔍</button>
+    `;
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'resize-handle';
+
+    const rotationHandle = document.createElement('div');
+    rotationHandle.className = 'rotation-handle';
+
+    // Assemble: frame (behind), then video (above)
+    vpol.appendChild(frame);
+    vpol.appendChild(video);
+
+    wrapper.appendChild(vpol);
+    wrapper.appendChild(controls);
+    wrapper.appendChild(resizeHandle);
+    wrapper.appendChild(rotationHandle);
+
+    (document.querySelector('#editor .page-body') || document.getElementById('editor'))
+      .appendChild(wrapper);
+
+    wrapper.contentEditable = 'false';
+    wrapper.querySelectorAll('*').forEach(el => {
+        el.contentEditable = 'false';
+        el.draggable = false;
+    });
+    wrapper.contentEditable = 'false';
+    wrapper.querySelectorAll('*').forEach(el => {
+        el.contentEditable = 'false';
+        el.draggable = false;
+    });
+    addImageEventListeners(wrapper);
+    saveCurrentPage();
+  }
+
+  // Open native picker immediately; store as Data URL (consistent with images)
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'video/*';
+  input.onchange = function (e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => makeWrappedVideo(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+        function changeFont(fontFamily) {
+    globalFormatting.fontFamily = fontFamily;
+    applyGlobalFormatting();
+    saveCurrentPage();
+}
+
+        function saveNotebook() {
+            saveCurrentPage();
+            const notebookData = {
+    pages,
+    chapters,
+    currentPage: currentPageIndex,
+    globalFormatting
+};
+            
+            const dataStr = JSON.stringify(notebookData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `notebook-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+  if (!pages.length) initializeNotebook();
+});
+        
+        // Auto-save every 30 seconds
+        setInterval(() => {
+            saveCurrentPage();
+        }, 30000);
+    </script>
+</body>
+</html>
