@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 OldlyNotebook/*.exe
+node_modules/
+out/
+dist/
+*.exe
+*.zip
